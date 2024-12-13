@@ -186,31 +186,31 @@
                     <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu"
                         data-accordion="false">
                         <li class="nav-item">
-                            <a href="#" class="nav-link">
-                                <i class="fas fa-circle nav-icon"></i>
-                                <p>Level 1</p>
+                            <a href="{{ route('dashboard') }}" class="nav-link {{ Route::is('dashboard') ? 'active' : '' }}">
+                                <i class="nav-icon fas fa-tachometer-alt"></i>
+                                <p>Dashboard</p>
                             </a>
                         </li>
-                        <li class="nav-item menu-open">
-                            <a href="#" class="nav-link {{ request()->is('/dashboard') ? 'active' : '' }}">
-                                <i class="nav-icon fas fa-tachometer-alt"></i>
+                        <li class="nav-item {{ Request::is('layanan*') ? 'menu-open' : '' }}">
+                            <a href="#" class="nav-link {{ Request::is('layanan*') ? 'active' : '' }}">
+                                <i class="nav-icon fas fa-edit"></i>
                                 <p>
-                                    Dashboard
-                                    <i class="right fas fa-angle-left"></i>
+                                    Layanan
+                                    <i class="fas fa-angle-left right"></i>
                                 </p>
                             </a>
                             <ul class="nav nav-treeview">
                                 <li class="nav-item">
-                                    <a href="{{ route('dashboard') }}" class="nav-link {{ Route::is('dashboard') ? 'active' : '' }}">
+                                    <a href="{{ route('tagihan.index')}}" class="nav-link {{ Route::is('tagihan.index') ? 'active' : '' }}">
                                         <i class="far fa-circle nav-icon"></i>
-                                        <p>Dashboard v1</p>
+                                        <p>Tagihan</p>
                                     </a>
                                 </li>
                                 
                             </ul>
                         </li>
-                        <li class="nav-item">
-                            <a href="#" class="nav-link {{ Route::is('pelanggan.index') ? 'active' : '' }}">
+                        <li class="nav-item {{ Request::is('master*') ? 'menu-open' : '' }}">
+                            <a href="#" class="nav-link {{ Request::is('master*') ? 'active' : '' }}">
                                 <i class="nav-icon fas fa-edit"></i>
                                 <p>
                                     Master Data
@@ -219,29 +219,23 @@
                             </a>
                             <ul class="nav nav-treeview">
                                 <li class="nav-item">
+                                    <a href="{{ route('golongan-tarif.index')}}" class="nav-link {{ Route::is('golongan-tarif.index') ? 'active' : '' }}">
+                                        <i class="far fa-circle nav-icon"></i>
+                                        <p>Golongan Tarif</p>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
                                     <a href="{{ route('pelanggan.index')}}" class="nav-link {{ Route::is('pelanggan.index') ? 'active' : '' }}">
                                         <i class="far fa-circle nav-icon"></i>
                                         <p>Pelanggan</p>
                                     </a>
                                 </li>
                                 <li class="nav-item">
-                                    <a href="pages/forms/advanced.html" class="nav-link">
+                                    <a href="{{ route('tahun.index')}}" class="nav-link {{ Route::is('tahun.index') ? 'active' : '' }}">
                                         <i class="far fa-circle nav-icon"></i>
-                                        <p>Users</p>
+                                        <p>Data Tahun</p>
                                     </a>
                                 </li>
-                                {{-- <li class="nav-item">
-                <a href="pages/forms/editors.html" class="nav-link">
-                  <i class="far fa-circle nav-icon"></i>
-                  <p>Editors</p>
-                </a>
-              </li>
-              <li class="nav-item">
-                <a href="pages/forms/validation.html" class="nav-link">
-                  <i class="far fa-circle nav-icon"></i>
-                  <p>Validation</p>
-                </a>
-              </li> --}}
                             </ul>
                         </li>
 

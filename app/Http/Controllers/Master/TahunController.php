@@ -4,61 +4,45 @@ namespace App\Http\Controllers\Master;
 
 use App\Http\Controllers\BaseController;
 use App\Http\Controllers\Controller;
-use App\Models\Golongan;
+use App\Models\Tahun;
 use Illuminate\Http\Request;
 
-class GolonganController extends BaseController
+class TahunController extends BaseController
 {
-    protected $model = Golongan::class;
+    protected $model = Tahun::class;
     protected $form;
     protected $title;
     protected $breadcrumb;
     protected $route;
-    protected $primaryKey = 'golonganId';
+    protected $primaryKey = 'tahunId';
 
     public function __construct()
     {
-        $this->title = 'Golongan Tarif';
+        $this->title = 'Data Tahun';
         $this->breadcrumb = 'Master Data';
-        $this->route = 'golongan-tarif';
+        $this->route = 'tahun';
 
         $this->form = array(
             array(
-                'label' => 'ID Golongan',
-                'field' => 'golonganId',
+                'label' => 'ID Tahun',
+                'field' => 'tahunId',
                 'type' => 'text',
                 'placeholder' => '',
                 'width' => 6,
                 'disabled' => true,
             ),
             array(
-                'label' => 'Nama Golongan',
-                'field' => 'golonganNama',
-                'type' => 'text',
-                'placeholder' => 'Masukkan Nama',
+                'label' => 'Tahun',
+                'field' => 'tahun',
+                'type' => 'number',
+                'placeholder' => 'Masukkan Tahun',
                 'width' => 6,
                 'required' => true
 
             ),
             array(
-                'label' => 'Tarif Harga',
-                'field' => 'golonganTarif',
-                'type' => 'number',
-                'placeholder' => 'Masukkan Harga Tarif',
-                'width' => 6,
-                'required' => true
-            ),
-            array(
-                'label' => 'Denda Harga',
-                'field' => 'golonganDenda',
-                'type' => 'number',
-                'placeholder' => 'Masukkan Harga Denda',
-                'width' => 6,
-                'required' => true
-            ),
-            array(
-                'label' => 'Status Golongan',
-                'field' => 'golonganStatus',
+                'label' => 'Status Tahun',
+                'field' => 'tahunStatus',
                 'type' => 'select',
                 'placeholder' => 'Pilih Status',
                 'width' => 6,
@@ -74,14 +58,14 @@ class GolonganController extends BaseController
     public function index(Request $request)
     {
         if ($request->ajax()) {
-            $data = Golongan::all();
+            $data = Tahun::all();
             return datatables()::of($data)
                     ->addIndexColumn()
                     ->addColumn('action', function($row){
                         return '<div class="btn-group" role="group" aria-label="Basic example">
-                                    <a href="javascript:void(0)" data-toggle="tooltip" data-id="'.$row->golonganId.'" data-original-title="Edit" class="edit btn btn-primary btn-xs"><i class="fa-regular fa-pen-to-square"></i></a>
+                                    <a href="javascript:void(0)" data-toggle="tooltip" data-id="'.$row->tahunId.'" data-original-title="Edit" class="edit btn btn-primary btn-xs"><i class="fa-regular fa-pen-to-square"></i></a>
                                     &nbsp;
-                                    <a href="javascript:void(0)" data-toggle="tooltip" data-id="'.$row->golonganId.'" data-original-title="Delete" class="delete btn btn-danger btn-xs"><i class="fa-solid fa-trash"></i></a>
+                                    <a href="javascript:void(0)" data-toggle="tooltip" data-id="'.$row->tahunId.'" data-original-title="Delete" class="delete btn btn-danger btn-xs"><i class="fa-solid fa-trash"></i></a>
                                 </div>';
                     })
                     ->rawColumns(['action'])
@@ -108,11 +92,9 @@ class GolonganController extends BaseController
         }
         $request->validate($rules);
 
-        Golongan::create([
-            'golonganNama' => $request->golonganNama,
-            'golonganTarif' => $request->golonganTarif,
-            'golonganDenda' => $request->golonganDenda,
-            'golonganStatus' => $request->golonganStatus
+        Tahun::create([
+            'tahun' => $request->tahun,
+            'tahunStatus' => $request->tahunStatus
         ]);
 
         return response()->json(['success' => 'Data Berhasil Disimpan']);
