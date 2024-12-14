@@ -44,8 +44,7 @@
     <link rel="stylesheet" href="{{ asset('plugins/daterangepicker/daterangepicker.css') }}">
     <!-- summernote -->
     <link rel="stylesheet" href="{{ asset('plugins/summernote/summernote-bs4.min.css') }}">
-
-
+    
 </head>
 <style>
     .nav-pills .nav-link.active {
@@ -204,6 +203,12 @@
                                     <a href="{{ route('tagihan.index')}}" class="nav-link {{ Route::is('tagihan.index') ? 'active' : '' }}">
                                         <i class="far fa-circle nav-icon"></i>
                                         <p>Tagihan</p>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a href="{{ route('transaksi.index')}}" class="nav-link {{ Route::is('transaksi.index') ? 'active' : '' }}">
+                                        <i class="far fa-circle nav-icon"></i>
+                                        <p>Transaksi</p>
                                     </a>
                                 </li>
                                 

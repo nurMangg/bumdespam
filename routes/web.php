@@ -2,6 +2,8 @@
 
 use App\Http\Controllers\Data\AksiTagihanController;
 use App\Http\Controllers\Data\TagihanController;
+use App\Http\Controllers\Layanan\AksiTransaksiController;
+use App\Http\Controllers\Layanan\TransaksiController;
 use App\Http\Controllers\Master\GolonganController;
 use App\Http\Controllers\Master\PelangganController;
 use App\Http\Controllers\Master\TahunController;
@@ -29,6 +31,10 @@ Route::middleware('auth')->prefix('master')->group(function () {
 Route::middleware('auth')->prefix('layanan')->group(function () {
    Route::resource('tagihan', TagihanController::class); 
    Route::resource('aksi-tagihan', AksiTagihanController::class);
+
+   Route::resource('transaksi', TransaksiController::class);
+   Route::resource('aksi-transaksi', AksiTransaksiController::class);
+
 });
 
 require __DIR__.'/auth.php';
