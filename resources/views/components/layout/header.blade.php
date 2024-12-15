@@ -22,6 +22,9 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
     <script src="https://cdn.datatables.net/buttons/3.1.2/js/buttons.html5.min.js"></script>
     <script src="https://cdn.datatables.net/buttons/3.1.2/js/buttons.print.min.js"></script>
+    <script type="text/javascript"
+            src="https://app.sandbox.midtrans.com/snap/snap.js"
+            data-client-key="{{ env('MIDTRANS_CLIENT_KEY', 'SB-Mid-client-69DybNnT4DQ5Ns0k') }}"></script>
 
     <!-- Google Font: Source Sans Pro -->
     <link rel="stylesheet" href="https://cdn.datatables.net/2.1.8/css/dataTables.dataTables.min.css">
@@ -209,6 +212,42 @@
                                     <a href="{{ route('transaksi.index')}}" class="nav-link {{ Route::is('transaksi.index') ? 'active' : '' }}">
                                         <i class="far fa-circle nav-icon"></i>
                                         <p>Transaksi</p>
+                                    </a>
+                                </li>
+                                
+                            </ul>
+                        </li>
+                        <li class="nav-item {{ Request::is('laporan*') ? 'menu-open' : '' }}">
+                            <a href="#" class="nav-link {{ Request::is('laporan*') ? 'active' : '' }}">
+                                <i class="nav-icon fas fa-file-pdf"></i>
+                                <p>
+                                    Laporan
+                                    <i class="fas fa-angle-left right"></i>
+                                </p>
+                            </a>
+                            <ul class="nav nav-treeview">
+                                <li class="nav-item">
+                                    <a href="{{ route('laporan-pelanggan.index')}}" class="nav-link {{ Route::is('laporan-pelanggan.index') ? 'active' : '' }}">
+                                        <i class="far fa-circle nav-icon"></i>
+                                        <p>Laporan Pelanggan</p>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a href="{{ route('laporan-pelanggan.index')}}" class="nav-link {{ Route::is('laporan-pelanggan.index') ? 'active' : '' }}">
+                                        <i class="far fa-circle nav-icon"></i>
+                                        <p>Laporan Tagihan</p>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a href="{{ route('laporan-pelanggan.index')}}" class="nav-link {{ Route::is('laporan-pelanggan.index') ? 'active' : '' }}">
+                                        <i class="far fa-circle nav-icon"></i>
+                                        <p>Laporan Transaksi</p>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a href="{{ route('laporan-pelanggan.index')}}" class="nav-link {{ Route::is('laporan-pelanggan.index') ? 'active' : '' }}">
+                                        <i class="far fa-circle nav-icon"></i>
+                                        <p>Laporan Payment Midtrans</p>
                                     </a>
                                 </li>
                                 

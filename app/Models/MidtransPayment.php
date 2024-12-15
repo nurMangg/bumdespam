@@ -15,11 +15,12 @@ class MidtransPayment extends Model
         'midtransPaymentTransactionId',
         'midtransPaymentStatus',
         'midtransPaymentCatatan',
+        'midtransPaymentSnapToken'
     ];
 
     public function pembayaran()
     {
-        return $this->belongsTo(Pembayaran::class, 'midtransPaymentPembayaranId');
+        return $this->belongsTo(Pembayaran::class, 'midtransPaymentPembayaranId', 'pembayaranId');
     }
 
 }

@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Pelanggan;
 use App\Models\Tagihan;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Crypt;
 
 class AksiTransaksiController extends Controller
 {
@@ -48,7 +49,9 @@ class AksiTransaksiController extends Controller
 
     public function show($tagihanId)
     {
-        $detailtagihan = Tagihan::where('tagihanId', $tagihanId)->first();
+        $decodeTagihanKode = Crypt::decryptString($tagihanId);
+        
+        $detailtagihan = Tagihan::where('tagihanId', $decodeTagihanKode)->first();
         $pelangganInfo = Pelanggan::where('pelangganId', $detailtagihan->tagihanPelangganId)->first();
         
         // dd($penggunaanTagihan);

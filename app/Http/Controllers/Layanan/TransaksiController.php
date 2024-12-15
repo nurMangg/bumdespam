@@ -7,6 +7,7 @@ use App\Models\Pembayaran;
 use App\Models\Tagihan;
 use App\Models\Tahun;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Crypt;
 
 class TransaksiController extends Controller
 {
@@ -61,8 +62,9 @@ class TransaksiController extends Controller
             return datatables()::of($data)
                     ->addIndexColumn()
                     ->addColumn('action', function($row){
+                        $tagihanId = Crypt::encryptString($row->tagihanId);
                         return '<div class="btn-group" role="group" aria-label="Basic example">
-                                    <a href="javascript:void(0)" data-toggle="tooltip" data-id="'.$row->tagihanId.'" data-original-title="Bayar" class="bayar btn btn-success btn-xs"><i class="fa-solid fa-circle-dollar-to-slot"></i> Bayar</a>
+                                    <a href="javascript:void(0)" data-toggle="tooltip" data-id="'.$tagihanId.'" data-original-title="Bayar" class="bayar btn btn-success btn-xs"><i class="fa-solid fa-circle-dollar-to-slot"></i> Bayar</a>
                                 </div>';
                     })
                     ->addColumn('tagihanJumlah', function($row){

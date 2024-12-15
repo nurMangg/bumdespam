@@ -65,12 +65,17 @@
                         </div>
                         <div class="col-md-6 pr-5">
                             <label for="">Pilih Metode Pembayaran :</label>
-                            <select class="form-control" name="" id="paymentMethod" onchange="updateRow(this)">
-                                <option value="" disabled selected>Pilih Metode</option>
-                                @foreach($paymentMethod as $pay)
-                                    <option value="{{ $pay['value'] }}" data-price="{{ $pay['price'] }}">{{ $pay['label'] }}</option>
-                                @endforeach
-                            </select>
+                            @if ($detailTagihan->tagihanStatus == "Belum Lunas")
+                                <select class="form-control" name="" id="paymentMethod" onchange="updateRow(this)">
+                                    <option value="" disabled selected>Pilih Metode</option>
+                                    @foreach($paymentMethod as $pay)
+                                        <option value="{{ $pay['value'] }}" data-price="{{ $pay['price'] }}">{{ $pay['label'] }}</option>
+                                    @endforeach
+                                </select>
+                            @else
+                                <h5>{{ $detailTagihan->pembayaranInfo->pembayaranMetode }}</h5>                                
+                            @endif
+                            
 
                             <script>
                                 function updateRow(selectElement) {
@@ -91,7 +96,7 @@
                                     existingRow.cells[2].innerHTML = paymentPrice.includes('.') ? paymentPrice : `Rp. ${parseFloat(paymentPrice).toLocaleString('id-ID')}`; // Update the price
 
                                     calculateTotal();
-
+                                    document.getElementById('pembayaranAdminFee').value = paymentPrice;
                                     const payButton = document.getElementById('payButton');
                                     if (paymentValue) {
                                         payButton.disabled = false; // Enable the button
@@ -154,19 +159,38 @@
                             <td>Pembayaran Tagihan AIR PDAM Periode {{ $detailTagihan->tagihanBulan. ' ' . $detailTagihan->tagihanTahun}}</td>
                             <td>Rp. {{ number_format($detailTagihan->pembayaranInfo->pembayaranJumlah ?? 0, 0, ',', '.') }}</td>
                         </tr>
-                        @if ($detailTagihan->tagihanTanggal && date_create()->diff(date_create($detailTagihan->tagihanTanggal))->m > 1)
+                        @if ($detailTagihan->tagihanStatus == "Lunas")
                             <tr>
                                 <td></td>
-                                <td>Tagihan Denda</td>
-                                <td>Rp. {{ number_format($detailTagihan->tagihanInfoDenda, 0, ',', '.') }}</td>
+                                <td>Abondemen ({{ date_create($detailTagihan->pembayaranInfo->updated_at)->diff(date_create($detailTagihan->tagihanTanggal))->m > 1 ? date_create($detailTagihan->pembayaranInfo->updated_at)->diff(date_create($detailTagihan->tagihanTanggal))->m . ' bulan' : '' }})</td>
+                                <td>Rp. {{ number_format($detailTagihan->pembayaranInfo->pembayaranDenda ?? 0, 0, ',', '.') }}</td>
+                                
                             </tr>
+                        @else
+                            @if ($detailTagihan->tagihanTanggal && date_create()->diff(date_create($detailTagihan->tagihanTanggal))->m > 1)
+                                <tr>
+                                    <td></td>
+                                    <td>Abondemen ({{ date_create()->diff(date_create($detailTagihan->tagihanTanggal))->m > 1 ? date_create()->diff(date_create($detailTagihan->tagihanTanggal))->m . ' bulan' : '' }})</td>
+                                    <td>Rp. {{ number_format((date_create()->diff(date_create($detailTagihan->tagihanTanggal))->m > 1 ? $detailTagihan->tagihanInfoDenda * date_create()->diff(date_create($detailTagihan->tagihanTanggal))->m : $detailTagihan->tagihanInfoDenda), 0, ',', '.') }}</td>
+                                    
+                                </tr>
+                            @endif
                         @endif
                         
+                        @if ($detailTagihan->tagihanStatus == "Belum Lunas")
                         <tr id="paymentRow">
                             <td></td>
                             <td>-</td>
                             <td>-</td>
                         </tr>
+                        @else
+                        <tr id="">
+                            <td>2</td>
+                            <td>Biaya Admin {{ $detailTagihan->pembayaranInfo->pembayaranMetode }}</td>
+                            <td>{{ $detailTagihan->pembayaranInfo->pembayaranMetode == "QRIS" ? $detailTagihan->pembayaranInfo->pembayaranAdminFee : 'Rp. ' . number_format($detailTagihan->pembayaranInfo->pembayaranAdminFee ?? 0, 0, ',', '.') }}</td>
+                        </tr>
+                        @endif
+                        
                         @for ($i = 0; $i < 3; $i++)
                             <tr>
                                 <td></td>
@@ -176,40 +200,41 @@
                         @endfor
                         <tr>
                             <td colspan="2" style="text-align: right; font-weight: bold;">Total Tagihan</td>
-                            <td id="totalTagihan">
-                                <script>
-                                    function calculateTotal() {
-                                        const rows = document.querySelectorAll('#tindakanTable tbody tr');
-                                        let total = 0;
-
-                                        rows.forEach(row => {
-                                            const priceCell = row.cells[2]; // Ambil kolom harga
-                                            if (priceCell) {
-                                                const priceText = priceCell.textContent.trim();
-                                                let price = 0;
-
-                                                if (priceText.includes('%')) {
-                                                    const percentage = parseFloat(priceText.replace('%', '')) || 0;
-                                                    price = total * (percentage / 100);
-                                                } else {
-                                                    const numericText = priceText.replace(/[^\d]/g, ''); // Hapus karakter non-angka
-                                                    price = parseInt(numericText, 10) || 0;
-                                                }
-
-                                                total += price; // Tambahkan ke total
-                                            }
-                                        });
-
-                                        total = Math.round(total); // Pembulatan jika ada koma
-
-                                        // Tampilkan total dalam format Rp.
-                                        document.getElementById('totalTagihan').textContent = 
-                                            'Rp. ' + total.toLocaleString('id-ID');
-                                    }
-                                </script>
-                                
-                            </td>
+                            <td id="totalTagihan"></td>
                         </tr>
+                        <input type="text" id="pembayaranAdminFee" hidden>
+                        <input type="number" id="totalTagihanVal" hidden>
+                        <script>
+                            function calculateTotal() {
+                                const rows = document.querySelectorAll('#tindakanTable tbody tr');
+                                let total = 0;
+
+                                rows.forEach(row => {
+                                    const priceCell = row.cells[2]; // Ambil kolom harga
+                                    if (priceCell) {
+                                        const priceText = priceCell.textContent.trim();
+                                        let price = 0;
+
+                                        if (priceText.includes('%')) {
+                                            const percentage = parseFloat(priceText.replace('%', '')) || 0;
+                                            price = total * (percentage / 100);
+                                        } else {
+                                            const numericText = priceText.replace(/[^\d]/g, ''); // Hapus karakter non-angka
+                                            price = parseInt(numericText, 10) || 0;
+                                        }
+
+                                        total += price; // Tambahkan ke total
+                                    }
+                                });
+
+                                total = Math.round(total); // Pembulatan jika ada koma
+
+                                // Tampilkan total dalam format Rp.
+                                document.getElementById('totalTagihan').textContent = 
+                                    'Rp. ' + total.toLocaleString('id-ID');
+                                document.getElementById('totalTagihanVal').value = total;
+                            }
+                        </script>
                     </tbody>
                 </table>
                 <div class="mt-5">
@@ -237,20 +262,36 @@
                                 <tr>
                                     <td>Penalty</td>
                                     <td>&emsp;&emsp;: <span id="penaltyTagihan">
-                                        {{ $detailTagihan->tagihanTanggal ? (date_create()->diff(date_create($detailTagihan->tagihanTanggal))->m > 1 ? 'Rp. ' . number_format($detailTagihan->tagihanInfoDenda, 0, ',', '.') : '-') : '-' }}
+                                        Rp. {{ number_format((date_create()->diff(date_create($detailTagihan->tagihanTanggal))->m > 1 ? $detailTagihan->tagihanInfoDenda * date_create()->diff(date_create($detailTagihan->tagihanTanggal))->m : $detailTagihan->tagihanInfoDenda), 0, ',', '.') }}
+                                        <input type="text" id="penaltyTagihanVal" value="{{ (date_create()->diff(date_create($detailTagihan->tagihanTanggal))->m > 1 ? $detailTagihan->tagihanInfoDenda * date_create()->diff(date_create($detailTagihan->tagihanTanggal))->m : $detailTagihan->tagihanInfoDenda) }}" hidden>
                                     </span></td>
                                 </tr>
                                 
             
                             </table>
                         </div>
+                        <div class="col-md-4"></div>
+                        @if ($detailTagihan->tagihanStatus == "Lunas")
+                        <div class="col-md-4 text-center">
+                            <img src="{{ asset('images/pembayaranlunas.png') }}" alt="Bayar" width="150px">
+                        </div>
+                        @endif
+                        
                     </div>
                     
                 </div>
               </div>
               <!-- /.card-body -->
               <div class="card-footer text-right">
-                <button id="payButton" class="btn btn-outline-primary" disabled>Bayar Sekarang</button>
+                @if ($detailTagihan->tagihanStatus == "Belum Lunas")
+                    <button id="payButton" class="btn btn-outline-primary" disabled>Bayar Sekarang</button>
+                    
+                @elseif ($detailTagihan->tagihanStatus == "Lunas")
+                    <button id="" class="btn btn-outline-primary" disabled>Pembayaran Lunas</button>
+                @else
+                    <button id="cekPay" class="btn btn-outline-primary">Cek Pembayaran</button>
+
+                @endif
               </div>
             </div>
             <!-- /.card -->
@@ -281,6 +322,108 @@
             var id = $(this).data('id');
             window.location.href = '{{ route('aksi-tagihan' . '.index') }}/' + id;
         });
+
+        $('#payButton').click(function (e) {
+            e.preventDefault();
+            const paymentValue = $('#paymentMethod').val();
+            if (!paymentValue) {
+                alert('Please select a payment method.');
+                return;
+            }
+
+            $(this).html('Processing...').prop('disabled', true);
+
+            $.ajax({
+                url: '{{route('transaksi.createsnaptoken')}}',
+                type: 'POST',
+                data: {
+                    tagihanId: "{{ $detailTagihan->tagihanId ?? '' }}",
+                    paymentMethod: paymentValue,
+                    pembayaranDenda: $('#penaltyTagihanVal').val(),
+                    totalTagihan: $('#totalTagihanVal').val(),
+                    pembayaranAdminFee: $('#pembayaranAdminFee').val()
+
+                },
+                success: function (response) {
+                    $('#payButton').html('Bayar Sekarang').prop('disabled', false);
+
+                    const snapToken = response.snap_token;
+                    const orderId = response.order_id;
+                    
+                    executeSnap(snapToken);
+                    
+                },
+                error: function (xhr) {
+                    toastr.error("Pembayaran Sudah Ada!, Selesaikan Pembayaran");
+                    $('#payButton').html('Bayar Sekarang').prop('disabled', false);
+                }
+            });
+        });
+
+
+        $('#cekPay').click(function (e) {
+            var snapToken = '{{ $detailTagihan->pembayaranInfo->midtransPayment->midtransPaymentSnapToken ?? '' }}';
+            executeSnap(snapToken);
+        })
+
+        function executeSnap(snapToken) {
+            var tagihanId = "{{ $detailTagihan->tagihanId }}";
+            
+            snap.pay(snapToken, {
+                onSuccess: function(result) {
+                    console.log('Payment success:', result);
+                    toastr.warning("Pembayaran Berhasil!");
+                    // $.ajax({
+                    //     url: '{{ route('transaksi.updateDatabase') }}',
+                    //     type: 'POST',
+                    //     data: {
+                    //         tagihanId: tagihanId,
+                    //         orderId: result.order_id,
+                    //         transactionId: result.transaction_id,
+                    //         status: result.transaction_status
+                    //     },
+                    //     success: function(response) {
+                    //         window.location.reload();
+                    //     },
+                    //     error: function(xhr) {
+                    //         console.error('Database update error:', xhr);
+                    //         alert('An error occurred while updating the database.');
+                    //     }
+                    // });
+                    window.location.reload();
+
+                },
+                onPending: function(result) {
+                    console.log('Payment pending:', result);
+                    toastr.warning("Pembayaran Pending, Menunggu Konfirmasi");
+
+                    // $.ajax({
+                    //     url: '{{ route('transaksi.updateDatabase') }}',
+                    //     type: 'POST',
+                    //     data: {
+                    //         tagihanId: tagihanId,
+                    //         orderId: result.order_id,
+                    //         snapToken: snapToken,
+                    //         transactionId: result.transaction_id,
+                    //         status: result.transaction_status
+                    //     },
+                    //     success: function(response) {
+                    //         window.location.reload();
+                    //     },
+                    //     error: function(xhr) {
+                    //         console.error('Database update error:', xhr);
+                    //         alert('An error occurred while updating the database.');
+                    //     }
+                    // });
+                    window.location.reload();
+                },
+                onError: function(result) {
+                    console.log('Payment error:', result);
+                    $('#payButton').html('Bayar Sekarang').prop('disabled', false);
+                    alert('There was an error processing the payment. Please try again.');
+                }
+            });
+        }
 
     })
 </script>

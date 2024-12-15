@@ -9,6 +9,7 @@ use App\Models\Pelanggan;
 use Faker\Provider\Base;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Crypt;
 
 class PelangganController extends BaseController
 {
@@ -70,10 +71,11 @@ class PelangganController extends BaseController
             array(
                 'label' => 'Desa',
                 'field' => 'pelangganDesa',
-                'type' => 'text',
-                'placeholder' => 'Masukkan Desa',
+                'type' => 'select',
+                'placeholder' => 'Pilih Desa',
                 'width' => 6,
-                'required' => true
+                'required' => true,
+                'options' => \App\Models\Desa::all()->pluck('desaNama', 'desaNama')->toArray()
             ),
             array(
                 'label' => 'RT',
@@ -137,10 +139,12 @@ class PelangganController extends BaseController
             return datatables()::of($data)
                     ->addIndexColumn()
                     ->addColumn('action', function($row){
+                        $pelangganId = Crypt::encryptString($row->pelangganId);
+
                         return '<div class="btn-group" role="group" aria-label="Basic example">
-                                    <a href="javascript:void(0)" data-toggle="tooltip" data-id="'.$row->pelangganId.'" data-original-title="Edit" class="edit btn btn-primary btn-xs"><i class="fa-regular fa-pen-to-square"></i></a>
+                                    <a href="javascript:void(0)" data-toggle="tooltip" data-id="'.$pelangganId.'" data-original-title="Edit" class="edit btn btn-primary btn-xs"><i class="fa-regular fa-pen-to-square"></i></a>
                                     &nbsp;
-                                    <a href="javascript:void(0)" data-toggle="tooltip" data-id="'.$row->pelangganId.'" data-original-title="Delete" class="delete btn btn-danger btn-xs"><i class="fa-solid fa-trash"></i></a>
+                                    <a href="javascript:void(0)" data-toggle="tooltip" data-id="'.$pelangganId.'" data-original-title="Delete" class="delete btn btn-danger btn-xs"><i class="fa-solid fa-trash"></i></a>
                                 </div>';
                     })
                     ->editColumn('pelangganGolonganId', function ($row) {

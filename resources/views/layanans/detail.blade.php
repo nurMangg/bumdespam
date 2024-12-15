@@ -247,7 +247,7 @@
                 $('#modelHeading').html("Edit {{ $title ?? env('APP_NAME') }}");
                 $('#saveBtn').val("edit-action");
                 $('#ajaxModel').modal('show');
-                $('#id').val(data.{{ $primaryKey ?? 'id' }});
+                $('#id').val(id);
                 @foreach ($form as $field)
                     $('#{{ $field['field'] }}').val(data.{{ $field['field'] }});
                 @endforeach

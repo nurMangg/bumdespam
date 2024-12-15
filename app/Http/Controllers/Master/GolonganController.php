@@ -6,6 +6,7 @@ use App\Http\Controllers\BaseController;
 use App\Http\Controllers\Controller;
 use App\Models\Golongan;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Crypt;
 
 class GolonganController extends BaseController
 {
@@ -78,10 +79,11 @@ class GolonganController extends BaseController
             return datatables()::of($data)
                     ->addIndexColumn()
                     ->addColumn('action', function($row){
+                        $golonganId = Crypt::encryptString($row->golonganId);
                         return '<div class="btn-group" role="group" aria-label="Basic example">
-                                    <a href="javascript:void(0)" data-toggle="tooltip" data-id="'.$row->golonganId.'" data-original-title="Edit" class="edit btn btn-primary btn-xs"><i class="fa-regular fa-pen-to-square"></i></a>
+                                    <a href="javascript:void(0)" data-toggle="tooltip" data-id="'.$golonganId.'" data-original-title="Edit" class="edit btn btn-primary btn-xs"><i class="fa-regular fa-pen-to-square"></i></a>
                                     &nbsp;
-                                    <a href="javascript:void(0)" data-toggle="tooltip" data-id="'.$row->golonganId.'" data-original-title="Delete" class="delete btn btn-danger btn-xs"><i class="fa-solid fa-trash"></i></a>
+                                    <a href="javascript:void(0)" data-toggle="tooltip" data-id="'.$golonganId.'" data-original-title="Delete" class="delete btn btn-danger btn-xs"><i class="fa-solid fa-trash"></i></a>
                                 </div>';
                     })
                     ->rawColumns(['action'])

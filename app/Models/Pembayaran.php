@@ -15,6 +15,8 @@ class Pembayaran extends Model
         'pembayaranUang',
         'pembayaranKembali',
         'pembayaranStatus',
+        'pembayaranDenda',
+        'pembayaranAdminFee'
     ];
 
     public function tagihan()
@@ -24,8 +26,9 @@ class Pembayaran extends Model
 
     public function midtransPayment()
     {
-        return $this->hasOne(MidtransPayment::class, 'midtransPaymentPembayaranId');
+        return $this->hasOne(MidtransPayment::class, 'midtransPaymentPembayaranId', 'pembayaranId');
     }
+
 }
 
 
