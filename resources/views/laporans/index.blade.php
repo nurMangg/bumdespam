@@ -55,6 +55,7 @@
                         @endforeach
                       </div>
                         <div class="col-md-12 text-right">
+                          <button type="submit" id="pdfButton" class="btn btn-danger">Export to PDF</button>
                           <button type="submit" id="filterBtn" class="btn btn-primary">Preview Filter</button>
                         </div>
                       </form>
@@ -148,9 +149,31 @@
             scrollX: true,
         });
 
-        $('body').on('click', '.edit', function () {
-            var id = $(this).data('id');
-            window.location.href = '{{ route('aksi-tagihan' . '.index') }}/' + id;
+        $('#pdfButton').click(function (event) {
+            // Mencegah form submission default
+            event.preventDefault();
+            
+            // Kirim request AJAX
+            $.ajax({
+                url: '{{ route($route . '.exportPdf') }}',
+                type: 'POST',
+                data: function (d) {
+                    d.filter = {};
+                    @foreach ($form as $field)
+                        d.filter.{{ $field['field'] }} = $('#{{ $field['field'] }}').val();
+                    @endforeach
+                    console.log(d.filter);
+                },
+                success: function (response) {
+                    if (response.status === 'success') {
+                        // Redirect ke URL file PDF untuk diunduh
+                        window.open(response.url, '_blank');
+                    }
+                },
+                error: function (xhr, status, error) {
+                    alert('Terjadi kesalahan: ' + error);
+                }
+            });
         });
 
     })

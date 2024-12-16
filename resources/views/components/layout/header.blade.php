@@ -233,19 +233,19 @@
                                     </a>
                                 </li>
                                 <li class="nav-item">
-                                    <a href="{{ route('laporan-pelanggan.index')}}" class="nav-link {{ Route::is('laporan-pelanggan.index') ? 'active' : '' }}">
+                                    <a href="{{ route('laporan-tagihan.index')}}" class="nav-link {{ Route::is('laporan-tagihan.index') ? 'active' : '' }}">
                                         <i class="far fa-circle nav-icon"></i>
                                         <p>Laporan Tagihan</p>
                                     </a>
                                 </li>
                                 <li class="nav-item">
-                                    <a href="{{ route('laporan-pelanggan.index')}}" class="nav-link {{ Route::is('laporan-pelanggan.index') ? 'active' : '' }}">
+                                    <a href="" class="nav-link disabled ">
                                         <i class="far fa-circle nav-icon"></i>
                                         <p>Laporan Transaksi</p>
                                     </a>
                                 </li>
                                 <li class="nav-item">
-                                    <a href="{{ route('laporan-pelanggan.index')}}" class="nav-link {{ Route::is('laporan-pelanggan.index') ? 'active' : '' }}">
+                                    <a href="" class="nav-link disabled  ">
                                         <i class="far fa-circle nav-icon"></i>
                                         <p>Laporan Payment Midtrans</p>
                                     </a>
@@ -278,6 +278,52 @@
                                     <a href="{{ route('tahun.index')}}" class="nav-link {{ Route::is('tahun.index') ? 'active' : '' }}">
                                         <i class="far fa-circle nav-icon"></i>
                                         <p>Data Tahun</p>
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+                        <li class="nav-item {{ Request::is('import*') ? 'menu-open' : '' }}">
+                            <a href="#" class="nav-link {{ Request::is('import*') ? 'active' : '' }}">
+                                <i class="nav-icon fas fa-file-import"></i>
+                                <p>
+                                    Import Data
+                                    <i class="fas fa-angle-left right"></i>
+                                </p>
+                            </a>
+                            <ul class="nav nav-treeview">
+                                <li class="nav-item">
+                                    <a href="{{ route('import-pelanggan.index')}}" class="nav-link {{ Route::is('import-pelanggan.index') ? 'active' : '' }}">
+                                        <i class="far fa-circle nav-icon"></i>
+                                        <p>Import Pelanggan</p>
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+                        <li class="nav-item {{ Request::is('setting*') ? 'menu-open' : '' }}">
+                            <a href="#" class="nav-link {{ Request::is('setting*') ? 'active' : '' }}">
+                                <i class="nav-icon fas fa-cog"></i>
+                                <p>
+                                    Setting
+                                    <i class="fas fa-angle-left right"></i>
+                                </p>
+                            </a>
+                            <ul class="nav nav-treeview">
+                                <li class="nav-item">
+                                    <a href="{{ route('pengguna-aplikasi.index')}}" class="nav-link {{ Route::is('pengguna-aplikasi.index') ? 'active' : '' }}">
+                                        <i class="far fa-circle nav-icon"></i>
+                                        <p>Pengguna Aplikasi</p>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a href="{{ route('menu-aplikasi.index')}}" class="nav-link {{ Route::is('menu-aplikasi.index') ? 'active' : '' }}">
+                                        <i class="far fa-circle nav-icon"></i>
+                                        <p>Menu Aplikasi</p>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a href="{{ route('role-aplikasi.index')}}" class="nav-link {{ Route::is('role-aplikasi.index') ? 'active' : '' }}">
+                                        <i class="far fa-circle nav-icon"></i>
+                                        <p>Role Aplikasi</p>
                                     </a>
                                 </li>
                             </ul>

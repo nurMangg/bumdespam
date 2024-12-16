@@ -96,42 +96,42 @@ class MidtransController extends Controller
         
     }
 
-    public function updateDatabase(Request $request)
-    {
-        $tagihan = Tagihan::find($request->tagihanId);
+    // public function updateDatabase(Request $request)
+    // {
+    //     $tagihan = Tagihan::find($request->tagihanId);
 
-        MidtransPayment::updateOrCreate(
-            ['midtransPaymentPembayaranId' => $tagihan->pembayaranInfo->pembayaranId],
-            [
-                'midtransPaymentOrderId' => $request->orderId,
-                'midtransPaymentTransactionId' => $request->transactionId,
-                'midtransPaymentSnapToken' => $request->snapToken,
-                'midtransPaymentStatus' => $request->status,
-            ]
-        );
+    //     MidtransPayment::updateOrCreate(
+    //         ['midtransPaymentPembayaranId' => $tagihan->pembayaranInfo->pembayaranId],
+    //         [
+    //             'midtransPaymentOrderId' => $request->orderId,
+    //             'midtransPaymentTransactionId' => $request->transactionId,
+    //             'midtransPaymentSnapToken' => $request->snapToken,
+    //             'midtransPaymentStatus' => $request->status,
+    //         ]
+    //     );
 
-        if($request->status == "pending"){
-            $tagihan['tagihanStatus'] = 'Pending';
-            $tagihan->save();
+    //     if($request->status == "pending"){
+    //         $tagihan['tagihanStatus'] = 'Pending';
+    //         $tagihan->save();
 
-            $pembayaran = Pembayaran::where('pembayaranTagihanId', $tagihan->tagihanId)->first();
-            $pembayaran['pembayaranStatus'] = 'Pending';
-            $pembayaran->save();
+    //         $pembayaran = Pembayaran::where('pembayaranTagihanId', $tagihan->tagihanId)->first();
+    //         $pembayaran['pembayaranStatus'] = 'Pending';
+    //         $pembayaran->save();
 
-        } else {
-            $tagihan['tagihanStatus'] = 'Lunas';
-            $tagihan->save();
+    //     } else {
+    //         $tagihan['tagihanStatus'] = 'Lunas';
+    //         $tagihan->save();
 
-            $pembayaran = Pembayaran::where('pembayaranTagihanId', $tagihan->tagihanId)->first();
-            $pembayaran['pembayaranStatus'] = 'Lunas';
-            $pembayaran->save();
-        }
+    //         $pembayaran = Pembayaran::where('pembayaranTagihanId', $tagihan->tagihanId)->first();
+    //         $pembayaran['pembayaranStatus'] = 'Lunas';
+    //         $pembayaran->save();
+    //     }
 
 
 
         
 
-    }
+    // }
 
     public function handleNotification(Request $request)
     {

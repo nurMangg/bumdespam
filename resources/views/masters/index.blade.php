@@ -129,7 +129,13 @@
                 $('#ajaxModel').modal('show');
                 $('#id').val(id);
                 @foreach ($form as $field)
-                    $('#{{ $field['field'] }}').val(data.{{ $field['field'] }});
+                    @if ($field['type'] === 'checkbox')
+                        $('input[name="{{ $field['field'] }}[]"]').each(function() {
+                            $(this).prop('checked', data.{{ $field['field'] }}.includes($(this).val()));
+                        });
+                    @else
+                        $('#{{ $field['field'] }}').val(data.{{ $field['field'] }});
+                    @endif
                 @endforeach
             })
         });
@@ -150,10 +156,17 @@
             var isValid = true;
             @foreach ($form as $field)
                 @if ($field['required'] ?? false)
-                    if (!$('#{{ $field['field'] }}').val()) {
-                        $('#{{ $field['field'] }}Error').text('This field is required.');
-                        isValid = false;
-                    }
+                    @if ($field['type'] === 'checkbox')
+                        if (!$('input[name="{{ $field['field'] }}[]"]:checked').length) {
+                            $('#{{ $field['field'] }}Error').text('This field is required.');
+                            isValid = false;
+                        }
+                    @else
+                        if (!$('#{{ $field['field'] }}').val()) {
+                            $('#{{ $field['field'] }}Error').text('This field is required.');
+                            isValid = false;
+                        }
+                    @endif
                 @endif
             @endforeach
 

@@ -5,11 +5,9 @@ namespace App\Http\Controllers\Laporan;
 use App\Http\Controllers\Controller;
 use App\Models\Golongan;
 use App\Models\Pelanggan;
-use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
 
-class LaporanPenggunaController extends Controller
+class LaporanPenggunaanAirController extends Controller
 {
     protected $model = Pelanggan::class;
     protected $grid;
@@ -28,54 +26,13 @@ class LaporanPenggunaController extends Controller
 
         $this->form = array(
             array(
-                'label' => 'Desa',
-                'field' => 'pelangganDesa',
+                'label' => 'Kode Pelanggan',
+                'field' => 'pelangganKode',
                 'type' => 'select',
                 'options' => Pelanggan::all()->pluck('pelangganDesa', 'pelangganDesa')->unique()->sort()->toArray(),
                 'placeholder' => 'Semua Desa',
                 'width' => 6,
                 'required' => true
-            ),
-            array(
-                'label' => 'RT',
-                'field' => 'pelangganRt',
-                'type' => 'select',
-                'options' => Pelanggan::all()->pluck('pelangganRt', 'pelangganRt')->unique()->sort()->toArray(), // Add option values here
-                'placeholder' => 'Semua RT',
-                'width' => 3,
-                'required' => true
-            ),
-            array(
-                'label' => 'RW',
-                'field' => 'pelangganRw',
-                'type' => 'select',
-                'options' => Pelanggan::all()->pluck('pelangganRw', 'pelangganRw')->unique()->sort()->toArray(), 
-                'placeholder' => 'Semua RW',
-                'width' => 3,
-                'required' => true
-            ),
-            array(
-                'label' => 'Golongan',
-                'field' => 'pelangganGolonganId',
-                'type' => 'select',
-                'width' => 6,
-                'placeholder' => 'Semua Golongan',
-                'required' => true,
-                'options' => Golongan::pluck('golonganNama', 'golonganId')->toArray()
-
-            ),
-            array(
-                'label' => 'Status',
-                'field' => 'pelangganStatus',
-                'type' => 'select',
-                'width' => 6,
-                'placeholder' => 'Semua Status',
-                'required' => true,
-                'options' => [
-                    'Aktif' => 'Aktif',
-                    'Tidak Aktif' => 'Tidak Aktif'
-                ]
-
             ),
         );
 
@@ -98,14 +55,14 @@ class LaporanPenggunaController extends Controller
             ),
             array(
                 'label' => 'RT',
-                'field' => 'pelangganRt',
+                'field' => 'pelangganRT',
             ),
             array(
                 'label' => 'RW',
-                'field' => 'pelangganRw',
+                'field' => 'pelangganRW',
             ),
             array(
-                'label' => 'Golongan',
+                'label' => 'Golongan Tarif',
                 'field' => 'pelangganGolonganId',
             ),
             array(
@@ -115,14 +72,16 @@ class LaporanPenggunaController extends Controller
             array(
                 'label' => 'Status',
                 'field' => 'pelangganStatus',
-            ), 
+            ),
+            
+            
         );
     }
     
     public function index(Request $request)
     {
         if ($request->ajax()) {
-            $query = Pelanggan::select('pelangganId', 'pelangganKode', 'pelangganPhone', 'pelangganNama', 'pelangganDesa', 'pelangganRt', 'pelangganRw', 'pelangganStatus', 'pelangganGolonganId', 'created_at')
+            $query = Pelanggan::select('pelangganId', 'pelangganKode', 'pelangganPhone', 'pelangganNama', 'pelangganDesa', 'pelangganRT', 'pelangganRW', 'pelangganStatus', 'pelangganGolonganId', 'created_at')
                 ->orderBy('created_at', 'desc');
 
             if ($request->has('filter')) {
@@ -156,40 +115,6 @@ class LaporanPenggunaController extends Controller
                 'breadcrumb' => $this->breadcrumb,
                 'route' => $this->route,
                 'primaryKey' => $this->primaryKey
-        ]);
-    }
-
-    public function exportPdf(Request $request)
-    {
-        $filters = $request->input('filter', []);
-        $query = Pelanggan::query();
-
-        foreach ($filters as $field => $value) {
-            if (!empty($value)) {
-                $query->where($field, 'like', '%' . $value . '%');
-            }
-        }
-
-        $data = $query->get();
-        $data->transform(function($item) {
-            $item->pelangganGolonganId = Golongan::find($item->pelangganGolonganId)->golonganNama;
-            return $item;
-        });
-
-        // Generate PDF
-        $pdf = Pdf::loadView('laporans.pdf.index', ['data' => $data, 'title' => $this->title, 'grid' => $this->grid]);
-
-        // Simpan PDF ke folder storage
-        $fileName = 'laporan-pelanggan-' . time() . '.pdf';
-        Storage::disk('public')->put('exports/pelanggan/' . $fileName, $pdf->output());
-
-        $fileUrl = asset('storage/exports/pelanggan/' . $fileName);
-
-
-        // Return URL untuk file yang diunduh
-        return response()->json([
-            'status' => 'success',
-            'url' => $fileUrl,
         ]);
     }
 }

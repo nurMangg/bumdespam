@@ -11,9 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('midtrans_payments', function (Blueprint $table) {
-            $table->text('midtransPaymentSnapToken')->nullable()->after('midtransPaymentTransactionId');
-            
+        Schema::table('msrole', function (Blueprint $table) {
+            $table->mediumText('roleMenuId')->nullable()->after('roleId');
         });
     }
 
@@ -22,8 +21,9 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('midtrans_payments', function (Blueprint $table) {
-            $table->dropColumn('midtransPaymentSnapToken');
+        Schema::table('msrole', function (Blueprint $table) {
+            $table->dropForeign(['roleMenuId']);
+            $table->dropColumn('roleMenuId');
         });
     }
 };

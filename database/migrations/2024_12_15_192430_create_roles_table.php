@@ -11,9 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('midtrans_payments', function (Blueprint $table) {
-            $table->text('midtransPaymentSnapToken')->nullable()->after('midtransPaymentTransactionId');
-            
+        Schema::create('msrole', function (Blueprint $table) {
+            $table->increments('roleId');
+            $table->string('roleName');
+            $table->timestamps();
         });
     }
 
@@ -22,8 +23,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('midtrans_payments', function (Blueprint $table) {
-            $table->dropColumn('midtransPaymentSnapToken');
-        });
+        Schema::dropIfExists('msrole');
     }
 };

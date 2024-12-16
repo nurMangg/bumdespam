@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\CheckUserRole;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -16,6 +17,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'transaksi/handle-notification',
             
         ]);
+        $middleware->alias(['CheckUserRole' => CheckUserRole::class]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //

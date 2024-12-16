@@ -13,18 +13,43 @@
 
         <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
+        <style>
+            body {
+                transition: background-image 0.5s ease-in-out;
+            }
+        </style>
     </head>
-    <body class="font-sans text-gray-900 antialiased">
-        <div class="min-h-screen flex flex-col sm:justify-center items-center pt-6 sm:pt-0 bg-gray-100">
-            <div>
-                <a href="/">
-                    <x-application-logo class="w-20 h-20 fill-current text-gray-500" />
-                </a>
-            </div>
+    <body class="font-sans text-gray-900 antialiased bg-cover bg-center bg-no-repeat">
+        <div class="min-h-screen flex flex-col sm:justify-center items-center pt-6 sm:pt-0">
+            
 
-            <div class="w-full sm:max-w-md mt-6 px-6 py-4 bg-white shadow-md overflow-hidden sm:rounded-lg">
+            <div class="w-full sm:max-w-md mt-6 px-6 py-4 bg-white bg-opacity-50 shadow-md overflow-hidden sm:rounded-lg">
+                <div class="flex items-center justify-center mb-4">
+                    <a href="/">
+                        <x-application-logo class="w-100 h-100 fill-current text-gray-500" />
+                    </a>
+                </div>
                 {{ $slot }}
             </div>
         </div>
+
+        <!-- Random Background Script -->
+        <script>
+            document.addEventListener('DOMContentLoaded', () => {
+                // Daftar gambar background
+                const backgrounds = [
+                    "{{ asset('images/873.jpg') }}",
+                    "{{ asset('images/9126.jpg') }}",
+                    "{{ asset('images/24143.jpg') }}",
+                    "{{ asset('images/46361.jpg') }}"
+                ];
+
+                // Pilih gambar secara acak
+                const randomBackground = backgrounds[Math.floor(Math.random() * backgrounds.length)];
+
+                // Terapkan gambar ke body
+                document.body.style.backgroundImage = `url('${randomBackground}')`;
+            });
+        </script>
     </body>
 </html>

@@ -96,7 +96,8 @@
                                     existingRow.cells[2].innerHTML = paymentPrice.includes('.') ? paymentPrice : `Rp. ${parseFloat(paymentPrice).toLocaleString('id-ID')}`; // Update the price
 
                                     calculateTotal();
-                                    document.getElementById('pembayaranAdminFee').value = paymentPrice;
+                                    const paymentPriceNumber = parseFloat(paymentPrice.replace('%', '')) || 0;
+                                    document.getElementById('pembayaranAdminFee').value = paymentPriceNumber;
                                     const payButton = document.getElementById('payButton');
                                     if (paymentValue) {
                                         payButton.disabled = false; // Enable the button
