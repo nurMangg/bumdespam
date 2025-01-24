@@ -20,6 +20,7 @@ use App\Http\Controllers\Setting\ResetPasswordController;
 use App\Http\Controllers\Setting\RiwayatController;
 use App\Http\Controllers\Setting\RoleController;
 use App\Http\Controllers\Setting\WebController;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
 // Route::get('/', function () {
@@ -27,6 +28,10 @@ use Illuminate\Support\Facades\Route;
 // });
 
 Route::get('/dashboard', function () {
+    if (Auth::user()->userRoleId == 2) {
+        return view('pelanggan.dashboard');
+
+    }
     return view('dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
 

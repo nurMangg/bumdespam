@@ -15,7 +15,7 @@ class MidtransController extends Controller
 {
     public function createSnapToken(Request $request)
     {
-        $tagihanDecrypt = Crypt::decrypt($request->tagihanId);
+        $tagihanDecrypt = Crypt::decryptString($request->tagihanId);
         $tagihan = Tagihan::find($tagihanDecrypt);
 
         if($tagihan->tagihanStatus == "Lunas" || $tagihan->tagihanStatus == "Pending")

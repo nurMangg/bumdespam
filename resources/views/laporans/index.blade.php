@@ -27,43 +27,45 @@
         </div>
       <div class="container">
         <div class="row">
-            <div class="col-md-12">
-                <div class="card">
-                    <div class="card-header">
-                      <h3 class="card-title">{{ __('Filter Data') }}</h3>
-                      
-                    </div>
-                    <!-- /.card-header -->
-                    <div class="card-body">
-                      
-                      <form>
-                        <div class="row">
-                        @foreach ($form as $field)
-                        <div class="form-group mb-3 col-md-{{ $field['width'] ?? 12 }}">
-                          <label for="{{ $field['field'] }}" class="control-label">
-                              {{ $field['label'] }}
-                          </label>
-          
-                          <select class="form-control" id="{{ $field['field'] }}" name="{{ $field['field'] }}" {{ $field['required'] ?? false ? 'required' : '' }}>
-                            <option value="" selected>{{ $field['placeholder'] }}</option>
-                            @foreach ($field['options'] as $value => $label)
-                                <option value="{{ $value }}">{{ $label }}</option>
-                            @endforeach
-                          </select>
-                        </div>
-
+          @if (Auth::user()->userRoleId != 2)
+          <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                  <h3 class="card-title">{{ __('Filter Data') }}</h3>
+                  
+                </div>
+                <!-- /.card-header -->
+                <div class="card-body">
+                  
+                  <form>
+                    <div class="row">
+                    @foreach ($form as $field)
+                    <div class="form-group mb-3 col-md-{{ $field['width'] ?? 12 }}">
+                      <label for="{{ $field['field'] }}" class="control-label">
+                          {{ $field['label'] }}
+                      </label>
+      
+                      <select class="form-control" id="{{ $field['field'] }}" name="{{ $field['field'] }}" {{ $field['required'] ?? false ? 'required' : '' }}>
+                        <option value="" selected>{{ $field['placeholder'] }}</option>
+                        @foreach ($field['options'] as $value => $label)
+                            <option value="{{ $value }}">{{ $label }}</option>
                         @endforeach
-                      </div>
-                        <div class="col-md-12 text-right">
-                          <button type="submit" id="pdfButton" class="btn btn-danger">Export to PDF</button>
-                          <button type="submit" id="filterBtn" class="btn btn-primary">Preview Filter</button>
-                        </div>
-                      </form>
+                      </select>
                     </div>
-                    <!-- /.card-body -->
+
+                    @endforeach
                   </div>
-                  <!-- /.card -->
-            </div>
+                    <div class="col-md-12 text-right">
+                      <button type="submit" id="pdfButton" class="btn btn-danger">Export to PDF</button>
+                      <button type="submit" id="filterBtn" class="btn btn-primary">Preview Filter</button>
+                    </div>
+                  </form>
+                </div>
+                <!-- /.card-body -->
+              </div>
+              <!-- /.card -->
+        </div>
+          @endif
           <div class="col-md-12">
             <div class="card">
               <div class="card-header">

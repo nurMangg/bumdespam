@@ -3,11 +3,13 @@
 namespace App\Http\Controllers\Layanan;
 
 use App\Http\Controllers\Controller;
+use App\Models\Pelanggan;
 use App\Models\Pembayaran;
 use App\Models\Tagihan;
 use App\Models\Tahun;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Crypt;
 
 class TransaksiController extends Controller
@@ -59,7 +61,12 @@ class TransaksiController extends Controller
     public function index(Request $request)
     {
         if ($request->ajax()) {
-            $data = Tagihan::all();
+            if (Auth::user()->userRoleId != 2) {
+                $data = Tagihan::all();
+            } else {
+                $user = Pelanggan::where('pelangganUserId', Auth::user()->id)->first();
+                $data = Tagihan::where('tagihanPelangganId', $user->pelangganId)->get();
+            }
             return datatables()::of($data)
                     ->addIndexColumn()
                     ->addColumn('action', function($row){

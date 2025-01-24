@@ -8,6 +8,7 @@ use App\Models\Pelanggan;
 use App\Models\Tagihan;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 
 class LaporanTagihanController extends Controller
@@ -139,8 +140,15 @@ class LaporanTagihanController extends Controller
     public function index(Request $request)
     {
         if ($request->ajax()) {
-            $query = Tagihan::with('pelanggan')->select('*')
+            if (Auth::user()->userRoleId != 2) {
+                $query = Tagihan::with('pelanggan')->select('*')
                 ->orderBy('created_at', 'desc');
+            } else {
+                $pelanggan = Pelanggan::where('pelangganUserId', Auth::user()->id)->first();
+                $query = Tagihan::with('pelanggan')->select('*')->where('tagihanPelangganId', $pelanggan->pelangganId)
+                ->orderBy('created_at', 'desc');
+            }
+            
 
                 if ($request->has('filter')) {
                     // Apply filters specified in the request
