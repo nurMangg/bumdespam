@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Laporan;
 use App\Http\Controllers\Controller;
 use App\Models\Golongan;
 use App\Models\Pelanggan;
+use App\Models\SettingWeb;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -176,8 +177,11 @@ class LaporanPenggunaController extends Controller
             return $item;
         });
 
+        // Setting Web
+        $web = SettingWeb::first();
+
         // Generate PDF
-        $pdf = Pdf::loadView('laporans.pdf.index', ['data' => $data, 'title' => $this->title, 'grid' => $this->grid]);
+        $pdf = Pdf::loadView('laporans.pdf.pelanggan', ['data' => $data, 'title' => $this->title, 'grid' => $this->grid, 'web' => $web]);
 
         // Simpan PDF ke folder storage
         $fileName = 'laporan-pelanggan-' . time() . '.pdf';
