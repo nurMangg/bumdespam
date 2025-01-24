@@ -244,8 +244,7 @@ class InputTagihanController extends Controller
         // dd($pelanggan);
 
         $dataTagihan = Tagihan::where('tagihanPelangganId', $pelanggan->pelangganId)
-            ->orderBy('tagihanTahun', 'desc')
-            ->orderBy('tagihanBulan', 'desc')
+            ->orderBy('created_at', 'desc')
             ->first();
 
         if(!$dataTagihan){
@@ -317,8 +316,8 @@ class InputTagihanController extends Controller
         }
 
         $dataTagihan = Tagihan::where('tagihanPelangganId', $pelanggan->pelangganId)
-            ->orderBy('tagihanTahun', 'desc')
-            ->orderBy('tagihanBulan', 'desc')
+            ->orderBy('created_at', 'desc')
+    
             ->first();
 
         if(!$dataTagihan){
