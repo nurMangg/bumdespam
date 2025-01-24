@@ -234,7 +234,10 @@ class InputTagihanController extends Controller
             return response()->json(['errors' => $validator->errors()], 422);
         }
 
-        $pelanggan = Pelanggan::where('pelangganKode', $request->id)->first();
+        $decryptId = Crypt::decryptString($request->id);
+        // dd($decryptId);
+
+        $pelanggan = Pelanggan::where('pelangganKode', $decryptId)->first();
         if(!$pelanggan) {
             return response()->json(['errors' => "Tidak Ada Data Pelanggan", 'status'=> 'Error'], 422);
         }
@@ -337,7 +340,7 @@ class InputTagihanController extends Controller
         $dataTagihan['tagihanBulanBaru'] = Bulan::where('id', $idBulan)->value('bulan');
 
         $data = [
-            'pelangganId' => Crypt::encryptString($pelanggan->pelangganId),
+            'pelangganId' => Crypt::encryptString($pelanggan->pelangganKode),
             'pelangganKode' => $dataTagihan->pelanggan->pelangganKode,
             'pelangganNama' => $dataTagihan->pelanggan->pelangganNama,
             'pelangganDesa' => $dataTagihan->pelanggan->pelangganDesa,
