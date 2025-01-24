@@ -179,6 +179,13 @@ class PelangganController extends BaseController
         }
         $request->validate($rules);
 
+        $user = User::create([
+            'name' => $request->pelangganNama,
+            'email' => $request->pelangganEmail,
+            'password' => Hash::make('password'),
+            'userRoleId' => 2
+        ]);
+
         $newPelanggan = Pelanggan::create([
             'pelangganKode' => $this->generateUniqueCode(),
             'pelangganNama' => $request->pelangganNama,
@@ -190,15 +197,10 @@ class PelangganController extends BaseController
             'pelangganRw' => $request->pelangganRw,
             'pelangganGolonganId' => $request->pelangganGolonganId,
             'pelangganStatus' => $request->pelangganStatus,
-            'pelangganUserId' => Auth::user()->id
+            'pelangganUserId' => $user->id
         ]);
 
-        User::create([
-            'name' => $request->pelangganNama,
-            'email' => $request->pelangganEmail,
-            'password' => Hash::make('password'),
-            'userRoleId' => 2
-        ]);
+        
 
         HistoryWeb::create([
             'riwayatUserId' => Auth::user()->id,
