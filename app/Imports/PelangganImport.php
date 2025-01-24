@@ -23,7 +23,7 @@ class PelangganImport implements ToModel, WithStartRow, SkipsOnFailure, WithHead
 
     public function model(array $row)
     {
-        User::create([
+        $user = User::create([
             'name' => $row['nama'],
             'email' => $row['email'],
             'password' => Hash::make('password'),
@@ -41,7 +41,7 @@ class PelangganImport implements ToModel, WithStartRow, SkipsOnFailure, WithHead
             'pelangganRw' => $row['rw'],
             'pelangganGolonganId' => $row['golongan_id'],
             'pelangganStatus' => $row['status'],
-            'pelangganUserId' => Auth::user()->id
+            'pelangganUserId' => $user->id
         ]);
     }
 
