@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Data\AksiTagihanController;
+use App\Http\Controllers\Data\InputTagihanController;
 use App\Http\Controllers\Data\TagihanController;
 use App\Http\Controllers\Import\ImportPelangganController;
 use App\Http\Controllers\Import\ImportPenggunaController;
@@ -15,12 +16,15 @@ use App\Http\Controllers\Master\TahunController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Setting\MenuController;
 use App\Http\Controllers\Setting\PenggunaAplikasiController;
+use App\Http\Controllers\Setting\ResetPasswordController;
+use App\Http\Controllers\Setting\RiwayatController;
 use App\Http\Controllers\Setting\RoleController;
+use App\Http\Controllers\Setting\WebController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', function () {
-    return view('welcome');
-});
+// Route::get('/', function () {
+//     return view('welcome');
+// });
 
 Route::get('/dashboard', function () {
     return view('dashboard');
@@ -35,6 +39,7 @@ Route::middleware(['auth', 'CheckUserRole'])->prefix('master')->group(function (
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
     Route::resource('pelanggan', PelangganController::class);
+    Route::get('pelanggan/ViewKartu/{pelanggan}', [PelangganController::class, 'viewKartu'])->name('pelanggan.viewKartu');
     Route::resource('golongan-tarif', GolonganController::class);
     Route::resource('tahun', TahunController::class);
 });
@@ -46,11 +51,22 @@ Route::middleware(['auth', 'CheckUserRole'])->prefix('layanan')->group(function 
    Route::resource('transaksi', TransaksiController::class);
    Route::resource('aksi-transaksi', AksiTransaksiController::class);
 
+   Route::Post('transaksi/pembayaran-tunai', [AksiTransaksiController::class, 'pembayaranTunai'])->name('transaksi.pembayarantunai');
+   Route::get('transaksi/unduh-struk/{id}', [TransaksiController::class, 'unduhStruk'])->name('transaksi.struk');
+
+
    Route::Post('transaksi/create-snap-token', [MidtransController::class, 'createSnapToken'])->name('transaksi.createsnaptoken');
    Route::Post('transaksi/update-database', [MidtransController::class, 'updateDatabase'])->name('transaksi.updateDatabase');
 
 
 });
+
+Route::resource('input-tagihan', InputTagihanController::class);
+Route::post('input-tagihan/scanqrcode', [InputTagihanController::class, 'scanQRCode'])->name('input-tagihan.scanqrcode');
+
+// Route::middleware(['auth', 'CheckUserRole'])->prefix('input-tagihan')->group(function () {
+//     Route::resource('input-tagihan', InputTagihanController::class);
+// });
 
 Route::middleware(['auth', 'CheckUserRole'])->prefix('laporan')->group(function () {
     Route::get('laporan-pelanggan', [LaporanPenggunaController::class, 'index'])->name('laporan-pelanggan.index'); 
@@ -69,6 +85,11 @@ Route::middleware(['auth', 'CheckUserRole'])->prefix('setting')->group(function 
     Route::resource('pengguna-aplikasi', PenggunaAplikasiController::class);
     Route::resource('menu-aplikasi', MenuController::class);
     Route::resource('role-aplikasi', RoleController::class);
+    Route::resource('setting-web', WebController::class);
+    Route::get('riwayat-website', [RiwayatController::class, 'index'])->name('riwayat-website.index');
+
+    Route::get('reset-password', [ResetPasswordController::class, 'index'])->name('reset-password.index');
+    Route::post('reset-password/{id}', [ResetPasswordController::class, 'resetPassword'])->name('reset-password.resetPassword');
 });
 
 require __DIR__.'/auth.php';

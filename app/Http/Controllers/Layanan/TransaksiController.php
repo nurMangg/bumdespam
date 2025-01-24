@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Pembayaran;
 use App\Models\Tagihan;
 use App\Models\Tahun;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Crypt;
 
@@ -63,9 +64,15 @@ class TransaksiController extends Controller
                     ->addIndexColumn()
                     ->addColumn('action', function($row){
                         $tagihanId = Crypt::encryptString($row->tagihanId);
-                        return '<div class="btn-group" role="group" aria-label="Basic example">
-                                    <a href="javascript:void(0)" data-toggle="tooltip" data-id="'.$tagihanId.'" data-original-title="Bayar" class="bayar btn btn-success btn-xs"><i class="fa-solid fa-circle-dollar-to-slot"></i> Bayar</a>
-                                </div>';
+                        if ($row->tagihanStatus == 'Lunas') {
+                            return '<div class="btn-group" role="group" aria-label="Basic example">
+                                        <a href="javascript:void(0)" data-toggle="tooltip" data-id="'.$tagihanId.'" data-original-title="Lunas" class="bayar btn btn-primary btn-xs"><i class="fa-solid fa-circle-check"></i> Lihat</a>
+                                    </div>';
+                        } else {
+                            return '<div class="btn-group" role="group" aria-label="Basic example">
+                                        <a href="javascript:void(0)" data-toggle="tooltip" data-id="'.$tagihanId.'" data-original-title="Bayar" class="bayar btn btn-success btn-xs"><i class="fa-solid fa-circle-dollar-to-slot"></i> Bayar</a>
+                                    </div>';
+                        }
                     })
                     ->addColumn('tagihanJumlah', function($row){
                         $jumlah = Pembayaran::where('pembayaranTagihanId', $row->tagihanId)->first()->pembayaranJumlah;
@@ -89,5 +96,33 @@ class TransaksiController extends Controller
                 'route' => $this->route,
                 'primaryKey' => $this->primaryKey
         ]);
+    }
+
+    public function unduhStruk($id)
+    {
+        $tagihanId = Crypt::decryptString($id);
+        $tagihan = Tagihan::findOrFail($tagihanId);
+        // dd($tagihan);
+        $pembayaran = Pembayaran::where('pembayaranTagihanId', $tagihanId)->firstOrFail();
+
+        $data = [
+            'tagihanKode' => $tagihan->tagihanKode,
+            'pelangganKode' => $tagihan->pelanggan->pelangganKode,
+            'pelangganNama' => $tagihan->pelanggan->pelangganNama,
+            'tagihanMeteranAwal' => $tagihan->tagihanMAwal,
+            'tagihanMeteranAkhir' => $tagihan->tagihanMAkhir,
+            'nama_bulan' => $tagihan->tagihanBulan,
+            'tagihanTahun' => $tagihan->tagihanTahun,
+            'formattedTagihanTotal' => number_format($pembayaran->pembayaranJumlah, 0, ',', '.'),
+            'formattedTotalDenda' => number_format($pembayaran->pembayaranDenda, 0, ',', '.'),
+            'formattedTotal' => number_format($pembayaran->pembayaranJumlah + $pembayaran->pembayaranDenda, 0, ',', '.'),
+            'date' => now()->format('d-m-Y'),
+            'name' => "Kasir",
+        ];
+        // dd($data);
+
+        $pdf = Pdf::loadView('transaksis.struk.index', compact('data'));
+        return $pdf->download('struk-pembayaran-' . $data['pelangganKode'] . '-' . $data['tagihanKode'] . '.pdf');
+
     }
 }

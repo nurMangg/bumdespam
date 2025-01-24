@@ -3,7 +3,9 @@
 namespace App\Imports;
 
 use App\Models\Pelanggan;
+use App\Models\User;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 use Maatwebsite\Excel\Concerns\SkipsFailures;
 use Maatwebsite\Excel\Concerns\SkipsOnFailure;
 use Maatwebsite\Excel\Concerns\ToModel;
@@ -21,6 +23,13 @@ class PelangganImport implements ToModel, WithStartRow, SkipsOnFailure, WithHead
 
     public function model(array $row)
     {
+        User::create([
+            'name' => $row['nama'],
+            'email' => $row['email'],
+            'password' => Hash::make('password'),
+            'userRoleId' => 2
+        ]);
+
         return new Pelanggan([
             'pelangganKode' => $this->generateUniqueCode(),
             'pelangganNama' => $row['nama'],
@@ -48,3 +57,4 @@ class PelangganImport implements ToModel, WithStartRow, SkipsOnFailure, WithHead
         return "PAM{$date}{$pelangganPart}";
     }
 }
+

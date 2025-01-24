@@ -2,10 +2,13 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Pelanggan extends Model
 {
+    use HasFactory;
+
     protected $table = 'mspelanggan';
 
     protected $primaryKey = 'pelangganId';
@@ -27,4 +30,10 @@ class Pelanggan extends Model
     {
         return $this->belongsTo(Golongan::class, 'pelangganGolonganId', 'golonganId');
     }
+
+    public function tagihan()
+    {
+        return $this->hasMany(Tagihan::class, 'tagihanPelangganId', 'pelangganId');
+    }
 }
+

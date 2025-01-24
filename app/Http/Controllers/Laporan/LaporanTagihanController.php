@@ -120,6 +120,10 @@ class LaporanTagihanController extends Controller
                 'field' => 'tagihanPenggunaan',
             ),
             array(
+                'label' => 'Tagihan',
+                'field' => 'tagihanTotal',
+            ),
+            array(
                 'label' => 'Tagihan Terbit',
                 'field' => 'tagihanTerbit',
             ),
@@ -178,6 +182,10 @@ class LaporanTagihanController extends Controller
                 }
 
             $data = $query->get();
+            $data->transform(function($item) {
+                $item->tagihanTotal = ($item->tagihanMAkhir - $item->tagihanMAwal) * $item->tagihanInfoTarif;
+                return $item;
+            });
 
             return datatables()::of($data)
                     ->addIndexColumn()
@@ -195,6 +203,9 @@ class LaporanTagihanController extends Controller
                     })
                     ->addColumn('tagihanPenggunaan', function($row){
                         return $row->tagihanMAkhir - $row->tagihanMAwal . ' m3';
+                    })
+                    ->editColumn('tagihanTotal', function($row){
+                        return 'Rp. ' . number_format($row->tagihanTotal, 0, ',', '.');
                     })
                     ->make(true);
         }
@@ -252,18 +263,30 @@ class LaporanTagihanController extends Controller
         }
 
         $data = $query->get();
+        $jumlahBelumLunas = $data->where('tagihanStatus', 'Belum Lunas')->count();
+        $jumlahLunas = $data->where('tagihanStatus', 'Lunas')->count();
         $data->transform(function($item) {
             $pelanggan = $item->pelanggan;
             $item->pelangganNama = $pelanggan->pelangganNama;
             $item->pelangganAlamat = $pelanggan->pelangganDesa;
             $item->pelangganRTRW = $pelanggan->pelangganRt . ' / ' . $pelanggan->pelangganRw;
             $item->tagihanPenggunaan = $item->tagihanMAkhir - $item->tagihanMAwal;
+            $item->tagihanTotal = ($item->tagihanMAkhir - $item->tagihanMAwal) * $item->tagihanInfoTarif;
             $item->tagihanTerbit = $item->tagihanBulan . ' - ' . $item->tagihanTahun;
             return $item;
         });
 
+        $dataJumlah = [
+            'jumlahBelumLunas' => $jumlahBelumLunas,
+            'jumlahLunas' => $jumlahLunas,
+            'totalSemuaTagihanBelumLunas' => $data->where('tagihanStatus', 'Belum Lunas')->sum('tagihanTotal'),
+            'totalSemuaTagihanLunas' => $data->where('tagihanStatus', 'Lunas')->sum('tagihanTotal')
+        ];
+
+    
         // Generate PDF
-        $pdf = Pdf::loadView('laporans.pdf.index', ['data' => $data, 'title' => $this->title, 'grid' => $this->grid]);
+        $pdf = Pdf::loadView('laporans.pdf.index', ['data' => $data, 'title' => $this->title, 'grid' => $this->grid, 'dataJumlah' => $dataJumlah])
+            ->setPaper('a4', 'landscape');
 
         // Simpan PDF ke folder storage
         $fileName = 'laporan-tagihan-' . time() . '.pdf';

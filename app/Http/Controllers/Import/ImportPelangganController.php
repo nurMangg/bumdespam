@@ -4,7 +4,9 @@ namespace App\Http\Controllers\Import;
 
 use App\Http\Controllers\Controller;
 use App\Imports\PelangganImport;
+use App\Models\HistoryWeb;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use Maatwebsite\Excel\Facades\Excel;
 
@@ -65,6 +67,14 @@ class ImportPelangganController extends Controller
         // Proses import file
         try {
             Excel::import(new PelangganImport, $request->file('file'));
+
+            HistoryWeb::create([
+                'riwayatUserId' => Auth::user()->id,
+                'riwayatTable' => 'Pelanggan',
+                'riwayatAksi' => 'Import Data',
+                'riwayatData' => json_encode(['file' => $request->file('file')->getClientOriginalName()]),
+            ]);
+            
             return response()->json(['success' => 'Data pasien berhasil diimport.']);
         } catch (\Exception $e) {
             return response()->json(['error' => 'Terjadi kesalahan saat import: ' . $e->getMessage()], 500);

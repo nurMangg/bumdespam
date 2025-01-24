@@ -1,19 +1,9 @@
-<div class="modal modal-blur fade" id="ajaxModel" tabindex="-1" role="dialog" aria-hidden="true">
-    <div class="modal-dialog modal-xl modal-dialog-centered" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="modelHeading">Tambah {{ $title }}</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <form id="addForm" name="addForm" class="form-horizontal">
-                    <div class="row">
-                    <input type="hidden" name="id" id="id">
-                    @foreach ($form as $field)
+<form id="{{ $name ?? "addForm" }}" name="{{ $name ?? "addForm" }}" class="form-horizontal">
+    <div class="row">
+    <input type="hidden" name="id" id="id">
+    @foreach ($form as $field)
         <div class="form-group col-md-{{ $field['width'] ?? 12 }}">
-            <label for="{{ $field['field'] }}" class="control-label">
+            <label for="{{ $field['field'] }}" class="mb-0 control-label">
                 {{ $field['label'] }}
                 @if ($field['required'] ?? false)
                     <span class="text-danger">*</span>
@@ -57,12 +47,5 @@
             <span class="text-danger" id="{{ $field['field'] }}Error"></span>
         </div>
     @endforeach
-                </div>
-                    <div class="col-sm-12 mt-3 d-flex justify-content-end">
-                        <button type="submit" class="btn btn-blue" id="saveBtn" value="create">Simpan Data</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
 </div>
+</form>

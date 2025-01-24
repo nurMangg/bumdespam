@@ -16,17 +16,19 @@ $(function () {
   var salesChart = new Chart($salesChart, {
     type: 'bar',
     data: {
-      labels: ['JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'],
+      labels: chartLabels,
       datasets: [
         {
+          labels: 'Lunas',
           backgroundColor: '#007bff',
           borderColor: '#007bff',
-          data: [1000, 2000, 3000, 2500, 2700, 2500, 3000]
+          data: chartDataLunas
         },
         {
+          labels: 'Belum Lunas',
           backgroundColor: '#ced4da',
           borderColor: '#ced4da',
-          data: [700, 1700, 2700, 2000, 1800, 1500, 2000]
+          data: chartDataBelumLunas
         }
       ]
     },
@@ -59,10 +61,10 @@ $(function () {
             callback: function (value) {
               if (value >= 1000) {
                 value /= 1000
-                value += 'k'
+                value += 'rb'
               }
 
-              return '$' + value
+              return 'Rp. ' + value
             }
           }, ticksStyle)
         }],
@@ -141,6 +143,40 @@ $(function () {
         }]
       }
     }
+  })
+
+  //-------------
+  // - PIE CHART -
+  //-------------
+  // Get context with jQuery - using jQuery's .get() method.
+  var pieChartCanvas = $('#pieChart').get(0).getContext('2d')
+  var pieChartData = {
+    labels: pieLabels,
+    datasets: [
+      {
+        data: pieData,
+        backgroundColor: [
+          '#f56954', '#00a65a', '#f39c12', '#00c0ef', '#3c8dbc', '#d2d6de',
+          '#39cccc', '#001f3f', '#85144b', '#f012be', '#b10dc9', '#ff851b',
+          '#ff4136', '#2ecc40', '#3d9970', '#111111', '#aaaaaa', '#dddddd',
+          '#ff851b', '#7fdbff', '#39cccc', '#3b9dcd', '#01ff70', '#ffdc00',
+          '#ff851b', '#bada55', '#ff69b4', '#ff6347', '#ffa500', '#8a2be2'
+        ]
+      }
+    ]
+  }
+  var pieOptions = {
+    legend: {
+      display: false
+    }
+  }
+  // Create pie or douhnut chart
+  // You can switch between pie and douhnut using the method below.
+  // eslint-disable-next-line no-unused-vars
+  var pieChart = new Chart(pieChartCanvas, {
+    type: 'doughnut',
+    data: pieChartData,
+    options: pieOptions
   })
 })
 

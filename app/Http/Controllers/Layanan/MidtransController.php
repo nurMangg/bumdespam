@@ -7,6 +7,7 @@ use App\Models\MidtransPayment;
 use App\Models\Pembayaran;
 use App\Models\Tagihan;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Crypt;
 use Midtrans\Config;
 use Midtrans\Snap;
 
@@ -14,7 +15,8 @@ class MidtransController extends Controller
 {
     public function createSnapToken(Request $request)
     {
-        $tagihan = Tagihan::find($request->tagihanId);
+        $tagihanDecrypt = Crypt::decrypt($request->tagihanId);
+        $tagihan = Tagihan::find($tagihanDecrypt);
 
         if($tagihan->tagihanStatus == "Lunas" || $tagihan->tagihanStatus == "Pending")
         {

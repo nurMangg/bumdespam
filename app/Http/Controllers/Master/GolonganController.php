@@ -5,7 +5,9 @@ namespace App\Http\Controllers\Master;
 use App\Http\Controllers\BaseController;
 use App\Http\Controllers\Controller;
 use App\Models\Golongan;
+use App\Models\HistoryWeb;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Crypt;
 
 class GolonganController extends BaseController
@@ -110,11 +112,18 @@ class GolonganController extends BaseController
         }
         $request->validate($rules);
 
-        Golongan::create([
+        $newGolongan = Golongan::create([
             'golonganNama' => $request->golonganNama,
             'golonganTarif' => $request->golonganTarif,
             'golonganDenda' => $request->golonganDenda,
             'golonganStatus' => $request->golonganStatus
+        ]);
+
+        HistoryWeb::create([
+            'riwayatUserId' => Auth::user()->id,
+            'riwayatTable' => 'Golongan',
+            'riwayatAksi' => 'Tambah Golongan',
+            'riwayatData' => json_encode($newGolongan),
         ]);
 
         return response()->json(['success' => 'Data Berhasil Disimpan']);

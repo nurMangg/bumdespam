@@ -1,3 +1,28 @@
+<?php
+
+    use App\Models\Roles;
+    use App\Models\Menu;
+    use App\Models\SettingWeb;
+
+
+
+    $rolemenu = Roles::where('roleId', Auth::user()->userRoleId)->first();
+    $menuIds = json_decode($rolemenu->roleMenuId, true);
+
+    // Ambil semua menu sesuai dengan menu_id
+    $menus = Menu::whereIn('menuId', $menuIds)->orderBy('menuOrder')->get();
+
+    // Ambil menu utama (parent_id = null)
+    $megamenus = Menu::whereNull('menuParentId')
+        ->orderBy('menuOrder')
+        ->get()
+        ->filter(function ($menu) use ($menus) {
+            // Hanya tampilkan menu utama jika memiliki sub-menu dalam daftar menu_id
+            return $menus->contains('menuParentId', $menu->menuId);
+        });
+
+    $settingWeb = SettingWeb::first();
+?>
 <!DOCTYPE html>
 <html lang="en">
 
@@ -6,6 +31,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{{ 'BUMI DESA | PDAM' ?? env('APP_NAME') }}</title>
     <meta name="csrf-token" content="{{ csrf_token() }}">
+    <link rel="shortcut icon" href="{{ $settingWeb->settingWebLogo ?? asset('images/favicon.svg') }}" type="image/x-icon">
 
     {{-- TOASTR --}}
     <link rel="stylesheet" href="{{ asset('plugins/toastr/toastr.min.css') }}">
@@ -47,6 +73,8 @@
     <link rel="stylesheet" href="{{ asset('plugins/daterangepicker/daterangepicker.css') }}">
     <!-- summernote -->
     <link rel="stylesheet" href="{{ asset('plugins/summernote/summernote-bs4.min.css') }}">
+
+    <link rel="stylesheet" href="{{ asset('plugins/sweetalert2/sweetalert2.min.css')}}">
     
 </head>
 <style>
@@ -63,6 +91,17 @@
         background-color: white;
         color: #608BC1;
         border: #777777 solid 1px;
+    }
+
+    .btn-out-blue {
+        background-color: white;
+        color: #608BC1;
+        border: #777777 solid 1px;
+    }
+
+    .btn-out-blue:hover {
+        background-color: #608BC1;
+        color: white;
     }
 
     .btn-outline-blue {
@@ -89,8 +128,8 @@
 
         <!-- Preloader -->
         <div class="preloader flex-column justify-content-center align-items-center">
-            <img class="animation__shake" src="{{asset('images/favicon.svg')}}" alt="AdminLTELogo" height="60"
-                width="60">
+            <img class="animation__shake" src="{{ $settingWeb->settingWebLogo ?? asset('images/favicon.svg')}}" alt="AdminLTELogo" height="160"
+                width="160">
         </div>
 
         <!-- Navbar -->
@@ -130,7 +169,7 @@
 
 
                 <!-- Notifications Dropdown Menu -->
-                <li class="nav-item dropdown">
+                {{-- <li class="nav-item dropdown">
                     <a class="nav-link" data-toggle="dropdown" href="#">
                         <i class="far fa-bell"></i>
                         <span class="badge badge-warning navbar-badge">15</span>
@@ -155,17 +194,40 @@
                         <div class="dropdown-divider"></div>
                         <a href="#" class="dropdown-item dropdown-footer">See All Notifications</a>
                     </div>
-                </li>
+                </li> --}}
                 <li class="nav-item">
                     <a class="nav-link" data-widget="fullscreen" href="#" role="button">
                         <i class="fas fa-expand-arrows-alt"></i>
                     </a>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link" data-widget="control-sidebar" data-controlsidebar-slide="true" href="#"
-                        role="button">
-                        <i class="fas fa-th-large"></i>
+                <li class="nav-item dropdown">
+                    <a class="nav-link" data-toggle="dropdown" href="#">
+                        <i class="fas fa-user-circle" style="font-size: 20px;"></i>
                     </a>
+                    <div class="dropdown-menu dropdown-menu-lg dropdown-menu-right">
+                        <!-- User Info -->
+                        <div class="dropdown-header text-center">
+                            <strong>{{ Auth::user()->name ?? 'Unknown' }}</strong>
+                            <p class="text-muted text-sm">{{ Auth::user()->role->roleName ?? 'Unknown' }}</p>
+                        </div>
+                        <div class="dropdown-divider"></div>
+                        {{-- <a href="#" class="dropdown-item">
+                            <i class="fas fa-user mr-2"></i> Profile
+                        </a>
+                        <div class="dropdown-divider"></div>
+                        <a href="#" class="dropdown-item">
+                            <i class="fas fa-cogs mr-2"></i> Settings
+                        </a> --}}
+                        <div class="dropdown-divider"></div>
+                        <!-- Logout Button -->
+                        <form action="/logout" method="POST">
+                            @csrf
+                            <!-- Tambahkan CSRF jika menggunakan Laravel -->
+                            <button type="submit" class="dropdown-item text-danger">
+                                <i class="fas fa-sign-out-alt mr-2"></i> Logout
+                            </button>
+                        </form>
+                    </div>
                 </li>
             </ul>
         </nav>
@@ -175,9 +237,9 @@
         <aside class="main-sidebar" style="background-color: #ffffff;">
             <!-- Brand Logo -->
             <a href="index3.html" class="brand-link">
-                <img src="{{asset('images/favicon.svg')}}" alt="AdminLTE Logo"
+                <img src="{{ $settingWeb->settingWebLogo ?? asset('images/favicon.svg')}}" alt="AdminLTE Logo"
                     class="brand-image img-circle elevation-3" style="opacity: .8">
-                <span class="brand-text font-weight-light">BUMDES PDAM</span>
+                <span class="brand-text font-weight-light">{{ $settingWeb->settingWebNama ?? "BUMDES PDAM"}}</span>
             </a>
 
             <!-- Sidebar -->
@@ -193,142 +255,34 @@
                                 <p>Dashboard</p>
                             </a>
                         </li>
-                        <li class="nav-item {{ Request::is('layanan*') ? 'menu-open' : '' }}">
-                            <a href="#" class="nav-link {{ Request::is('layanan*') ? 'active' : '' }}">
-                                <i class="nav-icon fas fa-edit"></i>
-                                <p>
-                                    Layanan
-                                    <i class="fas fa-angle-left right"></i>
-                                </p>
-                            </a>
-                            <ul class="nav nav-treeview">
-                                <li class="nav-item">
-                                    <a href="{{ route('tagihan.index')}}" class="nav-link {{ Route::is('tagihan.index') ? 'active' : '' }}">
-                                        <i class="far fa-circle nav-icon"></i>
-                                        <p>Tagihan</p>
-                                    </a>
-                                </li>
-                                <li class="nav-item">
-                                    <a href="{{ route('transaksi.index')}}" class="nav-link {{ Route::is('transaksi.index') ? 'active' : '' }}">
-                                        <i class="far fa-circle nav-icon"></i>
-                                        <p>Transaksi</p>
-                                    </a>
-                                </li>
-                                
-                            </ul>
-                        </li>
-                        <li class="nav-item {{ Request::is('laporan*') ? 'menu-open' : '' }}">
-                            <a href="#" class="nav-link {{ Request::is('laporan*') ? 'active' : '' }}">
-                                <i class="nav-icon fas fa-file-pdf"></i>
-                                <p>
-                                    Laporan
-                                    <i class="fas fa-angle-left right"></i>
-                                </p>
-                            </a>
-                            <ul class="nav nav-treeview">
-                                <li class="nav-item">
-                                    <a href="{{ route('laporan-pelanggan.index')}}" class="nav-link {{ Route::is('laporan-pelanggan.index') ? 'active' : '' }}">
-                                        <i class="far fa-circle nav-icon"></i>
-                                        <p>Laporan Pelanggan</p>
-                                    </a>
-                                </li>
-                                <li class="nav-item">
-                                    <a href="{{ route('laporan-tagihan.index')}}" class="nav-link {{ Route::is('laporan-tagihan.index') ? 'active' : '' }}">
-                                        <i class="far fa-circle nav-icon"></i>
-                                        <p>Laporan Tagihan</p>
-                                    </a>
-                                </li>
-                                <li class="nav-item">
-                                    <a href="" class="nav-link disabled ">
-                                        <i class="far fa-circle nav-icon"></i>
-                                        <p>Laporan Transaksi</p>
-                                    </a>
-                                </li>
-                                <li class="nav-item">
-                                    <a href="" class="nav-link disabled  ">
-                                        <i class="far fa-circle nav-icon"></i>
-                                        <p>Laporan Payment Midtrans</p>
-                                    </a>
-                                </li>
-                                
-                            </ul>
-                        </li>
-                        <li class="nav-item {{ Request::is('master*') ? 'menu-open' : '' }}">
-                            <a href="#" class="nav-link {{ Request::is('master*') ? 'active' : '' }}">
-                                <i class="nav-icon fas fa-edit"></i>
-                                <p>
-                                    Master Data
-                                    <i class="fas fa-angle-left right"></i>
-                                </p>
-                            </a>
-                            <ul class="nav nav-treeview">
-                                <li class="nav-item">
-                                    <a href="{{ route('golongan-tarif.index')}}" class="nav-link {{ Route::is('golongan-tarif.index') ? 'active' : '' }}">
-                                        <i class="far fa-circle nav-icon"></i>
-                                        <p>Golongan Tarif</p>
-                                    </a>
-                                </li>
-                                <li class="nav-item">
-                                    <a href="{{ route('pelanggan.index')}}" class="nav-link {{ Route::is('pelanggan.index') ? 'active' : '' }}">
-                                        <i class="far fa-circle nav-icon"></i>
-                                        <p>Pelanggan</p>
-                                    </a>
-                                </li>
-                                <li class="nav-item">
-                                    <a href="{{ route('tahun.index')}}" class="nav-link {{ Route::is('tahun.index') ? 'active' : '' }}">
-                                        <i class="far fa-circle nav-icon"></i>
-                                        <p>Data Tahun</p>
-                                    </a>
-                                </li>
-                            </ul>
-                        </li>
-                        <li class="nav-item {{ Request::is('import*') ? 'menu-open' : '' }}">
-                            <a href="#" class="nav-link {{ Request::is('import*') ? 'active' : '' }}">
-                                <i class="nav-icon fas fa-file-import"></i>
-                                <p>
-                                    Import Data
-                                    <i class="fas fa-angle-left right"></i>
-                                </p>
-                            </a>
-                            <ul class="nav nav-treeview">
-                                <li class="nav-item">
-                                    <a href="{{ route('import-pelanggan.index')}}" class="nav-link {{ Route::is('import-pelanggan.index') ? 'active' : '' }}">
-                                        <i class="far fa-circle nav-icon"></i>
-                                        <p>Import Pelanggan</p>
-                                    </a>
-                                </li>
-                            </ul>
-                        </li>
-                        <li class="nav-item {{ Request::is('setting*') ? 'menu-open' : '' }}">
-                            <a href="#" class="nav-link {{ Request::is('setting*') ? 'active' : '' }}">
-                                <i class="nav-icon fas fa-cog"></i>
-                                <p>
-                                    Setting
-                                    <i class="fas fa-angle-left right"></i>
-                                </p>
-                            </a>
-                            <ul class="nav nav-treeview">
-                                <li class="nav-item">
-                                    <a href="{{ route('pengguna-aplikasi.index')}}" class="nav-link {{ Route::is('pengguna-aplikasi.index') ? 'active' : '' }}">
-                                        <i class="far fa-circle nav-icon"></i>
-                                        <p>Pengguna Aplikasi</p>
-                                    </a>
-                                </li>
-                                <li class="nav-item">
-                                    <a href="{{ route('menu-aplikasi.index')}}" class="nav-link {{ Route::is('menu-aplikasi.index') ? 'active' : '' }}">
-                                        <i class="far fa-circle nav-icon"></i>
-                                        <p>Menu Aplikasi</p>
-                                    </a>
-                                </li>
-                                <li class="nav-item">
-                                    <a href="{{ route('role-aplikasi.index')}}" class="nav-link {{ Route::is('role-aplikasi.index') ? 'active' : '' }}">
-                                        <i class="far fa-circle nav-icon"></i>
-                                        <p>Role Aplikasi</p>
-                                    </a>
-                                </li>
-                            </ul>
-                        </li>
+                        @foreach ($megamenus as $megaM)
+                            @php
+                                // Ambil sub-menu yang terkait dengan menu utama ini
+                                $subMenus = $menus->where('menuParentId', $megaM->menuId);
+                            @endphp
 
+                            @if ($subMenus->count() > 0)
+                                <li class="nav-item {{ Request::is($megaM->menuRoute . '/*') ? 'menu-open' : '' }}">
+                                    <a href="#" class="nav-link {{ Request::is($megaM->menuRoute . '/*') ? 'active' : '' }}">
+                                        <i class="nav-icon {{ $megaM->menuIcon }}"></i>
+                                        <p>
+                                            {{ $megaM->menuName }}
+                                            <i class="fas fa-angle-left right"></i>
+                                        </p>
+                                    </a>
+                                    <ul class="nav nav-treeview">
+                                        @foreach ($subMenus as $item)
+                                            <li class="nav-item">
+                                                <a href="{{ route($item->menuRoute )}}" class="nav-link {{ Route::is($item->menuRoute) ? 'active' : '' }}">
+                                                    <i class="far fa-circle nav-icon"></i>
+                                                    <p>{{ $item->menuName }}</p>
+                                                </a>
+                                            </li>
+                                        @endforeach
+                                    </ul>
+                                </li>
+                            @endif
+                        @endforeach
                     </ul>
                 </nav>
                 <!-- /.sidebar-menu -->

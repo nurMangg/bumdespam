@@ -73,6 +73,7 @@
 </div>
 
 <x-form.modal :form="$form" :title="$title ?? env('APP_NAME')" />
+<x-kartu.kartupelanggan />
 
 <script type="text/javascript">
     $(document).ready(function () {
@@ -138,6 +139,12 @@
                     @endif
                 @endforeach
             })
+        });
+
+        $('body').on('click', '.view', function () {
+            var id = $(this).data('id');
+            window.open("{{ route('pelanggan.viewKartu', ['pelanggan' => ':id']) }}".replace(':id', id), '_blank');
+
         });
 
 
@@ -218,24 +225,37 @@
 
         $('body').on('click', '.delete', function () {
             var id = $(this).data('id');
-            confirm("Apakah Anda yakin ingin menghapus data ini?");
-            $.ajax({
-                type: "DELETE",
-                url: "{{ route($route . '.index') }}/" + id,
-                success: function (data) {
-                    $('#laravel_datatable').DataTable().ajax.reload();
-                    toastr.success('Data berhasil dihapus!');
-                },
-                error: function (data) {
-                    console.log('Error:', data);
-                    toastr.error('Terjadi kesalahan saat menghapus data.');
+            var url = "{{ route($route . '.index') }}/" + id;
+            Swal.fire({
+                title: 'Anda yakin?',
+                text: "Apakah Anda yakin ingin menghapus data ini?",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Ya, hapus!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        type: "DELETE",
+                        url: url,
+                        success: function (data) {
+                            $('#laravel_datatable').DataTable().ajax.reload();
+                            toastr.success('Data berhasil dihapus!');
+                        },
+                        error: function (data) {
+                            console.log('Error:', data);
+                            toastr.error('Terjadi kesalahan saat menghapus data.');
+                        }
+                    });
                 }
             });
         });
             
-
-
     })
 </script>
     
+@push('scripts')
+    <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
+@endpush
 @endsection

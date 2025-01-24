@@ -5,11 +5,14 @@ namespace App\Http\Controllers\Master;
 use App\Http\Controllers\BaseController;
 use App\Http\Controllers\Controller;
 use App\Models\Golongan;
+use App\Models\HistoryWeb;
 use App\Models\Pelanggan;
+use App\Models\User;
 use Faker\Provider\Base;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Crypt;
+use Illuminate\Support\Facades\Hash;
 
 class PelangganController extends BaseController
 {
@@ -142,6 +145,8 @@ class PelangganController extends BaseController
                         $pelangganId = Crypt::encryptString($row->pelangganId);
 
                         return '<div class="btn-group" role="group" aria-label="Basic example">
+                                    <a href="javascript:void(0)" data-toggle="tooltip" data-id="'.$pelangganId.'" data-original-title="View" class="view btn btn-warning btn-xs"><i class="fa-regular fa-eye"></i></a>
+                                    &nbsp;
                                     <a href="javascript:void(0)" data-toggle="tooltip" data-id="'.$pelangganId.'" data-original-title="Edit" class="edit btn btn-primary btn-xs"><i class="fa-regular fa-pen-to-square"></i></a>
                                     &nbsp;
                                     <a href="javascript:void(0)" data-toggle="tooltip" data-id="'.$pelangganId.'" data-original-title="Delete" class="delete btn btn-danger btn-xs"><i class="fa-solid fa-trash"></i></a>
@@ -174,7 +179,7 @@ class PelangganController extends BaseController
         }
         $request->validate($rules);
 
-        Pelanggan::create([
+        $newPelanggan = Pelanggan::create([
             'pelangganKode' => $this->generateUniqueCode(),
             'pelangganNama' => $request->pelangganNama,
             'pelangganEmail' => $request->pelangganEmail,
@@ -188,6 +193,35 @@ class PelangganController extends BaseController
             'pelangganUserId' => Auth::user()->id
         ]);
 
+        User::create([
+            'name' => $request->pelangganNama,
+            'email' => $request->pelangganEmail,
+            'password' => Hash::make('password'),
+            'userRoleId' => 2
+        ]);
+
+        HistoryWeb::create([
+            'riwayatUserId' => Auth::user()->id,
+            'riwayatTable' => 'Pelanggan',
+            'riwayatAksi' => 'Tambah Data',
+            'riwayatData' => json_encode($newPelanggan),
+        ]);
+
         return response()->json(['success' => 'Data Berhasil Disimpan']);
+    }
+
+    public function viewKartu($id)
+    {
+        $decodeId = Crypt::decryptString($id);
+
+        $model = app($this->model);
+        $data = $model->find($decodeId);
+
+        if (!$data) {
+            return response()->json(['error' => 'Data not found'], 404);
+        }
+
+        // dd($data);
+        return view('masters.cardnama.index', ['data'=> $data]);
     }
 }

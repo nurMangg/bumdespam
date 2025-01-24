@@ -105,7 +105,28 @@
                 </tr>
             @endforeach
         </tbody>
-        
+    </table>
+    <br>
+    <table>
+        <tr>
+            <td colspan="2"><b>Jumlah Data</b></td>
+        </tr>
+        <tr>
+            <td>Tagihan Belum Lunas</td>
+            <td>{{ $dataJumlah['jumlahBelumLunas'] }}</td>
+        </tr>
+        <tr>
+            <td>Tagihan Lunas</td>
+            <td>{{ $dataJumlah['jumlahLunas'] }}</td>
+        </tr>
+        <tr>
+            <td>Total Tagihan Belum Lunas</td>
+            <td>Rp. {{ number_format($dataJumlah['totalSemuaTagihanBelumLunas'], 0, ',', '.') }}</td>
+        </tr>
+        <tr>
+            <td>Total Tagihan Lunas</td>
+            <td>Rp. {{ number_format($dataJumlah['totalSemuaTagihanLunas'], 0, ',', '.') }}</td>
+        </tr>
     </table>
     <div class="footer">
         Dicetak pada : {{ \Carbon\Carbon::now()->format('d F Y H:i') }}

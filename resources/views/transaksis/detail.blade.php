@@ -172,7 +172,7 @@
                                 <tr>
                                     <td></td>
                                     <td>Abondemen ({{ date_create()->diff(date_create($detailTagihan->tagihanTanggal))->m > 1 ? date_create()->diff(date_create($detailTagihan->tagihanTanggal))->m . ' bulan' : '' }})</td>
-                                    <td>Rp. {{ number_format((date_create()->diff(date_create($detailTagihan->tagihanTanggal))->m > 1 ? $detailTagihan->tagihanInfoDenda * date_create()->diff(date_create($detailTagihan->tagihanTanggal))->m : $detailTagihan->tagihanInfoDenda), 0, ',', '.') }}</td>
+                                    <td>Rp. {{ number_format((date_create()->diff(date_create($detailTagihan->tagihanTanggal))->m > 1 ? $detailTagihan->tagihanInfoDenda * date_create()->diff(date_create($detailTagihan->tagihanTanggal))->m : 0), 0, ',', '.') }}</td>
                                     
                                 </tr>
                             @endif
@@ -260,13 +260,15 @@
                                     <td>Pemakaian</td>
                                     <td>&emsp;&emsp;: <span id="pemakaianTagihan">{{ ($detailTagihan->tagihanMAkhir - $detailTagihan->tagihanMAwal) . ' m3' ?? '-'}}</span></td>
                                 </tr>
+                                @if($detailTagihan->tagihanStatus != "Lunas")
                                 <tr>
                                     <td>Penalty</td>
                                     <td>&emsp;&emsp;: <span id="penaltyTagihan">
-                                        Rp. {{ number_format((date_create()->diff(date_create($detailTagihan->tagihanTanggal))->m > 1 ? $detailTagihan->tagihanInfoDenda * date_create()->diff(date_create($detailTagihan->tagihanTanggal))->m : $detailTagihan->tagihanInfoDenda), 0, ',', '.') }}
-                                        <input type="text" id="penaltyTagihanVal" value="{{ (date_create()->diff(date_create($detailTagihan->tagihanTanggal))->m > 1 ? $detailTagihan->tagihanInfoDenda * date_create()->diff(date_create($detailTagihan->tagihanTanggal))->m : $detailTagihan->tagihanInfoDenda) }}" hidden>
+                                        Rp. {{ number_format((date_create()->diff(date_create($detailTagihan->tagihanTanggal))->m > 1 ? $detailTagihan->tagihanInfoDenda * date_create()->diff(date_create($detailTagihan->tagihanTanggal))->m : 0), 0, ',', '.') }}
+                                        <input type="text" id="penaltyTagihanVal" value="{{ (date_create()->diff(date_create($detailTagihan->tagihanTanggal))->m > 1 ? $detailTagihan->tagihanInfoDenda * date_create()->diff(date_create($detailTagihan->tagihanTanggal))->m : 0) }}" hidden>
                                     </span></td>
                                 </tr>
+                                @endif
                                 
             
                             </table>
@@ -285,10 +287,11 @@
               <!-- /.card-body -->
               <div class="card-footer text-right">
                 @if ($detailTagihan->tagihanStatus == "Belum Lunas")
+                    <button id="payButtonTunai" class="btn btn-success">Bayar Tunai</button>
                     <button id="payButton" class="btn btn-outline-primary" disabled>Bayar Sekarang</button>
                     
                 @elseif ($detailTagihan->tagihanStatus == "Lunas")
-                    <button id="" class="btn btn-outline-primary" disabled>Pembayaran Lunas</button>
+                    <button id="cetakStruk" class="btn btn-outline-primary">Unduh Struk</button>
                 @else
                     <button id="cekPay" class="btn btn-outline-primary">Cek Pembayaran</button>
 
@@ -338,7 +341,7 @@
                 url: '{{route('transaksi.createsnaptoken')}}',
                 type: 'POST',
                 data: {
-                    tagihanId: "{{ $detailTagihan->tagihanId ?? '' }}",
+                    tagihanId: "{{ $tagihanIdCrypt ?? '' }}",
                     paymentMethod: paymentValue,
                     pembayaranDenda: $('#penaltyTagihanVal').val(),
                     totalTagihan: $('#totalTagihanVal').val(),
@@ -360,6 +363,47 @@
                 }
             });
         });
+
+        $('#payButtonTunai').click(function (e) {
+            e.preventDefault();
+
+            Swal.fire({
+                title: 'Konfirmasi Pembayaran Tunai',
+                text: "Pastikan Anda sudah membayar tagihan sebelum mengkonfirmasi!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Ya, saya sudah membayar'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        url: '{{route('transaksi.pembayarantunai')}}',
+                        type: 'POST',
+                        data: {
+                            tagihanId: "{{ $tagihanIdCrypt ?? '' }}",
+                            pembayaranDenda: $('#penaltyTagihanVal').val(),
+                            totalTagihan: $('#totalTagihanVal').val(),
+                            pembayaranAdminFee: $('#pembayaranAdminFee').val()
+                        },
+                        success: function (response) {
+                            toastr.success("Pembayaran Berhasil!");
+                            window.location.reload();
+                        },
+                        error: function (xhr) {
+                            toastr.error("Terjadi kesalahan saat memproses pembayaran.");
+                        }
+                    });
+                }
+            });
+        });
+
+        $('#cetakStruk').click(function (e) {
+            e.preventDefault();
+            var id = "{{ $tagihanIdCrypt ?? '' }}";
+            window.open("{{ route('transaksi.struk', ':id') }}".replace(':id', id), '_blank');
+        });
+
 
 
         $('#cekPay').click(function (e) {

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Data;
 use App\Http\Controllers\BaseController;
 use App\Http\Controllers\Controller;
 use App\Models\Golongan;
+use App\Models\HistoryWeb;
 use App\Models\Pelanggan;
 use App\Models\Pembayaran;
 use App\Models\Tagihan;
@@ -200,6 +201,13 @@ class AksiTagihanController extends BaseController
             'pembayaranStatus' => 'Belum Lunas'
         ]);
 
+        HistoryWeb::create([
+            'riwayatUserId' => Auth::user()->id,
+            'riwayatTable' => 'Tagihan',
+            'riwayatAksi' => 'Input Tagihan',
+            'riwayatData' => json_encode($tagihan),
+        ]);
+
         return response()->json(['success' => 'Data Berhasil Disimpan']);
     }
 
@@ -219,6 +227,13 @@ class AksiTagihanController extends BaseController
         $pembayaran->update([
             'pembayaranJumlah' => ($data->tagihanMAkhir - $data->tagihanMAwal) * $data->tagihanInfoTarif,
             'pembayaranStatus' => 'Belum Lunas'
+        ]);
+
+        HistoryWeb::create([
+            'riwayatUserId' => Auth::user()->id,
+            'riwayatTable' => 'Pembayaran',
+            'riwayatAksi' => 'update',
+            'riwayatData' => json_encode($pembayaran),
         ]);
 
         return response()->json(['message' => 'Data updated successfully', 'data' => json_encode($data)]);

@@ -157,12 +157,14 @@
             $.ajax({
                 url: '{{ route($route . '.exportPdf') }}',
                 type: 'POST',
-                data: function (d) {
-                    d.filter = {};
-                    @foreach ($form as $field)
-                        d.filter.{{ $field['field'] }} = $('#{{ $field['field'] }}').val();
-                    @endforeach
-                    console.log(d.filter);
+                data: {
+                    filter: (function() {
+                        var filterData = {};
+                        @foreach ($form as $field)
+                            filterData['{{ $field['field'] }}'] = $('#{{ $field['field'] }}').val();
+                        @endforeach
+                        return filterData;
+                    })()
                 },
                 success: function (response) {
                     if (response.status === 'success') {
