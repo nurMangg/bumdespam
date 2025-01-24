@@ -234,9 +234,7 @@ class InputTagihanController extends Controller
             return response()->json(['errors' => $validator->errors()], 422);
         }
 
-        $KodeDecrypt = Crypt::decryptString($request->id);
-
-        $pelanggan = Pelanggan::where('pelangganKode', $KodeDecrypt)->first();
+        $pelanggan = Pelanggan::where('pelangganKode', $request->id)->first();
         if(!$pelanggan) {
             return response()->json(['errors' => "Tidak Ada Data Pelanggan", 'status'=> 'Error'], 422);
         }
