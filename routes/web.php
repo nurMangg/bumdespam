@@ -105,4 +105,8 @@ Route::middleware(['auth', 'CheckUserRole'])->prefix('setting')->group(function 
     Route::post('reset-password/{id}', [ResetPasswordController::class, 'resetPassword'])->name('reset-password.resetPassword');
 });
 
+Route::fallback(function () {
+    abort(404);
+});
+
 require __DIR__.'/auth.php';
