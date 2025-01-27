@@ -281,7 +281,7 @@ class LaporanTagihanController extends Controller
         $filterPelanggan = isset($appliedFilters->pelangganRt) ? ' RT ' . $appliedFilters->pelangganRt : '';
         $filterPelanggan .= isset($appliedFilters->pelangganRw) ? ' RW ' . $appliedFilters->pelangganRw : '';
 
-        $data = $query->get();
+        $data = $query->orderBy('tagihanKode', 'asc')->get();
         $jumlahBelumLunas = $data->where('tagihanStatus', 'Belum Lunas')->count();
         $jumlahLunas = $data->where('tagihanStatus', 'Lunas')->count();
         $data->transform(function($item) {

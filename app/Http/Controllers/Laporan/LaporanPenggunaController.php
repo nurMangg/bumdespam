@@ -158,7 +158,7 @@ class LaporanPenggunaController extends Controller
             }
         }
 
-        $data = $query->get();
+        $data = $query->orderBy('pelangganKode', 'asc')->get();
         $data->transform(function($item) {
             $item->pelangganGolonganId = Golongan::find($item->pelangganGolonganId)->golonganNama;
             return $item;
