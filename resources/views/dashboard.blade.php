@@ -310,7 +310,7 @@
               <div class="card-body">
                 <div class="d-flex">
                   <p class="d-flex flex-column">
-                    <span class="text-bold text-lg">Rp. {{ number_format($tagihan->sum('tagihanTotal'), 0, ',', '.') }} </span>
+                    <span class="text-bold text-lg">Rp. {{ number_format($tagihan->sum('tagihanJumlahTotal'), 0, ',', '.') }} </span>
                     <span>Transaksi per Waktu</span>
                   </p>
                   

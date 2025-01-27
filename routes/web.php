@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Data\AksiTagihanController;
+use App\Http\Controllers\Data\CekTagihanController;
 use App\Http\Controllers\Data\InputTagihanController;
 use App\Http\Controllers\Data\TagihanController;
 use App\Http\Controllers\Import\ImportDataController;
@@ -39,7 +40,8 @@ Route::get('/dashboard', function () {
 })->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::post('transaksi/handle-notification', [MidtransController::class, 'handleNotification'])->name('transaksi.handleNotification')->withoutMiddleware(['auth', 'verified']);
-
+Route::get('/tagihan/kode-pelanggan', [CekTagihanController::class, 'getTagihanByKodePelanggan']);
+Route::get('/cek-tagihan', [CekTagihanController::class, 'index']);
 
 Route::middleware(['auth', 'CheckUserRole'])->prefix('master')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
@@ -104,6 +106,9 @@ Route::middleware(['auth', 'CheckUserRole'])->prefix('setting')->group(function 
     Route::get('reset-password', [ResetPasswordController::class, 'index'])->name('reset-password.index');
     Route::post('reset-password/{id}', [ResetPasswordController::class, 'resetPassword'])->name('reset-password.resetPassword');
 });
+
+
+
 
 Route::fallback(function () {
     abort(404);

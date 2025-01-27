@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Bulan;
 use App\Models\Pelanggan;
 use App\Models\Pembayaran;
+use App\Models\Roles;
 use App\Models\Tagihan;
 use App\Models\Tahun;
 use Barryvdh\DomPDF\Facade\Pdf;
@@ -62,7 +63,7 @@ class TransaksiController extends Controller
     public function index(Request $request)
     {
         if ($request->ajax()) {
-            if (Auth::user()->userRoleId != 2) {
+            if (Auth::user()->userRoleId != Roles::where('roleName', 'pelanggan')->first()->roleId) {
                 $data = Tagihan::all();
             } else {
                 $user = Pelanggan::where('pelangganUserId', Auth::user()->id)->first();
