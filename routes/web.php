@@ -3,6 +3,7 @@
 use App\Http\Controllers\Data\AksiTagihanController;
 use App\Http\Controllers\Data\InputTagihanController;
 use App\Http\Controllers\Data\TagihanController;
+use App\Http\Controllers\Import\ImportDataController;
 use App\Http\Controllers\Import\ImportPelangganController;
 use App\Http\Controllers\Import\ImportPenggunaController;
 use App\Http\Controllers\Laporan\LaporanPenggunaController;
@@ -86,6 +87,9 @@ Route::middleware(['auth', 'CheckUserRole'])->prefix('laporan')->group(function 
 Route::middleware(['auth', 'CheckUserRole'])->prefix('import')->group(function () {
     Route::get('import-pelanggan', [ImportPelangganController::class, 'index'])->name('import-pelanggan.index');
     Route::Post('import-pelanggan/store', [ImportPelangganController::class, 'store'])->name('import-pelanggan.store');
+
+    Route::get('import-data-tagihan', [ImportDataController::class, 'index'])->name('import-data-tagihan.index');
+    Route::Post('import-data-tagihan/store', [ImportDataController::class, 'store'])->name('import-data-tagihan.store');
 });
 
 Route::middleware(['auth', 'CheckUserRole'])->prefix('setting')->group(function () {
