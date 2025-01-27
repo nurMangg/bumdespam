@@ -11,10 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('msbulan', function (Blueprint $table) {
-            $table->id();
-            $table->string('bulan');
-            $table->timestamps();
+        Schema::table('tagihans', function (Blueprint $table) {
+            $table->softDeletes();
         });
     }
 
@@ -23,6 +21,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('msbulan');
+        Schema::table('tagihans', function (Blueprint $table) {
+            $table->dropSoftDeletes();
+        });
     }
 };

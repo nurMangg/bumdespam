@@ -14,21 +14,9 @@ class Golongan extends Seeder
     {
         \App\Models\Golongan::insert([
             [
-                'golonganNama' => 'Rumah Tangga',
-                'golonganTarif' => 1350,
-                'golonganDenda' => 5000,
-                'golonganStatus' => 'Aktif',
-            ],
-            [
-                'golonganNama' => 'Niaga',
-                'golonganTarif' => 2500,
-                'golonganDenda' => 10000,
-                'golonganStatus' => 'Aktif',
-            ],
-            [
-                'golonganNama' => 'Instansi',
-                'golonganTarif' => 5000,
-                'golonganDenda' => 20000,
+                'golonganNama' => 'Tarif 1',
+                'golonganTarif' => 2000,
+                'golonganAbonemen' => 3000,
                 'golonganStatus' => 'Aktif',
             ],
         ]);

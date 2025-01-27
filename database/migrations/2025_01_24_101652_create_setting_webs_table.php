@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('settingWebNama')->nullable();
             $table->text('settingWebLogo')->nullable();
+            $table->text('settingWebLogoLandscape')->nullable();
             $table->text('settingWebAlamat')->nullable();
             $table->string('settingWebEmail')->nullable();
             $table->string('settingWebPhone')->nullable();

@@ -11,8 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('msrole', function (Blueprint $table) {
-            $table->mediumText('roleMenuId')->nullable()->after('roleId');
+        Schema::table('mspelanggan', function (Blueprint $table) {
+            $table->softDeletes();
+            
         });
     }
 
@@ -21,8 +22,9 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('msrole', function (Blueprint $table) {
-            $table->dropColumn('roleMenuId');
+        Schema::table('mspelanggan', function (Blueprint $table) {
+            $table->dropSoftDeletes();
+           
         });
     }
 };

@@ -3,6 +3,7 @@
 namespace App\Imports;
 
 use App\Models\Pelanggan;
+use App\Models\Roles;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -25,18 +26,15 @@ class PelangganImport implements ToModel, WithStartRow, SkipsOnFailure, WithHead
     {
         $user = User::create([
             'name' => $row['nama'],
-            'email' => $row['email'],
+            'email' => strtolower($this->generateUniqueCode()),
             'password' => Hash::make('password'),
-            'userRoleId' => 2
+            'userRoleId' => Roles::where('roleName', 'pelanggan')->first()->roleId
         ]);
 
         return new Pelanggan([
             'pelangganKode' => $this->generateUniqueCode(),
             'pelangganNama' => $row['nama'],
-            'pelangganEmail' => $row['email'],
             'pelangganPhone' => $row['phone'],
-            'pelangganAlamat' => $row['alamat'],
-            'pelangganDesa' => $row['desa'],
             'pelangganRt' => $row['rt'],
             'pelangganRw' => $row['rw'],
             'pelangganGolonganId' => $row['golongan_id'],
@@ -47,14 +45,11 @@ class PelangganImport implements ToModel, WithStartRow, SkipsOnFailure, WithHead
 
     public function generateUniqueCode(): string
     {
-        $date = date('ym');
-        $pelangganCount = Pelanggan::whereYear('created_at', date('Y'))
-            ->whereMonth('created_at', date('m'))
-            ->count();
+        $pelangganCount = Pelanggan::count();
 
-        $pelangganPart = str_pad($pelangganCount + 1, 3, '0', STR_PAD_LEFT);
+        $pelangganPart = str_pad($pelangganCount + 1, 4, '0', STR_PAD_LEFT);
 
-        return "PAM{$date}{$pelangganPart}";
+        return "PAM{$pelangganPart}";
     }
 }
 

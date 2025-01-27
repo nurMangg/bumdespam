@@ -27,21 +27,12 @@ class GolonganController extends BaseController
 
         $this->form = array(
             array(
-                'label' => 'ID Golongan',
-                'field' => 'golonganId',
-                'type' => 'text',
-                'placeholder' => '',
-                'width' => 6,
-                'disabled' => true,
-            ),
-            array(
                 'label' => 'Nama Golongan',
                 'field' => 'golonganNama',
                 'type' => 'text',
                 'placeholder' => 'Masukkan Nama',
                 'width' => 6,
                 'required' => true
-
             ),
             array(
                 'label' => 'Tarif Harga',
@@ -52,10 +43,10 @@ class GolonganController extends BaseController
                 'required' => true
             ),
             array(
-                'label' => 'Denda Harga',
-                'field' => 'golonganDenda',
+                'label' => 'Abonemen',
+                'field' => 'golonganAbonemen',
                 'type' => 'number',
-                'placeholder' => 'Masukkan Harga Denda',
+                'placeholder' => 'Masukkan Harga Abonemen',
                 'width' => 6,
                 'required' => true
             ),
@@ -69,7 +60,8 @@ class GolonganController extends BaseController
                 'options' => [
                     'Aktif' => 'Aktif',
                     'Tidak Aktif' => 'Tidak Aktif'
-                ]
+                ],
+                'default' => 'Aktif'
             ),
         );
     }

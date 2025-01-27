@@ -92,7 +92,7 @@ class AksiTransaksiController extends Controller
             $detailtagihan->save();
 
             $pembayaran->pembayaranMetode = "Tunai";
-            $pembayaran->pembayaranDenda = $request->input('pembayaranDenda') ?? '0';
+            $pembayaran->pembayaranAbonemen = $detailtagihan->tagihanInfoAbonemen;
             $pembayaran->pembayaranAdminFee = $request->input('pembayaranAdminFee') ?? '0';
             $pembayaran->pembayaranStatus = "Lunas";
 

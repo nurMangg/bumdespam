@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Golongan;
 use App\Models\HistoryWeb;
 use App\Models\Pelanggan;
+use App\Models\Roles;
 use App\Models\User;
 use Faker\Provider\Base;
 use Illuminate\Http\Request;
@@ -48,37 +49,11 @@ class PelangganController extends BaseController
 
             ),
             array(
-                'label' => 'Email',
-                'field' => 'pelangganEmail',
-                'type' => 'email',
-                'placeholder' => 'Masukkan Email',
-                'width' => 6,
-                'required' => true
-            ),
-            array(
                 'label' => 'No. Telepon',
                 'field' => 'pelangganPhone',
                 'type' => 'number',
                 'placeholder' => 'Masukkan No. Telepon',
                 'width' => 6,
-                'required' => true
-            ),
-            array(
-                'label' => 'Alamat',
-                'field' => 'pelangganAlamat',
-                'type' => 'textarea',
-                'placeholder' => 'Masukkan Alamat',
-                'width' => 6,
-                'required' => true
-            ),
-            array(
-                'label' => 'Desa',
-                'field' => 'pelangganDesa',
-                'type' => 'select',
-                'placeholder' => 'Pilih Desa',
-                'width' => 6,
-                'required' => true,
-                'options' => \App\Models\Desa::all()->pluck('desaNama', 'desaNama')->toArray()
             ),
             array(
                 'label' => 'RT',
@@ -116,7 +91,8 @@ class PelangganController extends BaseController
                 'options' => [
                     'Aktif' => 'Aktif',
                     'Tidak Aktif' => 'Tidak Aktif'
-                ]
+                ],
+                'default' => 'Aktif'
 
             ),
         );
@@ -125,14 +101,11 @@ class PelangganController extends BaseController
     // Generate Unique Code Pelanggan
     public function generateUniqueCode(): string
     {
-        $date = date('ym');
-        $pelangganCount = Pelanggan::whereYear('created_at', date('Y'))
-            ->whereMonth('created_at', date('m'))
-            ->count();
+        $pelangganCount = Pelanggan::count();
 
-        $pelangganPart = str_pad($pelangganCount + 1, 3, '0', STR_PAD_LEFT);
+        $pelangganPart = str_pad($pelangganCount + 1, 4, '0', STR_PAD_LEFT);
 
-        return "PAM{$date}{$pelangganPart}";
+        return "PAM{$pelangganPart}";
     }
 
     public function index(Request $request)
@@ -181,18 +154,15 @@ class PelangganController extends BaseController
 
         $user = User::create([
             'name' => $request->pelangganNama,
-            'email' => $request->pelangganEmail,
+            'username' => strtolower($this->generateUniqueCode()),
             'password' => Hash::make('password'),
-            'userRoleId' => 2
+            'userRoleId' => Roles::where('roleName', 'pelanggan')->first()->roleId
         ]);
 
         $newPelanggan = Pelanggan::create([
             'pelangganKode' => $this->generateUniqueCode(),
             'pelangganNama' => $request->pelangganNama,
-            'pelangganEmail' => $request->pelangganEmail,
             'pelangganPhone' => $request->pelangganPhone,
-            'pelangganAlamat' => $request->pelangganAlamat,
-            'pelangganDesa' => $request->pelangganDesa,
             'pelangganRt' => $request->pelangganRt,
             'pelangganRw' => $request->pelangganRw,
             'pelangganGolonganId' => $request->pelangganGolonganId,

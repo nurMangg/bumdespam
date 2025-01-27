@@ -3,13 +3,16 @@
 namespace App\Http\Controllers\Laporan;
 
 use App\Http\Controllers\Controller;
+use App\Models\Bulan;
 use App\Models\Golongan;
 use App\Models\Pelanggan;
 use App\Models\Tagihan;
+use App\Models\Tahun;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
+use stdClass;
 
 class LaporanTagihanController extends Controller
 {
@@ -30,28 +33,38 @@ class LaporanTagihanController extends Controller
 
         $this->form = array(
             array(
-                'label' => 'Bulan',
-                'field' => 'tagihanBulan',
+                'label' => 'Dari Bulan',
+                'field' => 'tagihanDariBulan',
                 'type' => 'select',
-                'options' => Tagihan::all()->pluck('tagihanBulan', 'tagihanBulan')->unique()->sort()->toArray(),
+                'options' => Bulan::all()->pluck('bulanNama', 'bulanId')->toArray(),
                 'placeholder' => 'Semua Bulan',
-                'width' => 6,
+                'width' => 3,
                 'required' => true
             ),
             array(
-                'label' => 'Desa',
-                'field' => 'tagihanDesa',
+                'label' => 'Dari Tahun',
+                'field' => 'tagihanDariTahun',
                 'type' => 'select',
-                'options' => Pelanggan::all()->pluck('pelangganDesa', 'pelangganDesa')->unique()->sort()->toArray(), // Add option values here
+                'options' => Tahun::all()->pluck('tahun', 'tahun')->sort()->toArray(), // Add option values here
                 'placeholder' => 'Semua Tahun',
                 'width' => 3,
                 'required' => true
             ),
             array(
-                'label' => 'Tahun',
-                'field' => 'tagihanTahun',
+                'label' => 'Sampai Bulan',
+                'field' => 'tagihanSampaiBulan',
                 'type' => 'select',
-                'options' => Tagihan::all()->pluck('tagihanTahun', 'tagihanTahun')->unique()->sort()->toArray(), // Add option values here
+                'options' => Bulan::all()->pluck('bulanNama', 'bulanId')->toArray(),
+
+                'placeholder' => 'Semua Bulan',
+                'width' => 3,
+                'required' => true
+            ),
+            array(
+                'label' => 'Sampai Tahun',
+                'field' => 'tagihanSampaiTahun',
+                'type' => 'select',
+                'options' => Tahun::all()->pluck('tahun', 'tahun')->sort()->toArray(), // Add option values here
                 'placeholder' => 'Semua Tahun',
                 'width' => 3,
                 'required' => true
@@ -61,7 +74,7 @@ class LaporanTagihanController extends Controller
                 'field' => 'pelangganRt',
                 'type' => 'select',
                 'options' => Pelanggan::all()->pluck('pelangganRt', 'pelangganRt')->unique()->sort()->toArray(), 
-                'placeholder' => 'Semua RW',
+                'placeholder' => 'Semua RT',
                 'width' => 3,
                 'required' => true
             ),
@@ -75,20 +88,6 @@ class LaporanTagihanController extends Controller
                 'required' => true
             ),
             
-            array(
-                'label' => 'Status',
-                'field' => 'tagihanStatus',
-                'type' => 'select',
-                'width' => 6,
-                'placeholder' => 'Semua Status',
-                'required' => true,
-                'options' => [
-                    'Belum Lunas' => 'Belum Lunas',
-                    'Lunas' => 'Lunas',
-                    'Pending' => 'Pending'
-                ]
-
-            ),
         );
 
         $this->grid = array(
@@ -101,12 +100,12 @@ class LaporanTagihanController extends Controller
                 'field' => 'pelangganNama',
             ),
             array(
-                'label' => 'Alamat',
-                'field' => 'pelangganAlamat',
-            ),
-            array(
                 'label' => 'RT/RW',
                 'field' => 'pelangganRTRW',
+            ),
+            array(
+                'label' => 'Tagihan Terbit',
+                'field' => 'tagihanTerbit',
             ),
             array(
                 'label' => 'Meteran Awal (m3)',
@@ -121,12 +120,16 @@ class LaporanTagihanController extends Controller
                 'field' => 'tagihanPenggunaan',
             ),
             array(
-                'label' => 'Tagihan',
-                'field' => 'tagihanTotal',
+                'label' => 'Biaya Tagihan',
+                'field' => 'formattedTagihanTotal',
             ),
             array(
-                'label' => 'Tagihan Terbit',
-                'field' => 'tagihanTerbit',
+                'label' => 'Biaya Abonemen',
+                'field' => 'formattedAbonemen',
+            ),
+            array(
+                'label' => 'Total Tagihan',
+                'field' => 'formattedTagihanJumlahTotal',
             ),
             array(
                 'label' => 'tagihan Status',
@@ -155,22 +158,18 @@ class LaporanTagihanController extends Controller
                     $filters = $request->input('filter');
                     foreach ($filters as $field => $value) {
                         if (!empty($value)) {
-                            if ($field === 'pelangganNama') {
-                                // Filter berdasarkan nama pelanggan dari tabel relasi
-                                $query->whereHas('pelanggan', function ($q) use ($value) {
-                                    $q->where('pelangganNama', 'like', '%' . $value . '%');
-                                });
-                            } elseif ($field === 'tagihanBulan') {
-                                // Filter berdasarkan bulan tagihan
-                                $query->where('tagihanBulan', $value);
-                            } elseif ($field === 'tagihanDesa') {
-                                // Filter berdasarkan desa pelanggan
-                                $query->whereHas('pelanggan', function ($q) use ($value) {
-                                    $q->where('pelangganDesa', $value);
-                                });
-                            } elseif ($field === 'tagihanTahun') {
-                                // Filter berdasarkan tahun tagihan
-                                $query->where('tagihanTahun', $value);
+                            if ($field === 'tagihanDariTahun') {
+                                // Filter berdasarkan dariTahun tagihan
+                                $query->where('tagihanTahun', '>=', $value);
+                            } elseif ($field === 'tagihanDariBulan') {
+                                // Filter berdasarkan daribulan tagihan
+                                $query->where('tagihanBulan', '>=', $value);
+                            } elseif ($field === 'tagihanSampaiTahun') {
+                                // Filter berdasarkan sampaiTahun tagihan
+                                $query->where('tagihanTahun', '<=', $value);
+                            } elseif ($field === 'tagihanSampaiBulan') {
+                                // Filter berdasarkan sampai bulan tagihan
+                                $query->where('tagihanBulan', '<=', $value);
                             } elseif ($field === 'pelangganRt') {
                                 // Filter berdasarkan rt pelanggan
                                 $query->whereHas('pelanggan', function ($q) use ($value) {
@@ -192,6 +191,7 @@ class LaporanTagihanController extends Controller
             $data = $query->get();
             $data->transform(function($item) {
                 $item->tagihanTotal = ($item->tagihanMAkhir - $item->tagihanMAwal) * $item->tagihanInfoTarif;
+                $item->tagihanJumlahTotal = $item->tagihanTotal + $item->tagihanInfoAbonemen;
                 return $item;
             });
 
@@ -200,20 +200,24 @@ class LaporanTagihanController extends Controller
                     ->addColumn('pelangganNama', function($row){
                         return $row->pelanggan->pelangganNama;
                     })
-                    ->addColumn('pelangganAlamat', function($row){
-                        return $row->pelanggan->pelangganDesa;
-                    })
+                    
                     ->addColumn('pelangganRTRW', function($row){
                         return $row->pelanggan->pelangganRt . ' / ' . $row->pelanggan->pelangganRw;
                     })
                     ->addColumn('tagihanTerbit', function($row){
-                        return $row->tagihanBulan . ' - ' . $row->tagihanTahun;
+                        return Bulan::where('bulanId', $row->tagihanBulan)->first()->bulanNama . ' - ' . $row->tagihanTahun;
                     })
                     ->addColumn('tagihanPenggunaan', function($row){
                         return $row->tagihanMAkhir - $row->tagihanMAwal . ' m3';
                     })
-                    ->editColumn('tagihanTotal', function($row){
+                    ->editColumn('formattedTagihanTotal', function($row){
                         return 'Rp. ' . number_format($row->tagihanTotal, 0, ',', '.');
+                    })
+                    ->editColumn('formattedAbonemen', function($row){
+                        return 'Rp. ' . number_format($row->tagihanInfoAbonemen, 0, ',', '.');
+                    })
+                    ->addColumn('formattedTagihanJumlahTotal', function($row){
+                        return 'Rp. ' . number_format($row->tagihanJumlahTotal, 0, ',', '.');
                     })
                     ->make(true);
         }
@@ -235,24 +239,25 @@ class LaporanTagihanController extends Controller
         $query = Tagihan::with('pelanggan')->select('*')
                 ->orderBy('created_at', 'desc');
 
+        $appliedFilters = new stdClass();
+
         foreach ($filters as $field => $value) {
             if (!empty($value)) {
-                if ($field === 'pelangganNama') {
-                    // Filter berdasarkan nama pelanggan dari tabel relasi
-                    $query->whereHas('pelanggan', function ($q) use ($value) {
-                        $q->where('pelangganNama', 'like', '%' . $value . '%');
-                    });
-                } elseif ($field === 'tagihanBulan') {
-                    // Filter berdasarkan bulan tagihan
-                    $query->where('tagihanBulan', $value);
-                } elseif ($field === 'tagihanDesa') {
-                    // Filter berdasarkan desa pelanggan
-                    $query->whereHas('pelanggan', function ($q) use ($value) {
-                        $q->where('pelangganDesa', $value);
-                    });
-                } elseif ($field === 'tagihanTahun') {
-                    // Filter berdasarkan tahun tagihan
-                    $query->where('tagihanTahun', $value);
+                $appliedFilters->$field = $value;
+
+                if ($field === 'tagihanDariTahun') {
+                    // Filter berdasarkan dariTahun tagihan
+                    $query->where('tagihanTahun', '>=', $value);
+
+                } elseif ($field === 'tagihanDariBulan') {
+                    // Filter berdasarkan daribulan tagihan
+                    $query->where('tagihanBulan', '>=', $value);
+                } elseif ($field === 'tagihanSampaiTahun') {
+                    // Filter berdasarkan sampaiTahun tagihan
+                    $query->where('tagihanTahun', '<=', $value);
+                } elseif ($field === 'tagihanSampaiBulan') {
+                    // Filter berdasarkan sampai bulan tagihan
+                    $query->where('tagihanBulan', '<=', $value);
                 } elseif ($field === 'pelangganRt') {
                     // Filter berdasarkan rt pelanggan
                     $query->whereHas('pelanggan', function ($q) use ($value) {
@@ -270,6 +275,12 @@ class LaporanTagihanController extends Controller
             }
         }
 
+        $filterTanggal = isset($appliedFilters->tagihanDariBulan) ? Bulan::where('bulanId', $appliedFilters->tagihanDariBulan)->first()->bulanNama . ' ' . $appliedFilters->tagihanDariTahun : '';
+        $filterTanggal .= isset($appliedFilters->tagihanSampaiBulan) ? ' s/d ' . Bulan::where('bulanId', $appliedFilters->tagihanSampaiBulan)->first()->bulanNama . ' ' . $appliedFilters->tagihanSampaiTahun : '';
+
+        $filterPelanggan = isset($appliedFilters->pelangganRt) ? ' RT ' . $appliedFilters->pelangganRt : '';
+        $filterPelanggan .= isset($appliedFilters->pelangganRw) ? ' RW ' . $appliedFilters->pelangganRw : '';
+
         $data = $query->get();
         $jumlahBelumLunas = $data->where('tagihanStatus', 'Belum Lunas')->count();
         $jumlahLunas = $data->where('tagihanStatus', 'Lunas')->count();
@@ -280,7 +291,13 @@ class LaporanTagihanController extends Controller
             $item->pelangganRTRW = $pelanggan->pelangganRt . ' / ' . $pelanggan->pelangganRw;
             $item->tagihanPenggunaan = $item->tagihanMAkhir - $item->tagihanMAwal;
             $item->tagihanTotal = ($item->tagihanMAkhir - $item->tagihanMAwal) * $item->tagihanInfoTarif;
-            $item->tagihanTerbit = $item->tagihanBulan . ' - ' . $item->tagihanTahun;
+            $item->tagihanJumlahTotal = $item->tagihanTotal + $item->tagihanInfoAbonemen;
+
+            $item->formattedAbonemen = 'Rp. ' . number_format($item->tagihanInfoAbonemen, 0, ',', '.');
+            $item->formattedTagihanTotal = 'Rp. ' . number_format($item->tagihanTotal, 0, ',', '.');
+            $item->formattedTagihanJumlahTotal = 'Rp. ' . number_format($item->tagihanJumlahTotal, 0, ',', '.');
+
+            $item->tagihanTerbit = Bulan::where('bulanId', $item->tagihanBulan)->first()->bulanNama . ' - ' . $item->tagihanTahun;
             return $item;
         });
 
@@ -293,7 +310,7 @@ class LaporanTagihanController extends Controller
 
     
         // Generate PDF
-        $pdf = Pdf::loadView('laporans.pdf.index', ['data' => $data, 'title' => $this->title, 'grid' => $this->grid, 'dataJumlah' => $dataJumlah])
+        $pdf = Pdf::loadView('laporans.pdf.index', ['data' => $data, 'title' => $this->title, 'grid' => $this->grid, 'dataJumlah' => $dataJumlah, 'filterTanggal' => $filterTanggal, 'filterPelanggan' => $filterPelanggan])
             ->setPaper('a4', 'landscape');
 
         // Simpan PDF ke folder storage

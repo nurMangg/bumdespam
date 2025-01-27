@@ -49,13 +49,6 @@ class InputTagihanController extends Controller
 
             ),
             array(
-                'label' => 'Desa',
-                'field' => 'pelangganDesa',
-                'type' => 'text',
-                'width' => 6,
-                'disabled' => true,
-            ),
-            array(
                 'label' => 'RT',
                 'field' => 'pelangganRt',
                 'type' => 'number',
@@ -116,13 +109,7 @@ class InputTagihanController extends Controller
                 'width' => 6,
                 'disabled' => false
             ),
-            array(
-                'label' => 'Catatan Tagihan',
-                'field' => 'tagihanKeterangan',
-                'type' => 'textarea',
-                'width' => 12,
-                'disabled' => false
-            ),
+
         );
 
         $this->form3 = array(
@@ -165,8 +152,8 @@ class InputTagihanController extends Controller
         // dd($pelanggan);
 
         $dataTagihan = Tagihan::where('tagihanPelangganId', $pelanggan->pelangganId)
-            ->orderBy('created_at', 'desc')
-            // ->orderBy('tagihanBulan', 'desc')
+            ->orderBy('tagihanTahun', 'desc')
+            ->orderBy('tagihanBulan', 'desc')
             ->first();
 
         // dd($dataTagihan);
@@ -175,7 +162,7 @@ class InputTagihanController extends Controller
             return response()->json(['message' => 'Data tidak ditemukan', 'status'=> 'Error'], 403);
         }
 
-        $idBulan = Bulan::where('bulan', $dataTagihan->tagihanBulan)->value('id');
+        $idBulan = $dataTagihan->tagihanBulan;
 
         $tahunBaru = $dataTagihan->tagihanTahun;
 
@@ -187,7 +174,7 @@ class InputTagihanController extends Controller
 
         }
 
-        $dataTagihan['tagihanBulanBaru'] = Bulan::where('id', $idBulan)->value('bulan');
+        $dataTagihan['tagihanBulanBaru'] = $idBulan;
 
         $data = [
             'pelangganId' => Crypt::encryptString($pelanggan->pelangganKode),
@@ -198,12 +185,12 @@ class InputTagihanController extends Controller
             'pelangganRw' => $dataTagihan->pelanggan->pelangganRw,
             'pelangganGolonganId' => Golongan::where('golonganId', $dataTagihan->pelanggan->pelangganGolonganId)->value('golonganNama'),
             'pelangganStatus' => $dataTagihan->pelanggan->pelangganStatus,
-            'tagihanBulanBaru' => $dataTagihan->tagihanBulanBaru,
+            'tagihanBulanBaru' => Bulan::where('bulanId', $idBulan)->value('bulanNama'),
             'tagihanTahunBaru' => $tahunBaru,
             'tagihanMeterAwal' => $dataTagihan->tagihanMAkhir + 1,
             'tagihanMeterAkhir' => '',
             'tagihanKeterangan' => $dataTagihan->tagihanKeterangan,
-            'tagihanTerakhir' => $dataTagihan->tagihanBulan . ' - ' . $dataTagihan->tagihanTahun,
+            'tagihanTerakhir' => Bulan::where('bulanId', $dataTagihan->tagihanBulan)->value('bulanNama') . ' - ' . $dataTagihan->tagihanTahun,
             'tagihanBulanLalu' => $dataTagihan->tagihanMAwal . ' - ' . $dataTagihan->tagihanMAkhir,
         ];
         
@@ -244,14 +231,15 @@ class InputTagihanController extends Controller
         // dd($pelanggan);
 
         $dataTagihan = Tagihan::where('tagihanPelangganId', $pelanggan->pelangganId)
-            ->orderBy('created_at', 'desc')
+            ->orderBy('tagihanTahun', 'desc')
+            ->orderBy('tagihanBulan', 'desc')
             ->first();
 
         if(!$dataTagihan){
             return response()->json(['message' => 'Data tidak ditemukan', 'status'=> 'Error'], 403);
         }
 
-        $idBulan = Bulan::where('bulan', $dataTagihan->tagihanBulan)->value('id');
+        $idBulan = $dataTagihan->tagihanBulan;
 
         $tahunBaru = $dataTagihan->tagihanTahun;
 
@@ -263,7 +251,7 @@ class InputTagihanController extends Controller
 
         }
 
-        $dataTagihan['tagihanBulanBaru'] = Bulan::where('id', $idBulan)->value('bulan');
+        $dataTagihan['tagihanBulanBaru'] = $idBulan;
 
         
         $newtagihan = Tagihan::create([
@@ -272,13 +260,12 @@ class InputTagihanController extends Controller
             'tagihanBulan' => $dataTagihan->tagihanBulanBaru,
             'tagihanTahun' => $tahunBaru,
             'tagihanInfoTarif' => $pelanggan->golongan->golonganTarif,
-            'tagihanInfoDenda' => $pelanggan->golongan->golonganTarif,
+            'tagihanInfoAbonemen' => $pelanggan->golongan->golonganAbonemen,
             'tagihanMAwal' => $dataTagihan->tagihanMAkhir + 1,
             'tagihanMAkhir' => $request->meterAkhir,
             'tagihanUserId' => Auth::user()->id,
             'tagihanTanggal' => date('Y-m-d'),
             'tagihanStatus' => "Belum Lunas",
-        'tagihanCatatan' => $request->catatanTagihan,
         ]);
 
         Pembayaran::create([
@@ -316,15 +303,17 @@ class InputTagihanController extends Controller
         }
 
         $dataTagihan = Tagihan::where('tagihanPelangganId', $pelanggan->pelangganId)
-            ->orderBy('created_at', 'desc')
-    
+            ->orderBy('tagihanTahun', 'desc')
+            ->orderBy('tagihanBulan', 'desc')
             ->first();
+
+        // dd($dataTagihan);
 
         if(!$dataTagihan){
             return response()->json(['message' => 'Data tidak ditemukan', 'status'=> 'Error'], 403);
         }
 
-        $idBulan = Bulan::where('bulan', $dataTagihan->tagihanBulan)->value('id');
+        $idBulan = $dataTagihan->tagihanBulan;
 
         $tahunBaru = $dataTagihan->tagihanTahun;
 
@@ -336,7 +325,7 @@ class InputTagihanController extends Controller
 
         }
 
-        $dataTagihan['tagihanBulanBaru'] = Bulan::where('id', $idBulan)->value('bulan');
+        $dataTagihan['tagihanBulanBaru'] = $idBulan;
 
         $data = [
             'pelangganId' => Crypt::encryptString($pelanggan->pelangganKode),
@@ -347,12 +336,12 @@ class InputTagihanController extends Controller
             'pelangganRw' => $dataTagihan->pelanggan->pelangganRw,
             'pelangganGolonganId' => Golongan::where('golonganId', $dataTagihan->pelanggan->pelangganGolonganId)->value('golonganNama'),
             'pelangganStatus' => $dataTagihan->pelanggan->pelangganStatus,
-            'tagihanBulanBaru' => $dataTagihan->tagihanBulanBaru,
+            'tagihanBulanBaru' => Bulan::where('bulanId', $dataTagihan->tagihanBulanBaru)->value('bulanNama'),
             'tagihanTahunBaru' => $tahunBaru,
             'tagihanMeterAwal' => $dataTagihan->tagihanMAkhir + 1,
             'tagihanMeterAkhir' => '',
             'tagihanKeterangan' => $dataTagihan->tagihanKeterangan,
-            'tagihanTerakhir' => $dataTagihan->tagihanBulan . ' - ' . $dataTagihan->tagihanTahun,
+            'tagihanTerakhir' => Bulan::where('bulanId', $dataTagihan->tagihanBulan)->value('bulanNama') . ' - ' . $dataTagihan->tagihanTahun,
             'tagihanBulanLalu' => $dataTagihan->tagihanMAwal . ' - ' . $dataTagihan->tagihanMAkhir,
         ];
         

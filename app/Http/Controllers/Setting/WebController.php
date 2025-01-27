@@ -6,6 +6,7 @@ use App\Http\Controllers\BaseController;
 use App\Http\Controllers\Controller;
 use App\Models\SettingWeb;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class WebController extends BaseController
 {
@@ -34,6 +35,15 @@ class WebController extends BaseController
             array(
                 'label' => 'Logo Usaha',
                 'field' => 'settingWebLogo',
+                'type' => 'file',
+                'placeholder' => '',
+                'width' => 6,
+                'required' => false
+
+            ),
+            array(
+                'label' => 'Logo Usaha Landscape',
+                'field' => 'settingWebLogoLandscape',
                 'type' => 'file',
                 'placeholder' => '',
                 'width' => 6,
@@ -70,7 +80,7 @@ class WebController extends BaseController
     public function index(Request $request)
     {
 
-        $data = SettingWeb::get();
+        $data = SettingWeb::first();
         if ($request->ajax()) {
             return response()->json($data);
         }
@@ -101,15 +111,36 @@ class WebController extends BaseController
         $settingWeb = SettingWeb::first();
 
         if ($settingWeb) {
+            // Menghapus dan mengupload logo jika ada di request
             if ($request->hasFile('settingWebLogo')) {
-                $data['settingWebLogo'] = asset('storage/' . $request->file('settingWebLogo')->store('logos', 'public'));
+                if ($settingWeb->settingWebLogo) {
+                    $oldLogoPath = str_replace(url('storage') . '/', '', $settingWeb->settingWebLogo);
+                    // dd($oldLogoPath);
+                    if (Storage::exists($oldLogoPath)) {
+                        Storage::delete($oldLogoPath);
+                    }
+                }
+                $data['settingWebLogo'] = 'storage/' . $request->file('settingWebLogo')->store('logos', 'public');
             }
-
+    
+            // Menghapus dan mengupload logo landscape jika ada di request
+            if ($request->hasFile('settingWebLogoLandscape')) {
+                if ($settingWeb->settingWebLogoLandscape) {
+                    $oldLogoLandscapePath = str_replace(url('storage') . '/', '', $settingWeb->settingWebLogoLandscape);
+                    if (Storage::exists($oldLogoLandscapePath)) {
+                        Storage::delete($oldLogoLandscapePath);
+                    }
+                }
+                $data['settingWebLogoLandscape'] = 'storage/' . $request->file('settingWebLogoLandscape')->store('logos', 'public');
+            }
+    
+            // Update data setting web
             $settingWeb->update($data);
-
+    
             return response()->json(['success' => 'Data Berhasil Diupdate']);
         }
-
+    
+        // Jika data setting web tidak ditemukan
         return response()->json(['error' => 'Data not found'], 404);
     }
 

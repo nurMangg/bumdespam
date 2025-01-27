@@ -13,7 +13,7 @@ class Golongan extends Model
     protected $fillable = [
         'golonganNama',
         'golonganTarif',
-        'golonganDenda',
+        'golonganAbonemen',
         'golonganStatus',
     ];
 

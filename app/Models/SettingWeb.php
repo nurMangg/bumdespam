@@ -12,6 +12,7 @@ class SettingWeb extends Model
     protected $fillable = [
         'settingWebNama',
         'settingWebLogo',
+        'settingWebLogoLandscape',
         'settingWebAlamat',
         'settingWebEmail',
         'settingWebPhone',

@@ -7,15 +7,19 @@
     <style>
         body {
             font-family: Arial, sans-serif;
-            font-size: 14px;
+            font-size: 10px;
             line-height: 1.5;
+            margin: 0;
+            padding: 0;
         }
         .struk {
-            width: 300px;
+            width: 80mm;
             margin: 0 auto;
-            padding: 20px;
+            padding: 10px;
             border: 1px solid #000;
+            box-sizing: border-box;
         }
+
         .struk h1, .struk h2, .struk h3 {
             text-align: center;
             margin: 0;

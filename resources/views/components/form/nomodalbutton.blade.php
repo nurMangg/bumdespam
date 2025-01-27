@@ -25,7 +25,7 @@
                 <select class="form-control" id="{{ $field['field'] }}" name="{{ $field['field'] }}" {{ $field['required'] ?? false ? 'required' : '' }}>
                     <option value="" disabled selected>{{ $field['placeholder'] ?? '' }}</option>
                     @foreach ($field['options'] as $value => $label)
-                        <option value="{{ $value }}">{{ $label }}</option>
+                        <option value="{{ $value }}" {{ old($field['field'], $field['default'] ?? '') == $value ? 'selected' : '' }}>{{ $label }}</option>
                     @endforeach
                 </select>
             @elseif ($field['type'] === 'checkbox')

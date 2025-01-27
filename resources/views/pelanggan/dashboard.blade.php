@@ -6,7 +6,7 @@
 
   $user = \App\Models\Pelanggan::where('pelangganUserId', Auth::user()->id)->first();
   $tagihan = \App\Models\Tagihan::where('tagihanPelangganId', $user->pelangganId)->get();
-  $tagihanLimit4 = \App\Models\Tagihan::where('tagihanPelangganId', $user->pelangganId)->orderBy('tagihanId', 'desc')->limit(4)->get();
+  $tagihanLimit4 = \App\Models\Tagihan::where('tagihanPelangganId', $user->pelangganId)->orderBy('tagihanId', 'desc')->limit(10)->get();
   
   $tagihan->transform(function($item) {
       $item->tagihanTotal = ($item->tagihanMAkhir - $item->tagihanMAwal) * $item->tagihanInfoTarif;
@@ -35,6 +35,15 @@
         </div><!-- /.row -->
 
         <div class="row">
+          @if (Hash::check('password', Auth::user()->password))
+          <div class="col-12">
+            <div class="alert alert-danger alert-dismissible">
+              <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+              <h5><i class="icon fas fa-exclamation-triangle"></i> Peringatan!</h5>
+              Anda masih menggunakan password default, silakan ubah password default Anda</a>.
+            </div>
+          </div>
+          @endif
 
           <div class="clearfix hidden-md-up"></div>
 
@@ -68,7 +77,7 @@
         </div>
 
         <div class="row">
-          <div class="col-md-6">
+          {{-- <div class="col-md-6"> --}}
             {{-- <div class="card">
               <div class="card-header border-0">
                 <div class="d-flex justify-content-between">
@@ -109,9 +118,9 @@
             <!-- /.card -->
 
             <!-- /.card -->
-          </div>
+          {{-- </div> --}}
 
-          <div class="col-md-6">
+          <div class="col-md-12">
             <div class="card">
               <div class="card-header border-0">
                 <h3 class="card-title">Tagihan Baru</h3>

@@ -11,13 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('msgolongan', function (Blueprint $table) {
-            $table->increments('golonganId');
-            $table->string('golonganNama');
-            $table->double('golonganTarif')->nullable();
-            $table->double('golonganAbonemen')->nullable();
-            $table->String('golonganStatus')->nullable();
-
+        Schema::create('msbulan', function (Blueprint $table) {
+            $table->increments('bulanId');
+            $table->string('bulanNama');
             $table->timestamps();
         });
     }
@@ -27,6 +23,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('msgolongan');
+        Schema::dropIfExists('msbulan');
     }
 };

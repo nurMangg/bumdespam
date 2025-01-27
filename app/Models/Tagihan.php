@@ -3,11 +3,15 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Tagihan extends Model
 {
+    use SoftDeletes;
+
     protected $table = 'tagihans';
     protected $primaryKey = 'tagihanId';
+    protected $dates = ['deleted_at'];
 
     protected $fillable = [
         'tagihanKode',
@@ -15,7 +19,7 @@ class Tagihan extends Model
         'tagihanBulan',
         'tagihanTahun',
         'tagihanInfoTarif',
-        'tagihanInfoDenda',
+        'tagihanInfoAbonemen',
         'tagihanMAwal',
         'tagihanMAkhir',
         'tagihanUserId',
@@ -33,5 +37,11 @@ class Tagihan extends Model
     {
         return $this->hasOne(Pembayaran::class, 'pembayaranTagihanId', 'tagihanId');
     }
+
+    public function bulan()
+    {
+        return $this->belongsTo(Bulan::class, 'tagihanBulan', 'bulanId');
+    }
+
 
 }

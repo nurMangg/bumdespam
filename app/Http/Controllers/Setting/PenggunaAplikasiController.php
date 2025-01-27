@@ -34,10 +34,10 @@ class PenggunaAplikasiController extends BaseController
                 'width' => 6,
             ),
             array(
-                'label' => 'Email',
-                'field' => 'email',
-                'type' => 'email',
-                'placeholder' => 'Masukkan email',
+                'label' => 'Username',
+                'field' => 'username',
+                'type' => 'text',
+                'placeholder' => 'Masukkan username',
                 'width' => 6,
                 'required' => true
 

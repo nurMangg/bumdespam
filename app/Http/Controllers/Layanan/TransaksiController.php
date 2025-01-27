@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Layanan;
 
 use App\Http\Controllers\Controller;
+use App\Models\Bulan;
 use App\Models\Pelanggan;
 use App\Models\Pembayaran;
 use App\Models\Tagihan;
@@ -86,7 +87,7 @@ class TransaksiController extends Controller
                         return 'Rp ' . number_format($jumlah, 0, ',', '.');
                     })
                     ->addColumn('tagihanTerbit', function($row){
-                        return $row->tagihanBulan . ' - ' . $row->tagihanTahun;
+                        return Bulan::where('bulanId', $row->tagihanBulan)->first()->bulanNama . ' - ' . $row->tagihanTahun;
                     })
                     ->addColumn('tagihanPelangganNama', function($row){
                         return $row->pelanggan->pelangganNama;
@@ -118,17 +119,18 @@ class TransaksiController extends Controller
             'pelangganNama' => $tagihan->pelanggan->pelangganNama,
             'tagihanMeteranAwal' => $tagihan->tagihanMAwal,
             'tagihanMeteranAkhir' => $tagihan->tagihanMAkhir,
-            'nama_bulan' => $tagihan->tagihanBulan,
+            'nama_bulan' => $tagihan->bulan->bulanNama,
             'tagihanTahun' => $tagihan->tagihanTahun,
             'formattedTagihanTotal' => number_format($pembayaran->pembayaranJumlah, 0, ',', '.'),
-            'formattedTotalDenda' => number_format($pembayaran->pembayaranDenda, 0, ',', '.'),
-            'formattedTotal' => number_format($pembayaran->pembayaranJumlah + $pembayaran->pembayaranDenda, 0, ',', '.'),
+            'formattedTotalDenda' => number_format($pembayaran->pembayaranAbonemen, 0, ',', '.'),
+            'formattedTotal' => number_format($pembayaran->pembayaranJumlah + $pembayaran->pembayaranAbonemen, 0, ',', '.'),
             'date' => now()->format('d-m-Y'),
             'name' => "Kasir",
         ];
         // dd($data);
 
-        $pdf = Pdf::loadView('transaksis.struk.index', compact('data'));
+        $pdf = Pdf::loadView('transaksis.struk.index', compact('data'))
+            ->setPaper([0, 0, 306, 475], 'portrait');
         return $pdf->download('struk-pembayaran-' . $data['pelangganKode'] . '-' . $data['tagihanKode'] . '.pdf');
 
     }

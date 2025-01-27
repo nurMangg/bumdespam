@@ -15,7 +15,7 @@ class Pembayaran extends Model
         'pembayaranUang',
         'pembayaranKembali',
         'pembayaranStatus',
-        'pembayaranDenda',
+        'pembayaranAbonemen',
         'pembayaranAdminFee'
     ];
 

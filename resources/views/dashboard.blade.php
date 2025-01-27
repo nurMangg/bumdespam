@@ -4,7 +4,7 @@
   $totalPelanggan = \App\Models\Pelanggan::all()->count();
   $totalTagihan = \App\Models\Tagihan::all()->count();
 
-  $tagihan = \App\Models\Tagihan::get();
+  $tagihan = \App\Models\Tagihan::whereNull('deleted_at')->get();
   $tagihanLimit4 = \App\Models\Tagihan::orderBy('tagihanId', 'desc')->limit(4)->get();
   
   $tagihan->transform(function($item) {
@@ -16,36 +16,50 @@
   $totalSemuaTagihanLunas = $tagihan->where('tagihanStatus', 'Lunas')->sum('tagihanTotal');
 
   //Transaksi tabel
-  $tagihanByMonthLunas = \App\Models\Tagihan::selectRaw('
-        CONCAT(tagihanBulan, "-", tagihanTahun) as bulanTahun,
-        SUM((tagihanMAkhir - tagihanMAwal) * tagihanInfoTarif) as total
-    ')
-    ->where('tagihanStatus', 'Lunas')
-    ->groupBy('bulanTahun')
-    ->orderByRaw('tagihanTahun, tagihanBulan')
-    ->get()
-    ->pluck('total', 'bulanTahun');
+  function getTagihanByStatus(string $status)
+  {
+      return DB::table('tagihans')
+          ->join('msbulan', 'tagihans.tagihanBulan', '=', 'msbulan.bulanId')
+          ->selectRaw('
+              CONCAT(msbulan.bulanNama, " ", tagihanTahun) as bulanTahun,
+              SUM((tagihanMAkhir - tagihanMAwal) * tagihanInfoTarif) as total
+          ')
+          ->whereNull('tagihans.deleted_at')
+          ->where('tagihanStatus', $status)
+          ->groupBy('bulanTahun')
+          ->orderByRaw('tagihanTahun, tagihanBulan')
+          ->pluck('total', 'bulanTahun');
+  }
 
-$tagihanByMonthBelumLunas = \App\Models\Tagihan::selectRaw('
-        CONCAT(tagihanBulan, "-", tagihanTahun) as bulanTahun,
-        SUM((tagihanMAkhir - tagihanMAwal) * tagihanInfoTarif) as total
-    ')
-    ->where('tagihanStatus', 'Belum Lunas')
-    ->groupBy('bulanTahun')
-    ->orderByRaw('tagihanTahun, tagihanBulan')
-    ->get()
-    ->pluck('total', 'bulanTahun');
+  // Fetch data for both statuses
+  $tagihanByMonthLunas = getTagihanByStatus('Lunas');
+  $tagihanByMonthBelumLunas = getTagihanByStatus('Belum Lunas');
 
-  $allMonths = $tagihanByMonthLunas->keys()->merge($tagihanByMonthBelumLunas->keys())->unique()->sort();
+  // Merge keys for all months and sort them
+  $allMonths = $tagihanByMonthLunas->keys()
+    ->merge($tagihanByMonthBelumLunas->keys())
+    ->unique()
+    ->sort(function ($a, $b) {
+        // Extract year and month from "NamaBulan Tahun" format
+        [$monthA, $yearA] = explode(' ', $a);
+        [$monthB, $yearB] = explode(' ', $b);
 
-  // Siapkan label dan dataset
+        $monthOrder = [
+            'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+            'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
+        ];
+
+        // Compare by year first, then by month order
+        return ($yearA <=> $yearB) ?: (array_search($monthA, $monthOrder) <=> array_search($monthB, $monthOrder));
+    });
+
+  // Prepare labels and datasets
   $labels = $allMonths->values();
-  // dd($labels);
   $dataLunas = $labels->map(fn($bulanTahun) => $tagihanByMonthLunas->get($bulanTahun, 0));
   $dataBelumLunas = $labels->map(fn($bulanTahun) => $tagihanByMonthBelumLunas->get($bulanTahun, 0));
 
   // Data Pelanggan PIE CHART
-  $dataPelanggan = \App\Models\Pelanggan::selectRaw('pelangganDesa, COUNT(*) as total')
+  $dataPelanggan = \App\Models\Pelanggan::selectRaw("CONCAT('RT ',pelangganRt, ' RW ', pelangganRw) as pelangganDesa, COUNT(*) as total")
     ->groupBy('pelangganDesa')
     ->get();
 

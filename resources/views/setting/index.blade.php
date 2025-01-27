@@ -32,6 +32,9 @@
                     <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Collapse">
                       <i class="fas fa-minus"></i>
                     </button>
+                    <button type="button" class="btn btn-tool" onclick="location.reload()" title="Refresh">
+                      <i class="fas fa-sync-alt"></i>
+                    </button>
                 </div>
               </div>
               <!-- /.card-header -->
@@ -39,25 +42,25 @@
                 <form id="addForm" name="addForm" class="form-horizontal">
                     <div class="row">
                     <input type="hidden" name="id" id="id">
-                    @foreach ($data as $item)
-                        @foreach ($form as $field)
-                            <div class="form-group col-md-{{ $field['width'] ?? 12 }}">
-                                <label for="{{ $field['field'] }}" class="mb-0 control-label ">
-                                    {{ $field['label'] }}
-                                    @if ($field['required'] ?? false)
-                                        <span class="text-danger">*</span>
-                                    @endif
-                                </label>
-                                @if ($field['type'] === 'file')
-                                    <input type="file" class="form-control" id="{{ $field['field'] }}" name="{{ $field['field'] }}" value="{{ $item->{$field['field']} }}" {{ $field['required'] ?? false ? 'required' : '' }} {{ $field['disabled'] ?? false ? 'disabled' : '' }}>
-                                @elseif ($field['type'] === 'email')
-                                    <input type="email" class="form-control" id="{{ $field['field'] }}" name="{{ $field['field'] }}" placeholder="{{ $field['placeholder'] ?? '' }}" value="{{ $item->{$field['field']} }}" {{ $field['required'] ?? false ? 'required' : '' }} {{ $field['disabled'] ?? false ? 'disabled' : '' }}>
-                                @else
-                                    <input type="text" class="form-control" id="{{ $field['field'] }}" name="{{ $field['field'] }}" placeholder="{{ $field['placeholder'] ?? '' }}" value="{{ $item->{$field['field']} }}" {{ $field['required'] ?? false ? 'required' : '' }} {{ $field['disabled'] ?? false ? 'disabled' : '' }}>
+                    @foreach ($form as $field)
+                        <div class="form-group col-md-{{ $field['width'] ?? 12 }}">
+                            <label for="{{ $field['field'] }}" class="mb-0 control-label ">
+                                {{ $field['label'] }}
+                                @if ($field['required'] ?? false)
+                                    <span class="text-danger">*</span>
                                 @endif
-                                <span class="text-danger" id="{{ $field['field'] }}Error"></span>
-                            </div>
-                        @endforeach
+                            </label>
+                            @if ($field['type'] === 'file')
+                                <input type="file" class="form-control" id="{{ $field['field'] }}" name="{{ $field['field'] }}" value="{{ old($field['field'], $data->{$field['field']} ?? '') }}" {{ $field['required'] ?? false ? 'required' : '' }} {{ $field['disabled'] ?? false ? 'disabled' : '' }}>
+                            @elseif ($field['type'] === 'password')
+                                <input type="password" class="form-control" id="{{ $field['field'] }}" name="{{ $field['field'] }}" placeholder="{{ $field['placeholder'] ?? '' }}" value="{{ old($field['field'], $data->{$field['field']} ?? '') }}" {{ $field['required'] ?? false ? 'required' : '' }} {{ $field['disabled'] ?? false ? 'disabled' : '' }}>
+                            @elseif ($field['type'] === 'email')
+                                <input type="email" class="form-control" id="{{ $field['field'] }}" name="{{ $field['field'] }}" placeholder="{{ $field['placeholder'] ?? '' }}" value="{{ old($field['field'], $data->{$field['field']} ?? '') }}" {{ $field['required'] ?? false ? 'required' : '' }} {{ $field['disabled'] ?? false ? 'disabled' : '' }}>
+                            @else
+                                <input type="text" class="form-control" id="{{ $field['field'] }}" name="{{ $field['field'] }}" placeholder="{{ $field['placeholder'] ?? '' }}" value="{{ old($field['field'], $data->{$field['field']} ?? '') }}" {{ $field['required'] ?? false ? 'required' : '' }} {{ $field['disabled'] ?? false ? 'disabled' : '' }}>
+                            @endif
+                            <span class="text-danger" id="{{ $field['field'] }}Error"></span>
+                        </div>
                     @endforeach
                     
                 </div>
@@ -95,77 +98,42 @@
 
             // Reset error messages
             @foreach ($form as $field)
-                @if ($field['required'] ?? false)
-                    $('#{{ $field['field'] }}Error').text('');
-                @endif
+                $('#{{ $field["field"] }}Error').text('');
             @endforeach
 
-            // Validate non-empty fields
-            var isValid = true;
-            @foreach ($form as $field)
-                @if ($field['required'] ?? false)
-                    @if ($field['type'] === 'checkbox')
-                        if (!$('input[name="{{ $field['field'] }}[]"]:checked').length) {
-                            $('#{{ $field['field'] }}Error').text('This field is required.');
-                            isValid = false;
-                        }
-                    @else
-                        if (!$('#{{ $field['field'] }}').val()) {
-                            $('#{{ $field['field'] }}Error').text('This field is required.');
-                            isValid = false;
-                        }
-                    @endif
-                @endif
-            @endforeach
-
-            if (!isValid) {
-                $('#saveBtn').html('Simpan Data');
-                return;
-            }
-
-            var actionType = $(this).val();
-            var url = "{{ route($route . '.store') }}"
-
-            // Tentukan jenis permintaan (POST atau PUT)
-            var requestType = "POST";
-
+            // Ajax request
             $.ajax({
                 data: new FormData($('#addForm')[0]),
-                url: url,
-                type: requestType,
+                url: "{{ route($route . '.store') }}",
+                type: "POST",
                 contentType: false,
                 processData: false,
                 dataType: 'json',
-                success: function (data) {
-                    $('#id').val('');
+                success: function (response) {
                     $('#ajaxModel').modal('hide');
                     $('#saveBtn').html('Simpan Data');
 
-                    var message = "Data berhasil diperbarui!";
-                    toastr.success(message);
+                    toastr.success(response.success || "Data berhasil disimpan!");
                 },
                 error: function (xhr) {
                     $('#saveBtn').html('Simpan Data');
 
                     if (xhr.status === 422) {
+                        // Tampilkan error validasi
                         var errors = xhr.responseJSON.errors;
-                        @foreach ($form as $field)
-                            @if ($field['required'] ?? false)
-                                if (errors.{{ $field['field'] }}) {
-                                    $('#{{ $field['field'] }}Error').text(errors.{{ $field['field'] }});
-                                }
-                            @endif
-                        @endforeach
+                        for (const field in errors) {
+                            $(`#${field}Error`).text(errors[field][0]);
+                        }
 
-                    $('#saveBtn').html('Simpan Data');
+                        toastr.error("Terdapat error validasi. Silakan periksa form.");
                     } else {
-                      toastr.error('Terjadi kesalahan saat menyimpan data.');
-
-                    $('#saveBtn').html('Simpan Data');
+                        // Error selain validasi
+                        toastr.error(xhr.responseJSON.error || "Terjadi kesalahan sistem.");
                     }
                 }
             });
         });
+
             
 
 

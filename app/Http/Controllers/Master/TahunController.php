@@ -25,14 +25,6 @@ class TahunController extends BaseController
 
         $this->form = array(
             array(
-                'label' => 'ID Tahun',
-                'field' => 'tahunId',
-                'type' => 'text',
-                'placeholder' => '',
-                'width' => 6,
-                'disabled' => true,
-            ),
-            array(
                 'label' => 'Tahun',
                 'field' => 'tahun',
                 'type' => 'number',
@@ -51,7 +43,8 @@ class TahunController extends BaseController
                 'options' => [
                     'Aktif' => 'Aktif',
                     'Tidak Aktif' => 'Tidak Aktif'
-                ]
+                ],
+                'default' => 'Aktif'
             ),
         );
     }

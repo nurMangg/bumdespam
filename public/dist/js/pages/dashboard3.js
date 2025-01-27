@@ -59,9 +59,13 @@ $(function () {
 
             // Include a dollar sign in the ticks
             callback: function (value) {
-              if (value >= 1000) {
+              if (value >= 1000000) {
+                value /= 1000000
+                value += ' juta'
+              }
+              else if (value >= 1000) {
                 value /= 1000
-                value += 'rb'
+                value += ' rb'
               }
 
               return 'Rp. ' + value

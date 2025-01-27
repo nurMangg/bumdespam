@@ -29,9 +29,9 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{{ 'BUMI DESA | PDAM' ?? env('APP_NAME') }}</title>
+    <title>{{ $settingWeb->settingWebNama ? $settingWeb->settingWebNama . ' | PDAM' : env('APP_NAME') }}</title>
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <link rel="shortcut icon" href="{{ $settingWeb->settingWebLogo ?? asset('images/favicon.svg') }}" type="image/x-icon">
+    <link rel="shortcut icon" href="{{ $settingWeb->settingWebLogo ? asset($settingWeb->settingWebLogo) : asset('images/favicon.svg') }}" type="image/x-icon">
 
     {{-- TOASTR --}}
     <link rel="stylesheet" href="{{ asset('plugins/toastr/toastr.min.css') }}">
@@ -128,7 +128,7 @@
 
         <!-- Preloader -->
         <div class="preloader flex-column justify-content-center align-items-center">
-            <img class="animation__shake" src="{{ $settingWeb->settingWebLogo ?? asset('images/favicon.svg')}}" alt="AdminLTELogo" height="160"
+            <img class="animation__shake" src="{{ $settingWeb->settingWebLogo ? asset($settingWeb->settingWebLogo) : asset('images/favicon.svg') }}" alt="AdminLTELogo" height="160"
                 width="160">
         </div>
 
@@ -237,7 +237,7 @@
         <aside class="main-sidebar" style="background-color: #ffffff;">
             <!-- Brand Logo -->
             <a href="index3.html" class="brand-link">
-                <img src="{{ $settingWeb->settingWebLogo ?? asset('images/favicon.svg')}}" alt="AdminLTE Logo"
+                <img src="{{ $settingWeb->settingWebLogo ? asset($settingWeb->settingWebLogo) : asset('images/favicon.svg') }}" alt="AdminLTE Logo"
                     class="brand-image img-circle elevation-3" style="opacity: .8">
                 <span class="brand-text font-weight-light">{{ $settingWeb->settingWebNama ?? "BUMDES PDAM"}}</span>
             </a>

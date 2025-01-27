@@ -15,40 +15,40 @@ class BulanSeeder extends Seeder
     {
         Bulan::insert([
             [
-                'bulan' => 'Januari'
+                'bulanNama' => 'Januari'
             ],
             [
-                'bulan' => 'Februari'
+                'bulanNama' => 'Februari'
             ],
             [
-                'bulan' => 'Maret'
+                'bulanNama' => 'Maret'
             ],
             [
-                'bulan' => 'April'
+                'bulanNama' => 'April'
             ],
             [
-                'bulan' => 'Mei'
+                'bulanNama' => 'Mei'
             ],
             [
-                'bulan' => 'Juni'
+                'bulanNama' => 'Juni'
             ],
             [
-                'bulan' => 'Juli'
+                'bulanNama' => 'Juli'
             ],
             [
-                'bulan' => 'Agustus'
+                'bulanNama' => 'Agustus'
             ],
             [
-                'bulan' => 'September'
+                'bulanNama' => 'September'
             ],
             [
-                'bulan' => 'Oktober'
+                'bulanNama' => 'Oktober'
             ],
             [
-                'bulan' => 'November'
+                'bulanNama' => 'November'
             ],
             [
-                'bulan' => 'Desember'
+                'bulanNama' => 'Desember'
             ]
             ]);
     }

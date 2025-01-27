@@ -14,4 +14,6 @@ class Bulan extends Model
     protected $fillable = [
         'bulan',
     ];
+
+    
 }

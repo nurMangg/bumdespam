@@ -73,7 +73,9 @@
         <img src="{{ public_path('images/logo.png') }}" alt="Logo">
         <div>
             <h3>Pagar Sejahtera | PDAM BUMDES</h3>
-            <h4>{{ $title ?? env('APP_NAME') }}</h4>
+            <h4>{{ $title ?? env('APP_NAME') }}</h4><br>
+            <h4>Tanggal&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: {{ $filterTanggal }}</h4>
+            <h4>Pelanggan&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: {{ $filterPelanggan ?? 'Semua Pelanggan' }}</h4>
         </div>
     </div>
     <table>
@@ -120,11 +122,11 @@
             <td>{{ $dataJumlah['jumlahLunas'] }}</td>
         </tr>
         <tr>
-            <td>Total Tagihan Belum Lunas</td>
+            <td>Jumlah Tagihan Belum Lunas</td>
             <td>Rp. {{ number_format($dataJumlah['totalSemuaTagihanBelumLunas'], 0, ',', '.') }}</td>
         </tr>
         <tr>
-            <td>Total Tagihan Lunas</td>
+            <td>Jumlah Tagihan Lunas</td>
             <td>Rp. {{ number_format($dataJumlah['totalSemuaTagihanLunas'], 0, ',', '.') }}</td>
         </tr>
     </table>

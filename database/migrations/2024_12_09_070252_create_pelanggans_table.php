@@ -15,10 +15,7 @@ return new class extends Migration
             $table->increments('pelangganId');
             $table->string('pelangganKode');
             $table->string('pelangganNama');
-            $table->string('pelangganEmail')->nullable();
             $table->string('pelangganPhone')->nullable();
-            $table->text('pelangganAlamat')->nullable();
-            $table->string('pelangganDesa')->nullable();
             $table->string('pelangganRt')->nullable();
             $table->string('pelangganRw')->nullable();
 

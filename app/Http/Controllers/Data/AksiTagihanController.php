@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Data;
 
 use App\Http\Controllers\BaseController;
 use App\Http\Controllers\Controller;
+use App\Models\Bulan;
 use App\Models\Golongan;
 use App\Models\HistoryWeb;
 use App\Models\Pelanggan;
@@ -46,18 +47,18 @@ class AksiTagihanController extends BaseController
                 'width' => 6,
                 'required' => true,
                 'options' => [
-                    'Januari' => 'Januari',
-                    'Februari' => 'Februari',
-                    'Maret' => 'Maret',
-                    'April' => 'April',
-                    'Mei' => 'Mei',
-                    'Juni' => 'Juni',
-                    'Juli' => 'Juli',
-                    'Agustus' => 'Agustus',
-                    'September' => 'September',
-                    'Oktober' => 'Oktober',
-                    'November' => 'November',
-                    'Desember' => 'Desember'
+                    '1' => 'Januari',
+                    '2' => 'Februari',
+                    '3' => 'Maret',
+                    '4' => 'April',
+                    '5' => 'Mei',
+                    '6' => 'Juni',
+                    '7' => 'Juli',
+                    '8' => 'Agustus',
+                    '9' => 'September',
+                    '10' => 'Oktober',
+                    '11' => 'November',
+                    '12' => 'Desember'
                 ]
             ),
             array(
@@ -85,6 +86,14 @@ class AksiTagihanController extends BaseController
                 'width' => 6,
                 'required' => true,
             ),
+            
+            array(
+                'label' => 'Tagihan Abonemen (Default 3000)',
+                'field' => 'tagihanInfoAbonemen',
+                'type' => 'text',
+                'placeholder' => 'Kosongkan Jika Abonemen Rp. 3000',
+                'width' => 6,
+            ),
             array(
                 'label' => 'Status Tagihan',
                 'field' => 'tagihanStatus',
@@ -96,14 +105,8 @@ class AksiTagihanController extends BaseController
                     'Lunas' => 'Lunas',
                     'Belum Lunas' => 'Belum Lunas',
                     'Pending' => 'Pending'
-                ]
-            ),
-            array(
-                'label' => 'Catatan Tagihan',
-                'field' => 'tagihanCatatan',
-                'type' => 'textarea',
-                'placeholder' => 'Masukkan Catatan',
-                'width' => 6,
+                ],
+                'default' => 'Belum Lunas'
             ),
         );
     }
@@ -112,7 +115,7 @@ class AksiTagihanController extends BaseController
     {
         $tagihan = Pelanggan::where('pelangganKode', $request->pelangganKode)->first()->pelangganId;
         if ($request->ajax()) {
-            $data = Tagihan::where('tagihanPelangganId', $tagihan)->get();
+            $data = Tagihan::where('tagihanPelangganId', $tagihan)->whereNull('deleted_at')->get();
             return datatables()::of($data)
                     ->addIndexColumn()
                     ->addColumn('action', function($row){
@@ -125,7 +128,14 @@ class AksiTagihanController extends BaseController
                     })
                     ->addColumn('tagihanJumlah', function($row){
                         $jumlah = Pembayaran::where('pembayaranTagihanId', $row->tagihanId)->first()->pembayaranJumlah;
-                        return 'Rp ' . number_format($jumlah, 0, ',', '.');
+                        $total = $jumlah + $row->tagihanInfoAbonemen;
+                        return 'Rp ' . number_format($total, 0, ',', '.');
+                    })
+                    ->editColumn('tagihanInfoAbonemen', function($row){
+                        return 'Rp ' . number_format($row->tagihanInfoAbonemen, 0, ',', '.');
+                    })
+                    ->editColumn('tagihanBulan', function($row){
+                        return Bulan::where('bulanId', $row->tagihanBulan)->first()->bulanNama;
                     })
                     ->rawColumns(['action'])
                     ->make(true);
@@ -140,6 +150,7 @@ class AksiTagihanController extends BaseController
             selectRaw('MAX(tagihanMAkhir) as tagihanMAkhir')
             ->selectRaw('SUM((tagihanMAkhir - tagihanMAwal) * tagihanInfoTarif) as totalTagihan')
             ->where('tagihanPelangganId', $detailPelanggan->pelangganId)
+            ->where('tagihanStatus', 'Lunas')
             ->first();
         
         // dd($penggunaanTagihan);
@@ -186,18 +197,17 @@ class AksiTagihanController extends BaseController
             'tagihanBulan' => $request->tagihanBulan,
             'tagihanTahun' => $request->tagihanTahun,
             'tagihanInfoTarif' => Pelanggan::where('pelangganId', $request->pelangganId)->first()->golongan->golonganTarif,
-            'tagihanInfoDenda' => Pelanggan::where('pelangganId', $request->pelangganId)->first()->golongan->golonganDenda,
+            'tagihanInfoAbonemen' => Pelanggan::where('pelangganId', $request->pelangganId)->first()->golongan->golonganAbonemen,
             'tagihanMAwal' => $request->tagihanMAwal,
             'tagihanMAkhir' => $request->tagihanMAkhir,
             'tagihanUserId' => Auth::user()->id,
             'tagihanTanggal' => date('Y-m-d'),
             'tagihanStatus' => $request->tagihanStatus,
-            'tagihanCatatan' => $request->tagihanCatatan,
         ]);
 
         Pembayaran::create([
             'pembayaranTagihanId' => $tagihan->tagihanId,
-            'pembayaranJumlah' => ($request->tagihanMAkhir - $request->tagihanMAwal) * $tagihan->tagihanInfoTarif,
+            'pembayaranJumlah' => (($request->tagihanMAkhir - $request->tagihanMAwal) * $tagihan->tagihanInfoTarif),
             'pembayaranStatus' => 'Belum Lunas'
         ]);
 
@@ -221,11 +231,12 @@ class AksiTagihanController extends BaseController
             return response()->json(['error' => 'Data not found'], 404);
         }
 
+
         $data->update($request->except(['pembayaranJumlah', 'pembayaranStatus']));
 
         $pembayaran = Pembayaran::where('pembayaranTagihanId', $data->tagihanId)->first();
         $pembayaran->update([
-            'pembayaranJumlah' => ($data->tagihanMAkhir - $data->tagihanMAwal) * $data->tagihanInfoTarif,
+            'pembayaranJumlah' => (($request->tagihanMAkhir - $request->tagihanMAwal) * $data->tagihanInfoTarif),
             'pembayaranStatus' => 'Belum Lunas'
         ]);
 

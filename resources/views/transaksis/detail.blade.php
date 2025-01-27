@@ -1,4 +1,7 @@
 @extends('layouts.app')
+<?php
+    $web = \App\Models\SettingWeb::first();
+?>
 
 @section('content')
 <style>
@@ -48,7 +51,7 @@
           <div class="col-12">
             <div class="card mb-5">
 
-                <img src="{{ asset('images/logo.svg')}}" alt="Logo-bumdes" width="300px" class="img-fluid p-4">
+                <img src="{{  asset('images/logolandscape.png')}}" alt="Logo-bumdes" width="350" class="img-fluid p-4">
                 <div class="pl-5">
                     <div class="row">
                         <div class="col-md-6">
@@ -126,17 +129,13 @@
                         <td>&emsp;&emsp;: <span id="detailPelangganNama">{{  $detailPelanggan->pelangganNama ?? ' -'}}</span></td>
                     </tr>
                     <tr>
-                        <td>Email</td>
-                        <td>&emsp;&emsp;: <span id="detailPelangganEmail">{{  $detailPelanggan->pelangganEmail ?? ' -' }}</span></td>
-                    </tr>
-                    <tr>
                         <td>Nomor Hp</td>
                         <td>&emsp;&emsp;: <span
                                 id="detailPelangganPhone">{{  $detailPelanggan->pelangganPhone ?? ' -'}}</span></td>
                     </tr>
                     <tr>
                         <td>Alamat</td>
-                        <td>&emsp;&emsp;: <span id="detailPelangganAlamat">{{  $detailPelanggan->pelangganAlamat ?? ' -'}}</span></td>
+                        <td>&emsp;&emsp;: <span id="detailPelangganAlamat">{{ 'RT.' . $detailPelanggan->pelangganRt . ' / ' . ' RW.' . $detailPelanggan->pelangganRw ?? ' -'}}</span></td>
                     </tr>
                     <tr>
                         <td>Golongan Tarif</td>
@@ -163,19 +162,18 @@
                         @if ($detailTagihan->tagihanStatus == "Lunas")
                             <tr>
                                 <td></td>
-                                <td>Abondemen ({{ date_create($detailTagihan->pembayaranInfo->updated_at)->diff(date_create($detailTagihan->tagihanTanggal))->m > 1 ? date_create($detailTagihan->pembayaranInfo->updated_at)->diff(date_create($detailTagihan->tagihanTanggal))->m . ' bulan' : '' }})</td>
-                                <td>Rp. {{ number_format($detailTagihan->pembayaranInfo->pembayaranDenda ?? 0, 0, ',', '.') }}</td>
+                                <td>Abonemen</td>
+                                <td>Rp. {{ number_format($detailTagihan->pembayaranInfo->pembayaranAbonemen ?? 0, 0, ',', '.') }}</td>
                                 
                             </tr>
                         @else
-                            @if ($detailTagihan->tagihanTanggal && date_create()->diff(date_create($detailTagihan->tagihanTanggal))->m > 1)
                                 <tr>
                                     <td></td>
-                                    <td>Abondemen ({{ date_create()->diff(date_create($detailTagihan->tagihanTanggal))->m > 1 ? date_create()->diff(date_create($detailTagihan->tagihanTanggal))->m . ' bulan' : '' }})</td>
-                                    <td>Rp. {{ number_format((date_create()->diff(date_create($detailTagihan->tagihanTanggal))->m > 1 ? $detailTagihan->tagihanInfoDenda * date_create()->diff(date_create($detailTagihan->tagihanTanggal))->m : 0), 0, ',', '.') }}</td>
+                                    <td>Abonemen </td>
+                                    <td>Rp. {{ number_format($detailTagihan->tagihanInfoAbonemen, 0, ',', '.') }}</td>
                                     
                                 </tr>
-                            @endif
+                            
                         @endif
                         
                         @if ($detailTagihan->tagihanStatus == "Belum Lunas")
@@ -250,7 +248,7 @@
                                 <tr>
                                     <td>Periode</td>
                                     <td>&emsp;&emsp;: <span
-                                            id="periodeTagihan">{{ $detailTagihan->tagihanBulan. ' ' . $detailTagihan->tagihanTahun ?? '-'}}</span></td>
+                                            id="periodeTagihan">{{ $detailTagihan->bulan->bulanNama. ' ' . $detailTagihan->tagihanTahun ?? '-'}}</span></td>
                                 </tr>
                                 <tr>
                                     <td>Stand Meter</td>
@@ -260,15 +258,7 @@
                                     <td>Pemakaian</td>
                                     <td>&emsp;&emsp;: <span id="pemakaianTagihan">{{ ($detailTagihan->tagihanMAkhir - $detailTagihan->tagihanMAwal) . ' m3' ?? '-'}}</span></td>
                                 </tr>
-                                @if($detailTagihan->tagihanStatus != "Lunas")
-                                <tr>
-                                    <td>Penalty</td>
-                                    <td>&emsp;&emsp;: <span id="penaltyTagihan">
-                                        Rp. {{ number_format((date_create()->diff(date_create($detailTagihan->tagihanTanggal))->m > 1 ? $detailTagihan->tagihanInfoDenda * date_create()->diff(date_create($detailTagihan->tagihanTanggal))->m : 0), 0, ',', '.') }}
-                                        <input type="text" id="penaltyTagihanVal" value="{{ (date_create()->diff(date_create($detailTagihan->tagihanTanggal))->m > 1 ? $detailTagihan->tagihanInfoDenda * date_create()->diff(date_create($detailTagihan->tagihanTanggal))->m : 0) }}" hidden>
-                                    </span></td>
-                                </tr>
-                                @endif
+                                
                                 
             
                             </table>
@@ -345,7 +335,7 @@
                 data: {
                     tagihanId: "{{ $tagihanIdCrypt ?? '' }}",
                     paymentMethod: paymentValue,
-                    pembayaranDenda: $('#penaltyTagihanVal').val(),
+                    pembayaranAbonemen: $('#penaltyTagihanVal').val(),
                     totalTagihan: $('#totalTagihanVal').val(),
                     pembayaranAdminFee: $('#pembayaranAdminFee').val()
 
@@ -384,7 +374,7 @@
                         type: 'POST',
                         data: {
                             tagihanId: "{{ $tagihanIdCrypt ?? '' }}",
-                            pembayaranDenda: $('#penaltyTagihanVal').val(),
+                            pembayaranAbonemen: $('#penaltyTagihanVal').val(),
                             totalTagihan: $('#totalTagihanVal').val(),
                             pembayaranAdminFee: $('#pembayaranAdminFee').val()
                         },

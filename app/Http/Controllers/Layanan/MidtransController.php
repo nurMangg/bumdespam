@@ -62,6 +62,18 @@ class MidtransController extends Controller
                         'quantity' => 1,
                         'name' => 'Tagihan #' . $tagihan->tagihanKode,
                     ],
+                    [
+                        'id' => '2',
+                        'price' => $tagihan->tagihanInfoAbonemen,
+                        'quantity' => 1,
+                        'name' => 'Abonemen',
+                    ],
+                    [
+                        'id' => '3',
+                        'price' => $request->input('pembayaranAdminFee'),
+                        'quantity' => 1,
+                        'name' => 'Admin Fee',
+                    ],
                 ],
             ];
 
@@ -71,7 +83,7 @@ class MidtransController extends Controller
                 $pembayaran = Pembayaran::where('pembayaranTagihanId', $tagihan->tagihanId)->first();
                 if ($pembayaran) {
                     $pembayaran->pembayaranMetode = $selectedMethod;
-                    $pembayaran->pembayaranDenda = $request->input('pembayaranDenda') ?? '0';
+                    $pembayaran->pembayaranAbonemen = $request->input('pembayaranAbonemen') ?? '0';
                     $pembayaran->pembayaranAdminFee = $request->input('pembayaranAdminFee') ?? '0';
                     $pembayaran->save();
                 }

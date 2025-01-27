@@ -14,16 +14,23 @@ return new class extends Migration
         Schema::create('tagihans', function (Blueprint $table) {
             $table->increments('tagihanId');
             $table->string('tagihanKode');
+
             $table->unsignedInteger('tagihanPelangganId')->nullable();
             $table->foreign('tagihanPelangganId')
                 ->references('pelangganId')
                 ->on('mspelanggan')
                 ->onDelete('cascade');
-            $table->string('tagihanBulan');
+
+            $table->unsignedInteger('tagihanBulan')->nullable();
+            $table->foreign('tagihanBulan')
+                ->references('bulanId')
+                ->on('msbulan')
+                ->onDelete('cascade');
+
             $table->string('tagihanTahun');
 
             $table->double('tagihanInfoTarif');
-            $table->double('tagihanInfoDenda');
+            $table->double('tagihanInfoAbonemen');
             
             $table->double('tagihanMAwal');
             $table->double('tagihanMAkhir');
@@ -44,6 +51,10 @@ return new class extends Migration
      */
     public function down(): void
     {
+        // Schema::table('tagihans', function (Blueprint $table) {
+        //     $table->dropForeign('tagihanPelangganId');
+        //     $table->dropForeign('tagihanBulan');
+        // });
         Schema::dropIfExists('tagihans');
     }
 };

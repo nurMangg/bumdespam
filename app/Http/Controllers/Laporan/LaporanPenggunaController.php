@@ -29,15 +29,6 @@ class LaporanPenggunaController extends Controller
 
         $this->form = array(
             array(
-                'label' => 'Desa',
-                'field' => 'pelangganDesa',
-                'type' => 'select',
-                'options' => Pelanggan::all()->pluck('pelangganDesa', 'pelangganDesa')->unique()->sort()->toArray(),
-                'placeholder' => 'Semua Desa',
-                'width' => 6,
-                'required' => true
-            ),
-            array(
                 'label' => 'RT',
                 'field' => 'pelangganRt',
                 'type' => 'select',
@@ -94,10 +85,6 @@ class LaporanPenggunaController extends Controller
                 'field' => 'pelangganPhone',
             ],
             array(
-                'label' => 'Desa',
-                'field' => 'pelangganDesa',
-            ),
-            array(
                 'label' => 'RT',
                 'field' => 'pelangganRt',
             ),
@@ -123,7 +110,7 @@ class LaporanPenggunaController extends Controller
     public function index(Request $request)
     {
         if ($request->ajax()) {
-            $query = Pelanggan::select('pelangganId', 'pelangganKode', 'pelangganPhone', 'pelangganNama', 'pelangganDesa', 'pelangganRt', 'pelangganRw', 'pelangganStatus', 'pelangganGolonganId', 'created_at')
+            $query = Pelanggan::select('pelangganId', 'pelangganKode', 'pelangganPhone', 'pelangganNama', 'pelangganRt', 'pelangganRw', 'pelangganStatus', 'pelangganGolonganId', 'created_at')
                 ->orderBy('created_at', 'desc');
 
             if ($request->has('filter')) {

@@ -19,7 +19,9 @@ use App\Http\Controllers\Setting\PenggunaAplikasiController;
 use App\Http\Controllers\Setting\ResetPasswordController;
 use App\Http\Controllers\Setting\RiwayatController;
 use App\Http\Controllers\Setting\RoleController;
+use App\Http\Controllers\Setting\SettingPenggunaController;
 use App\Http\Controllers\Setting\WebController;
+use App\Models\Roles;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
@@ -28,7 +30,7 @@ use Illuminate\Support\Facades\Route;
 // });
 
 Route::get('/dashboard', function () {
-    if (Auth::user()->userRoleId == 2) {
+    if (Auth::user()->userRoleId == Roles::where('roleName', 'pelanggan')->first()->roleId) {
         return view('pelanggan.dashboard');
 
     }
@@ -90,6 +92,8 @@ Route::middleware(['auth', 'CheckUserRole'])->prefix('setting')->group(function 
     Route::resource('pengguna-aplikasi', PenggunaAplikasiController::class);
     Route::resource('menu-aplikasi', MenuController::class);
     Route::resource('role-aplikasi', RoleController::class);
+    Route::resource('setting-pengguna', SettingPenggunaController::class);
+
     Route::resource('setting-web', WebController::class);
     Route::get('riwayat-website', [RiwayatController::class, 'index'])->name('riwayat-website.index');
 

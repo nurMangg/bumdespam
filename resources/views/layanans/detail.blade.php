@@ -22,7 +22,7 @@
     <!-- /.content-header -->
 
     <!-- Main content -->
-    <section class="content">
+    <section class="content pb-5">
         <div class="container mb-3">
             
         </div>
@@ -62,17 +62,13 @@
                                 <td>&emsp;&emsp;: <span id="detailPelangganNama">{{  $detailPelanggan->pelangganNama ?? ' -'}}</span></td>
                             </tr>
                             <tr>
-                                <td>Email</td>
-                                <td>&emsp;&emsp;: <span id="detailPelangganEmail">{{  $detailPelanggan->pelangganEmail ?? ' -' }}</span></td>
-                            </tr>
-                            <tr>
                                 <td>Nomor Hp</td>
                                 <td>&emsp;&emsp;: <span
                                         id="detailPelangganPhone">{{  $detailPelanggan->pelangganPhone ?? ' -'}}</span></td>
                             </tr>
                             <tr>
                                 <td>Alamat</td>
-                                <td>&emsp;&emsp;: <span id="detailPelangganAlamat">{{  $detailPelanggan->pelangganAlamat ?? ' -'}}</span></td>
+                                <td>&emsp;&emsp;: <span id="detailPelangganAlamat">{{  'RT ' . $detailPelanggan->pelangganRt . '/' . 'RW ' . $detailPelanggan->pelangganRw  ?? ' -'}}</span></td>
                             </tr>
                             <tr>
                                 <td>Golongan Tarif</td>
@@ -93,11 +89,11 @@
                             <tr>
                                 <td>Tarif Harga</td>
                                 <td>&emsp;&emsp;: <span
-                                        id="detailPelangganGolonganHarga">{{ $detailPelanggan->golongan->golonganTarif ?? ' -'}}</span></td>
+                                        id="detailPelangganGolonganHarga">Rp. {{ number_format($detailPelanggan->golongan->golonganTarif ?? 0, 0, ',', '.') }}</span></td>
                             </tr>
                             <tr>
                                 <td>Tarif Denda</td>
-                                <td>&emsp;&emsp;: <span id="detailPelangganGolonganDenda">{{  $detailPelanggan->golongan->golonganDenda ?? ' -'}}</span></td>
+                                <td>&emsp;&emsp;: <span id="detailPelangganGolonganDenda">Rp. {{ number_format($detailPelanggan->golongan->golonganAbonemen ?? 0, 0, ',', '.') }}</span></td>
                             </tr>
                         </table>
                         <h6>Informasi Penggunaan</h6>
@@ -112,8 +108,8 @@
                                         id="detailPelangganGolonganHarga">{{ $penggunaanTagihan->tagihanMAkhir ?? ' -'}} m3</span></td>
                             </tr>
                             <tr>
-                                <td>Total Tagihan</td>
-                                <td>&emsp;&emsp;: <span id="detailPelangganGolonganDenda">Rp. {{ number_format($penggunaanTagihan->totalTagihan ?? 0, 0, ',', '.') }}</span></td>
+                                <td>Total Tagihan Kemarin</td>
+                                <td>&emsp;&emsp;: <span id="detailPelangganTotalTagihan">Rp. {{ number_format($penggunaanTagihan->totalTagihan ?? 0, 0, ',', '.') }}</span></td>
                             </tr>
                         </table>
                     </div>
@@ -325,17 +321,28 @@
 
         $('body').on('click', '.delete', function () {
             var id = $(this).data('id');
-            confirm("Apakah Anda yakin ingin menghapus data ini?");
-            $.ajax({
-                type: "DELETE",
-                url: "{{ route($route . '.index') }}/" + id,
-                success: function (data) {
-                    $('#laravel_datatable').DataTable().ajax.reload();
-                    toastr.success('Data berhasil dihapus!');
-                },
-                error: function (data) {
-                    console.log('Error:', data);
-                    toastr.error('Terjadi kesalahan saat menghapus data.');
+            Swal.fire({
+                title: 'Anda yakin?',
+                text: "Apakah Anda yakin ingin menghapus data ini?",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Ya, hapus!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        type: "DELETE",
+                        url: "{{ route($route . '.index') }}/" + id,
+                        success: function (data) {
+                            $('#laravel_datatable').DataTable().ajax.reload();
+                            toastr.success('Data berhasil dihapus!');
+                        },
+                        error: function (data) {
+                            console.log('Error:', data);
+                            toastr.error('Terjadi kesalahan saat menghapus data.');
+                        }
+                    });
                 }
             });
         });
