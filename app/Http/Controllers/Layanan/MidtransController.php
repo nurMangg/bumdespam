@@ -51,7 +51,7 @@ class MidtransController extends Controller
                 ],
                 'customer_details' => [
                     'first_name' => $tagihan->pelanggan->pelangganNama ?? '',
-                    'email' => $tagihan->pelanggan->pelangganEmail ?? '',
+                    // 'email' => $tagihan->pelanggan->pelangganEmail ?? '',
                     'phone' => $tagihan->pelanggan->pelangganPhone ?? '',
                 ],
                 'enabled_payments' => $enabledPayments,
@@ -61,18 +61,6 @@ class MidtransController extends Controller
                         'price' => $request->totalTagihan,
                         'quantity' => 1,
                         'name' => 'Tagihan #' . $tagihan->tagihanKode,
-                    ],
-                    [
-                        'id' => '2',
-                        'price' => $tagihan->tagihanInfoAbonemen,
-                        'quantity' => 1,
-                        'name' => 'Abonemen',
-                    ],
-                    [
-                        'id' => '3',
-                        'price' => $request->input('pembayaranAdminFee'),
-                        'quantity' => 1,
-                        'name' => 'Admin Fee',
                     ],
                 ],
             ];
@@ -93,6 +81,7 @@ class MidtransController extends Controller
                     [
                         'midtransPaymentOrderId' => $transactionData['transaction_details']['order_id'],
                         'midtransPaymentSnapToken' => $snapToken,
+                        'midtransPaymentTransactionId' => '',
                         'midtransPaymentStatus' => 'Pending'
                     ]
                 );
