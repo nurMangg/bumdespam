@@ -277,7 +277,7 @@
               <!-- /.card-body -->
               <div class="card-footer text-right">
                 @if ($detailTagihan->tagihanStatus == "Belum Lunas")
-                    @if (Auth::user()->userRoleId != 2)
+                    @if (Auth::user()->userRoleId != 4)
                         <button id="payButtonTunai" class="btn btn-success">Bayar Tunai</button>
                     @endif
                     <button id="payButton" class="btn btn-outline-primary" disabled>Bayar Sekarang</button>
