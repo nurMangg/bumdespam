@@ -44,7 +44,7 @@ class DataImport implements ToModel, WithStartRow, SkipsOnFailure, WithHeadingRo
         ]);
 
         $tagihan = Tagihan::create([
-            'tagihanKode' => $this->generateUniqueCode(),
+            'tagihanKode' => $this->generateUniqueCodeTagihan(),
             'tagihanPelangganId' => $pelanggan->pelangganId,
             'tagihanBulan' => $row['bulan'],
             'tagihanTahun' => $row['tahun'],
@@ -71,5 +71,14 @@ class DataImport implements ToModel, WithStartRow, SkipsOnFailure, WithHeadingRo
         $pelangganPart = str_pad($pelangganCount + 1, 4, '0', STR_PAD_LEFT);
 
         return "PAM{$pelangganPart}";
+    }
+
+    public function generateUniqueCodeTagihan(): string
+    {
+        $pelangganCount = Tagihan::count();
+
+        $pelangganPart = str_pad($pelangganCount + 1, 4, '0', STR_PAD_LEFT);
+
+        return "TPAM{$pelangganPart}";
     }
 }

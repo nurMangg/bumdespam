@@ -237,7 +237,7 @@ class LaporanTagihanController extends Controller
     {
         $filters = $request->input('filter', []);
         $query = Tagihan::with('pelanggan')->select('*')
-                ->orderBy('created_at', 'desc');
+                ->orderBy('tagihanKode', 'asc');
 
         $appliedFilters = new stdClass();
 
@@ -281,7 +281,7 @@ class LaporanTagihanController extends Controller
         $filterPelanggan = isset($appliedFilters->pelangganRt) ? ' RT ' . $appliedFilters->pelangganRt : '';
         $filterPelanggan .= isset($appliedFilters->pelangganRw) ? ' RW ' . $appliedFilters->pelangganRw : '';
 
-        $data = $query->orderBy('tagihanKode', 'asc')->get();
+        $data = $query->get();
         $jumlahBelumLunas = $data->where('tagihanStatus', 'Belum Lunas')->count();
         $jumlahLunas = $data->where('tagihanStatus', 'Lunas')->count();
         $data->transform(function($item) {

@@ -161,6 +161,9 @@
         $('#pdfButton').click(function (event) {
             // Mencegah form submission default
             event.preventDefault();
+
+            // Menyembunyikan tombol PDF
+            $('#pdfButton').text('Exporting...');
             
             // Kirim request AJAX
             $.ajax({
@@ -176,12 +179,16 @@
                     })()
                 },
                 success: function (response) {
+                    $('#pdfButton').text('Export to PDF');
+
                     if (response.status === 'success') {
                         // Redirect ke URL file PDF untuk diunduh
                         window.open(response.url, '_blank');
                     }
                 },
                 error: function (xhr, status, error) {
+                  $('#pdfButton').text('Export to PDF');
+
                     alert('Terjadi kesalahan: ' + error);
                 }
             });
