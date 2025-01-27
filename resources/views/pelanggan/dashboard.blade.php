@@ -10,10 +10,11 @@
   
   $tagihan->transform(function($item) {
       $item->tagihanTotal = ($item->tagihanMAkhir - $item->tagihanMAwal) * $item->tagihanInfoTarif;
+      $item->tagihanJumlahTotal = $item->tagihanTotal + $item->tagihanInfoAbonemen;
       return $item;
   });
 
-  $totalSemuaTagihanBelumLunas = $tagihan->where('tagihanStatus', 'Belum Lunas')->sum('tagihanTotal');
+  $totalSemuaTagihanBelumLunas = $tagihan->where('tagihanStatus', 'Belum Lunas')->sum('tagihanJumlahTotal');
   $totalSemuaTagihanLunas = $tagihan->where('tagihanStatus', 'Lunas')->sum('tagihanTotal');
 
 ?>

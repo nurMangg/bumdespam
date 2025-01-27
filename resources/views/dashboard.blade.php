@@ -9,11 +9,12 @@
   
   $tagihan->transform(function($item) {
       $item->tagihanTotal = ($item->tagihanMAkhir - $item->tagihanMAwal) * $item->tagihanInfoTarif;
+      $item->tagihanJumlahTotal = $item->tagihanTotal + $item->tagihanInfoAbonemen;
       return $item;
   });
 
-  $totalSemuaTagihanBelumLunas = $tagihan->where('tagihanStatus', 'Belum Lunas')->sum('tagihanTotal');
-  $totalSemuaTagihanLunas = $tagihan->where('tagihanStatus', 'Lunas')->sum('tagihanTotal');
+  $totalSemuaTagihanBelumLunas = $tagihan->where('tagihanStatus', 'Belum Lunas')->sum('tagihanJumlahTotal');
+  $totalSemuaTagihanLunas = $tagihan->where('tagihanStatus', 'Lunas')->sum('tagihanJumlahTotal');
 
   //Transaksi tabel
   function getTagihanByStatus(string $status)
@@ -22,13 +23,13 @@
           ->join('msbulan', 'tagihans.tagihanBulan', '=', 'msbulan.bulanId')
           ->selectRaw('
               CONCAT(msbulan.bulanNama, " ", tagihanTahun) as bulanTahun,
-              SUM((tagihanMAkhir - tagihanMAwal) * tagihanInfoTarif) as total
+              SUM((tagihans.tagihanMAkhir - tagihans.tagihanMAwal) * tagihans.tagihanInfoTarif + tagihans.tagihanInfoAbonemen) as totalJumlah
           ')
           ->whereNull('tagihans.deleted_at')
           ->where('tagihanStatus', $status)
           ->groupBy('bulanTahun')
           ->orderByRaw('tagihanTahun, tagihanBulan')
-          ->pluck('total', 'bulanTahun');
+          ->pluck('totalJumlah', 'bulanTahun');
   }
 
   // Fetch data for both statuses

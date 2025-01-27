@@ -304,7 +304,7 @@ class LaporanTagihanController extends Controller
         $dataJumlah = [
             'jumlahBelumLunas' => $jumlahBelumLunas,
             'jumlahLunas' => $jumlahLunas,
-            'totalSemuaTagihanBelumLunas' => $data->where('tagihanStatus', 'Belum Lunas')->sum('tagihanTotal'),
+            'totalSemuaTagihanBelumLunas' => $data->where('tagihanStatus', 'Belum Lunas')->sum('tagihanJumlahTotal'),
             'totalSemuaTagihanLunas' => $data->where('tagihanStatus', 'Lunas')->sum('tagihanTotal')
         ];
 
