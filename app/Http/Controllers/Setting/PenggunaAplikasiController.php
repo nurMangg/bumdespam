@@ -98,7 +98,7 @@ class PenggunaAplikasiController extends BaseController
 
         User::create([
             'name' => $request->name,
-            'email' => $request->email,
+            'username' => $request->username,
             'password' => Hash::make('password'),
             'userRoleId' => $request->userRoleId,
         ]);
