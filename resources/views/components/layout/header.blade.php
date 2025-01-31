@@ -33,6 +33,11 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <link rel="shortcut icon" href="{{ $settingWeb->settingWebLogo ? asset($settingWeb->settingWebLogo) : asset('images/favicon.svg') }}" type="image/x-icon">
 
+    {{-- PWA --}}
+    <meta name="theme-color" content="#6777ef"/>
+    <link rel="apple-touch-icon" href="{{ asset('logo.png') }}">
+    <link rel="manifest" href="{{ asset('/manifest.json') }}">
+
     {{-- TOASTR --}}
     <link rel="stylesheet" href="{{ asset('plugins/toastr/toastr.min.css') }}">
 
