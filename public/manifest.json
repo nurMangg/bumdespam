@@ -2,10 +2,10 @@
     "name": "BUMDES Pagar Sejahtera",
     "short_name": "PDAM Pagar Sejahtera",
     "start_url": "/index.php",
-    "background_color": "#6777ef",
+    "background_color": "#ffffff",
     "description": "Aplikasi BUMDES PAM Pagar Sejahtera",
     "display": "fullscreen",
-    "theme_color": "#6777ef",
+    "theme_color": "#ffffff",
     "icons": [
         {
             "src": "logo.png",
