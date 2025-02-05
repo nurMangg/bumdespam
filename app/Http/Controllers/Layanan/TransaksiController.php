@@ -9,7 +9,9 @@ use App\Models\Pembayaran;
 use App\Models\Roles;
 use App\Models\Tagihan;
 use App\Models\Tahun;
+use App\Models\User;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Crypt;
@@ -107,6 +109,52 @@ class TransaksiController extends Controller
         ]);
     }
 
+    public function getInfoAllTransaksi(Request $request)
+    {
+        if ($request->ajax()) {
+            if (Auth::user()->userRoleId != Roles::where('roleName', 'pelanggan')->first()->roleId) {
+                $tagihan = Tagihan::whereNull('deleted_at')->get();
+            } else {
+                $pelanggan = Pelanggan::where('pelangganUserId', Auth::user()->id)->first();
+                $tagihan = Tagihan::whereNull('deleted_at')->where('tagihanPelangganId', $pelanggan->pelangganId)->get();
+
+            }
+            
+            
+            $tagihan->transform(function($item) {
+                $item->tagihanTotal = ($item->tagihanMAkhir - $item->tagihanMAwal) * $item->tagihanInfoTarif;
+                $item->tagihanJumlahTotal = $item->tagihanTotal + $item->tagihanInfoAbonemen;
+                return $item;
+            });
+
+            $totalSemuaTagihanBelumLunas = $tagihan->where('tagihanStatus', 'Belum Lunas')->sum('tagihanJumlahTotal');
+            $jumlahTagihanBelumLunas = $tagihan->where('tagihanStatus', 'Belum Lunas')->count();
+            $totalSemuaTagihanLunas = $tagihan->where('tagihanStatus', 'Lunas')->sum('tagihanJumlahTotal');
+            $jumlahTagihanLunas = $tagihan->where('tagihanStatus', 'Lunas')->count();
+
+            $tanggalSekarang = Carbon::now();
+            $tanggalBulanLalu = $tanggalSekarang->subMonth();
+            $bulanIni = $tanggalBulanLalu->month;
+            $tahunIni = $tanggalBulanLalu->year;
+
+            $totalTagihanLunasBulanIni = $tagihan->where('tagihanStatus', 'Lunas')->where('tagihanBulan', $bulanIni)->where('tagihanTahun', $tahunIni)->sum('tagihanJumlahTotal');
+            $totalTagihanBelumLunasBulanIni = $tagihan->where('tagihanStatus', 'Belum Lunas')->where('tagihanBulan', $bulanIni)->where('tagihanTahun', $tahunIni)->sum('tagihanJumlahTotal');
+            $jumlahTagihanLunasBulanIni = $tagihan->where('tagihanStatus', 'Lunas')->where('tagihanBulan', $bulanIni)->where('tagihanTahun', $tahunIni)->count();
+            $jumlahTagihanBelumLunasBulanIni = $tagihan->where('tagihanStatus', 'Belum Lunas')->where('tagihanBulan', $bulanIni)->where('tagihanTahun', $tahunIni)->count();
+
+            return response()->json([
+                'totalSemuaTagihanBelumLunas' => $totalSemuaTagihanBelumLunas,
+                'totalSemuaTagihanLunas' => $totalSemuaTagihanLunas,
+                'jumlahTagihanBelumLunas' => $jumlahTagihanBelumLunas,
+                'jumlahTagihanLunas' => $jumlahTagihanLunas,
+                'totalTagihanLunasBulanIni' => $totalTagihanLunasBulanIni,
+                'totalTagihanBelumLunasBulanIni' => $totalTagihanBelumLunasBulanIni,
+                'jumlahTagihanLunasBulanIni' => $jumlahTagihanLunasBulanIni,
+                'jumlahTagihanBelumLunasBulanIni' => $jumlahTagihanBelumLunasBulanIni
+            ]);
+        }
+    }
+
     public function unduhStruk($id)
     {
         $tagihanId = Crypt::decryptString($id);
@@ -124,8 +172,9 @@ class TransaksiController extends Controller
             'tagihanTahun' => $tagihan->tagihanTahun,
             'formattedTagihanTotal' => number_format($pembayaran->pembayaranJumlah, 0, ',', '.'),
             'formattedTotalDenda' => number_format($pembayaran->pembayaranAbonemen, 0, ',', '.'),
+            'pembayaranKasirName' => User::find($pembayaran->pembayaranKasirId)->name ?? 'Aplikasi',
             'formattedTotal' => number_format($pembayaran->pembayaranJumlah + $pembayaran->pembayaranAbonemen, 0, ',', '.'),
-            'date' => now()->format('d-m-Y'),
+            'date' => $tagihan->tagihanDibayarPadaWaktu,
             'name' => "Kasir",
         ];
         // dd($data);

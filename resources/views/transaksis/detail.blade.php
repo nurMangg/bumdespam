@@ -232,6 +232,8 @@
                                 document.getElementById('totalTagihan').textContent = 
                                     'Rp. ' + total.toLocaleString('id-ID');
                                 document.getElementById('totalTagihanVal').value = total;
+                                document.getElementById('totalTagihanTunai').value = total.toLocaleString('id-ID');
+
                             }
                         </script>
                     </tbody>
@@ -302,7 +304,8 @@
 
 </div>
 
-{{-- <x-form.modal :form="$form" :title="$title ?? env('APP_NAME')" /> --}}
+<x-transaksi.pay-tunai />
+
 
 <script type="text/javascript">
     $(document).ready(function () {
@@ -311,6 +314,73 @@
             headers: {
                 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
             }
+        });
+
+        $('#uangBayarTunai').on('keyup', function(event) {
+            if (event.which >= 37 && event.which <= 40) return;
+            $(this).val(function(index, value) {
+                return value.replace(/\D/g, "")
+                    .replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+            });
+
+            var totalTagihan = parseFloat($('#totalTagihanTunai').val().replace(/\./g, '')) || 0;
+            var uangBayar = parseFloat($(this).val().replace(/\./g, '')) || 0;
+            var uangKembali = uangBayar - totalTagihan;
+            
+            $('#uangKembaliTunai').val(uangKembali >= 0 ? uangKembali.toLocaleString('id-ID') : '');
+        });
+
+        $('#saveBtn').click(function (e) {
+            e.preventDefault();
+            $('#saveBtn').html('Mengirim..');
+
+            // Validasi sebelum mengirim data
+            const totalTagihan = parseFloat($('#totalTagihanVal').val());
+            const uangBayarTunai = parseFloat($('#uangBayarTunai').val().replace(/\./g, ''));
+
+            if (isNaN(uangBayarTunai) || uangBayarTunai < totalTagihan) {
+                toastr.error("Uang bayar tidak cukup untuk membayar total tagihan.");
+                $('#saveBtn').html('Simpan Data');
+                return;
+            }
+
+            // Jika validasi lolos, kirim data
+            Swal.fire({
+                title: 'Konfirmasi Pembayaran Tunai',
+                text: "Pastikan Data Pembayaran Tunai Sudah Benar, Cek Baik-baik sebelum mengkonfirmasi!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Ya, sudah benar'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        url: '{{route('transaksi.pembayarantunai')}}',
+                        type: 'POST',
+                        data: {
+                            tagihanId: "{{ $tagihanIdCrypt ?? '' }}",
+                            pembayaranAbonemen: $('#penaltyTagihanVal').val(),
+                            totalTagihan: $('#totalTagihanVal').val(),
+                            pembayaranAdminFee: $('#pembayaranAdminFee').val(),
+                            totalTagihanTunai: $('#uangBayarTunai').val().replace(/\./g, ''),
+                            uangKembaliTunai: $('#uangKembaliTunai').val().replace(/\./g, ''),
+                            uangBayarTunai: $('#uangBayarTunai').val().replace(/\./g, ''),
+                        },
+                        success: function (response) {
+                            toastr.success("Pembayaran Berhasil!");
+                            window.location.reload();
+                        },
+                        error: function (xhr) {
+                            toastr.error("Terjadi kesalahan saat memproses pembayaran.");
+                        }
+                    });
+                }
+                if (result.dismiss === Swal.DismissReason.cancel) {
+                    $('#saveBtn').html('Simpan Data');
+                }
+            });
+
         });
 
 
@@ -358,36 +428,7 @@
 
         $('#payButtonTunai').click(function (e) {
             e.preventDefault();
-
-            Swal.fire({
-                title: 'Konfirmasi Pembayaran Tunai',
-                text: "Pastikan Anda sudah membayar tagihan sebelum mengkonfirmasi!",
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#3085d6',
-                cancelButtonColor: '#d33',
-                confirmButtonText: 'Ya, saya sudah membayar'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    $.ajax({
-                        url: '{{route('transaksi.pembayarantunai')}}',
-                        type: 'POST',
-                        data: {
-                            tagihanId: "{{ $tagihanIdCrypt ?? '' }}",
-                            pembayaranAbonemen: $('#penaltyTagihanVal').val(),
-                            totalTagihan: $('#totalTagihanVal').val(),
-                            pembayaranAdminFee: $('#pembayaranAdminFee').val()
-                        },
-                        success: function (response) {
-                            toastr.success("Pembayaran Berhasil!");
-                            window.location.reload();
-                        },
-                        error: function (xhr) {
-                            toastr.error("Terjadi kesalahan saat memproses pembayaran.");
-                        }
-                    });
-                }
-            });
+            $('#ajaxModel').modal('show');
         });
 
         $('#cetakStruk').click(function (e) {
@@ -410,48 +451,13 @@
                 onSuccess: function(result) {
                     console.log('Payment success:', result);
                     toastr.warning("Pembayaran Berhasil!");
-                    // $.ajax({
-                    //     url: '{{ route('transaksi.updateDatabase') }}',
-                    //     type: 'POST',
-                    //     data: {
-                    //         tagihanId: tagihanId,
-                    //         orderId: result.order_id,
-                    //         transactionId: result.transaction_id,
-                    //         status: result.transaction_status
-                    //     },
-                    //     success: function(response) {
-                    //         window.location.reload();
-                    //     },
-                    //     error: function(xhr) {
-                    //         console.error('Database update error:', xhr);
-                    //         alert('An error occurred while updating the database.');
-                    //     }
-                    // });
+                   
                     window.location.reload();
 
                 },
                 onPending: function(result) {
                     console.log('Payment pending:', result);
                     toastr.warning("Pembayaran Pending, Menunggu Konfirmasi");
-
-                    // $.ajax({
-                    //     url: '{{ route('transaksi.updateDatabase') }}',
-                    //     type: 'POST',
-                    //     data: {
-                    //         tagihanId: tagihanId,
-                    //         orderId: result.order_id,
-                    //         snapToken: snapToken,
-                    //         transactionId: result.transaction_id,
-                    //         status: result.transaction_status
-                    //     },
-                    //     success: function(response) {
-                    //         window.location.reload();
-                    //     },
-                    //     error: function(xhr) {
-                    //         console.error('Database update error:', xhr);
-                    //         alert('An error occurred while updating the database.');
-                    //     }
-                    // });
                     window.location.reload();
                 },
                 onError: function(result) {

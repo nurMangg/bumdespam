@@ -10,6 +10,7 @@ use App\Models\Tagihan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Crypt;
+use Illuminate\Support\Facades\DB;
 
 class AksiTransaksiController extends Controller
 {
@@ -55,6 +56,8 @@ class AksiTransaksiController extends Controller
         $decodeTagihanKode = Crypt::decryptString($tagihanId);
         
         $detailtagihan = Tagihan::where('tagihanId', $decodeTagihanKode)->first();
+
+        // dd($detailtagihan->pembayaranInfo);
         $pelangganInfo = Pelanggan::where('pelangganId', $detailtagihan->tagihanPelangganId)->first();
 
         $detailTagihanCrypt = Crypt::encryptString($detailtagihan->tagihanId);
@@ -76,36 +79,68 @@ class AksiTransaksiController extends Controller
 
     public function pembayaranTunai(Request $request)
     {
+        $request->validate([
+            'tagihanId' => 'required|string',
+            'totalTagihan' => 'required|numeric',
+            'pembayaranAdminFee' => 'nullable|numeric',
+            'totalTagihanTunai' => 'required|numeric',
+            'uangKembaliTunai' => 'required|numeric',
+            'uangBayarTunai' => 'required|numeric'
+        ]);
+    
         $tagihanId = $request->tagihanId;
         $decodeTagihanKode = Crypt::decryptString($tagihanId);
-        // dd($decodeTagihanKode);
-
+    
         $detailtagihan = Tagihan::where('tagihanId', $decodeTagihanKode)->first();
-
+    
         if(!$detailtagihan){
-            return response()->json(['error' => "Tagihan tidak ditemukan"], 500);
+            return response()->json(['error' => "Tagihan tidak ditemukan"], 404);
+        }
+    
+        if ($detailtagihan->tagihanStatus != "Belum Lunas") {
+            return response()->json(['error' => "Tagihan Sudah Lunas"], 400);
         }
 
+        $totalTagihanReal = (($detailtagihan->tagihanMAkhir - $detailtagihan->tagihanMAwal) * $detailtagihan->tagihanInfoTarif);
+
+        // dd($totalTagihanReal);
+        if ($totalTagihanReal >= $request->uangBayarTunai) {
+            return response()->json(['error' => "Uang Bayar Tidak Sesuai Dengan Total Tagihan"], 400);
+        }
+    
         $pembayaran = Pembayaran::where('pembayaranTagihanId', $detailtagihan->tagihanId)->first();
-        if ($pembayaran) {
+        if (!$pembayaran) {
+            return response()->json(['error' => "Pembayaran Tidak ada"], 400);
+        }
+
+        DB::beginTransaction();
+        try {
             $detailtagihan->tagihanStatus = "Lunas";
+            $detailtagihan->tagihanDibayarPadaWaktu = now();
             $detailtagihan->save();
-
-            $pembayaran->pembayaranMetode = "Tunai";
-            $pembayaran->pembayaranAbonemen = $detailtagihan->tagihanInfoAbonemen;
-            $pembayaran->pembayaranAdminFee = $request->input('pembayaranAdminFee') ?? '0';
-            $pembayaran->pembayaranStatus = "Lunas";
-
-            $pembayaran->save();
-
+    
+            $pembayaran->update([
+                'pembayaranMetode' => "Tunai",
+                'pembayaranUang' => $request->input('uangBayarTunai'),
+                'pembayaranKembali' => $request->input('uangKembaliTunai'),
+                'pembayaranAbonemen' => $detailtagihan->tagihanInfoAbonemen,
+                'pembayaranJumlah' => $totalTagihanReal,
+                'pembayaranAdminFee' => $request->input('pembayaranAdminFee') ?? '0',
+                'pembayaranStatus' => "Lunas",
+                'pembayaranKasirId' => Auth::user()->id,
+            ]);
+    
             HistoryWeb::create([
                 'riwayatUserId' => Auth::user()->id,
                 'riwayatTable' => 'Transaksi',
                 'riwayatAksi' => 'Transaksi Tunai',
                 'riwayatData' => json_encode($pembayaran),
             ]);
+    
+            DB::commit();
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json(['error' => $e->getMessage()], 500);
         }
-    
-    
     }
 }

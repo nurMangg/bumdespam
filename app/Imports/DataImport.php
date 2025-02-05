@@ -75,10 +75,13 @@ class DataImport implements ToModel, WithStartRow, SkipsOnFailure, WithHeadingRo
 
     public function generateUniqueCodeTagihan(): string
     {
-        $pelangganCount = Tagihan::count();
+        $date = date('ym');
+        $tagihanCount = Tagihan::whereYear('created_at', date('Y'))
+            ->whereMonth('created_at', date('m'))
+            ->count();
 
-        $pelangganPart = str_pad($pelangganCount + 1, 4, '0', STR_PAD_LEFT);
+        $tagihanPart = str_pad($tagihanCount + 1, 4, '0', STR_PAD_LEFT);
 
-        return "TPAM{$pelangganPart}";
+        return "TPAM-{$date}{$tagihanPart}";
     }
 }

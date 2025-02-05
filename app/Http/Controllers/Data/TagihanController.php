@@ -6,9 +6,12 @@ use App\Http\Controllers\Controller;
 use App\Models\Bulan;
 use App\Models\Golongan;
 use App\Models\Pelanggan;
+use App\Models\Roles;
 use App\Models\Tagihan;
 use App\Models\Tahun;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Crypt;
 
 class TagihanController extends Controller
@@ -97,5 +100,41 @@ class TagihanController extends Controller
                 'route' => $this->route,
                 'primaryKey' => $this->primaryKey
         ]);
+    }
+
+    public function getInfoTagihan(Request $request)
+    {
+        if ($request->ajax()) {
+            if (Auth::user()->userRoleId != Roles::where('roleName', 'pelanggan')->first()->roleId) {
+                $tagihan = Tagihan::whereNull('deleted_at')->get();
+            } else {
+                $pelanggan = Pelanggan::where('pelangganUserId', Auth::user()->id)->first();
+                $tagihan = Tagihan::whereNull('deleted_at')->where('tagihanPelangganId', $pelanggan->pelangganId)->get();
+
+            }
+            
+            $tanggalSekarang = Carbon::now();
+            $bulanIni = $tanggalSekarang->month;
+            $tahunIni = $tanggalSekarang->year;
+
+            $tanggalBulanLalu = $tanggalSekarang->subMonth();
+            $bulanLalu = $tanggalBulanLalu->month;
+            $tahunLalu = $tanggalBulanLalu->year;
+
+            // dd($bulanIni, $tahunIni, $bulanLalu, $tahunLalu);
+
+            $jumlahTagihan = Pelanggan::whereNull('deleted_at')->where('pelangganStatus', 'Aktif')->count();
+            $jumlahTagihanBulanLalu = $tagihan->where('tagihanBulan', $bulanLalu)->where('tagihanTahun', $tahunLalu)->count();
+            $jumlahTagihanBulanIni = $tagihan->where('tagihanBulan', $bulanIni)->where('tagihanTahun', $tahunIni)->count();
+
+            return response()->json([
+                'jumlahInputTagihan' => $jumlahTagihan,
+                'bulanLalu' => Bulan::where('bulanId', $bulanLalu)->first()->bulanNama,
+                'bulanIni' => Bulan::where('bulanId', $bulanIni)->first()->bulanNama,
+                'jumlahInputTagihanBulanLalu' => $jumlahTagihanBulanLalu,
+                'jumlahInputTagihanBulanIni' => $jumlahTagihanBulanIni,
+            ]);
+        };
+        
     }
 }

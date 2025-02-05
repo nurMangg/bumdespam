@@ -27,7 +27,7 @@
         </div>
       <div class="container">
         <div class="row">
-          @if (Auth::user()->userRoleId != 2)
+          @if (Auth::user()->userRoleId != App\Models\Roles::where('roleName', 'pelanggan')->first()->roleId)
           <div class="col-md-12">
             <div class="card">
                 <div class="card-header">
@@ -51,13 +51,28 @@
                       <label for="{{ $field['field'] }}" class="control-label">
                           {{ $field['label'] }}
                       </label>
-      
-                      <select class="form-control" id="{{ $field['field'] }}" name="{{ $field['field'] }}" {{ $field['required'] ?? false ? 'required' : '' }}>
-                        <option value="" selected>{{ $field['placeholder'] }}</option>
-                        @foreach ($field['options'] as $value => $label)
-                            <option value="{{ $value }}">{{ $label }}</option>
-                        @endforeach
-                      </select>
+                      @if ($field['type'] === 'checkbox')
+                      {{-- <div class="row ms-3 mt-2"> --}}
+                          @foreach ($field['options'] as $value => $label)
+                          
+                              <div class="form-check">
+                                  <input class="form-check-input" type="checkbox" id="{{ $field['field'] }}-{{ $value }}" name="{{ $field['field'] }}[]" value="{{ $value }}" {{ in_array($value, old($field['field'], [])) ? 'checked' : '' }}>
+                                  <label class="form-check-label" for="{{ $field['field'] }}-{{ $value }}">
+                                      {{ $label }}
+                                  </label>
+                              </div>
+                          
+                          @endforeach
+                      {{-- </div> --}}
+                      @else
+                        <select class="form-control" id="{{ $field['field'] }}" name="{{ $field['field'] }}" {{ $field['required'] ?? false ? 'required' : '' }}>
+                          <option value="" selected>{{ $field['placeholder'] }}</option>
+                          @foreach ($field['options'] as $value => $label)
+                              <option value="{{ $value }}">{{ $label }}</option>
+                          @endforeach
+                        </select>
+                      @endif
+                      
                     </div>
 
                     @endforeach
@@ -132,9 +147,14 @@
                 data: function (d) {
                     d.filter = {};
                     @foreach ($form as $field)
-                        d.filter.{{ $field['field'] }} = $('#{{ $field['field'] }}').val();
+                      @if ($field['type'] === 'checkbox')
+                          d.filter.{{ $field['field'] }} = $('input[name="{{ $field['field'] }}[]"]:checked').map(function() {
+                              return this.value;
+                          }).get();
+                      @else
+                          d.filter.{{ $field['field'] }} = $('#{{ $field['field'] }}').val();
+                      @endif
                     @endforeach
-                    console.log(d.filter);
                 },
                 error: function (xhr, status, error) {
                     console.error('AJAX Error: ' + status + error);
@@ -173,7 +193,14 @@
                     filter: (function() {
                         var filterData = {};
                         @foreach ($form as $field)
-                            filterData['{{ $field['field'] }}'] = $('#{{ $field['field'] }}').val();
+                            @if ($field['type'] === 'checkbox') 
+                                filterData['{{ $field['field'] }}'] = $('input[name="{{ $field['field'] }}[]"]:checked').map(function() {
+                                    return this.value;
+                                }).get();
+                            
+                            @else 
+                                filterData['{{ $field['field'] }}'] = $('#{{ $field['field'] }}').val();
+                            @endif
                         @endforeach
                         return filterData;
                     })()

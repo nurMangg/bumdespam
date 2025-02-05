@@ -80,10 +80,12 @@
                     <td style="border: none;">: {{ $filterTanggal ?? 'Semua Tanggal' }}</td>
                 </tr>
                 <tr>
-                    <td style="border: none;" width="100">Pelanggan</td>
+                    <td style="border: none;" width="100">Kasir</td>
                     <td style="border: none;">: {{ $filterKasir ?? 'Semua Kasir' }}</td>
                 </tr>
             </table>
+            {{-- <h4>Tanggal: {{ $filterTanggal ?? 'Semua Tanggal' }}</h4>
+            <h4>Kasir&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: {{ $filterPelanggan ?? 'Semua Kasir' }}</h4> --}}
         </div>
     </div>
     <table>
@@ -122,19 +124,7 @@
             <td colspan="2"><b>Jumlah Data</b></td>
         </tr>
         <tr>
-            <td>Tagihan Belum Lunas</td>
-            <td>{{ $dataJumlah['jumlahBelumLunas'] }}</td>
-        </tr>
-        <tr>
-            <td>Tagihan Lunas</td>
-            <td>{{ $dataJumlah['jumlahLunas'] }}</td>
-        </tr>
-        <tr>
-            <td>Jumlah Tagihan Belum Lunas</td>
-            <td>Rp. {{ number_format($dataJumlah['totalSemuaTagihanBelumLunas'], 0, ',', '.') }}</td>
-        </tr>
-        <tr>
-            <td>Jumlah Tagihan Lunas</td>
+            <td>Total Tagihan Lunas</td>
             <td>Rp. {{ number_format($dataJumlah['totalSemuaTagihanLunas'], 0, ',', '.') }}</td>
         </tr>
     </table>

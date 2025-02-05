@@ -52,13 +52,14 @@
 <body>
     <div class="struk">
         <div class="kop">
-            <h2>KOP</h2>
+            {{-- <h2>KOP</h2> --}}
+            <img src="{{ public_path('images/logolandscape.png') }}" alt="Logo-bumdes">
             <hr>
         </div>
         <div class="header">
             <h3>STRUK PEMBAYARAN PAMSIMAS</h3>
             <p>No. Ref : {{ $data['tagihanKode']}}</p>
-            {{-- <p>Kasir : {{ $data['name'] }}</p> --}}
+            <p>Kasir : {{ $data['pembayaranKasirName'] ?? 'Aplikasi' }}</p>
         </div>
         <div class="content">
             <table>
@@ -87,7 +88,7 @@
                     <td>: Rp. {{ $data['formattedTagihanTotal'] }},-</td>
                 </tr>
                 <tr>
-                    <td>Denda</td>
+                    <td>Abonemen</td>
                     <td>: Rp. {{ $data['formattedTotalDenda'] }},-</td>
                 </tr>
                 <tr>
@@ -102,7 +103,7 @@
             <hr>
             <p><strong>TERIMA KASIH</strong></p>
         </div>
-    <p>Dicetak pada tanggal : {{ $data['date']}}</p>
+    <p>Dicetak pada tanggal : {{ \Carbon\Carbon::now()->format('Y-m-d H:i:s') }}</p>
 
     </div>
 </body>

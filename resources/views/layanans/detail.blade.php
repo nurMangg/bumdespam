@@ -234,7 +234,7 @@
             $('#addForm').trigger("reset");
             $('#modelHeading').html("Tambah Baru {{ $title ?? env('APP_NAME') }}");
             $('#ajaxModel').modal('show');
-            $('#tagihanMAwal').val('{{ number_format(($penggunaanTagihan->tagihanMAkhir ?? 0) + 1, 0, ',', '.') }}')
+            $('#tagihanMAwal').val('{{ ($penggunaanTagihan->tagihanMAkhir ?? 0) + 1 }}')
         });
 
         $('body').on('click', '.edit', function () {

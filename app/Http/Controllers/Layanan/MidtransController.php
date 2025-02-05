@@ -99,43 +99,6 @@ class MidtransController extends Controller
         
     }
 
-    // public function updateDatabase(Request $request)
-    // {
-    //     $tagihan = Tagihan::find($request->tagihanId);
-
-    //     MidtransPayment::updateOrCreate(
-    //         ['midtransPaymentPembayaranId' => $tagihan->pembayaranInfo->pembayaranId],
-    //         [
-    //             'midtransPaymentOrderId' => $request->orderId,
-    //             'midtransPaymentTransactionId' => $request->transactionId,
-    //             'midtransPaymentSnapToken' => $request->snapToken,
-    //             'midtransPaymentStatus' => $request->status,
-    //         ]
-    //     );
-
-    //     if($request->status == "pending"){
-    //         $tagihan['tagihanStatus'] = 'Pending';
-    //         $tagihan->save();
-
-    //         $pembayaran = Pembayaran::where('pembayaranTagihanId', $tagihan->tagihanId)->first();
-    //         $pembayaran['pembayaranStatus'] = 'Pending';
-    //         $pembayaran->save();
-
-    //     } else {
-    //         $tagihan['tagihanStatus'] = 'Lunas';
-    //         $tagihan->save();
-
-    //         $pembayaran = Pembayaran::where('pembayaranTagihanId', $tagihan->tagihanId)->first();
-    //         $pembayaran['pembayaranStatus'] = 'Lunas';
-    //         $pembayaran->save();
-    //     }
-
-
-
-        
-
-    // }
-
     public function handleNotification(Request $request)
     {
         // Ambil notifikasi dari Midtrans
@@ -156,12 +119,13 @@ class MidtransController extends Controller
             // Update status berdasarkan notifikasi
             switch ($transactionStatus) {
                 case 'settlement':
-                    $tagihan->update(['tagihanStatus' => 'Lunas']);
+                    $tagihan->update(['tagihanStatus' => 'Lunas', 'tagihanDibayarPadaWaktu' => now()]);
+                    
                     $midtransPayment->update(['midtransPaymentStatus' => 'success', 'midtransPaymentTransactionId' => $notification['transaction_id']]);
                     $midtransPayment->pembayaran->update(['pembayaranStatus' => 'Lunas']);
                     break;
                 case 'pending':
-                    $tagihan->update(['tagihanStatus' => 'Pending']);
+                    // $tagihan->update(['tagihanStatus' => 'Pending']);
                     $midtransPayment->update(['midtransPaymentStatus' => 'Pending', 'midtransPaymentTransactionId' => $notification['transaction_id']]);
                     break;
                 case 'deny':

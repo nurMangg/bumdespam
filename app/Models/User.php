@@ -50,4 +50,13 @@ class User extends Authenticatable
     {
         return $this->belongsTo(Roles::class, 'userRoleId', 'roleId');
     }
+
+    public function scopeWithAdminOrKasirRole($query)
+    {
+        return $query->whereHas('role', function ($query) {
+            $query->whereIn('roleName', ['kasir', 'admin']);
+        });
+    }
+
+
 }

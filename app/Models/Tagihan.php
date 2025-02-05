@@ -25,7 +25,8 @@ class Tagihan extends Model
         'tagihanUserId',
         'tagihanTanggal',
         'tagihanStatus',
-        'tagihanCatatan'
+        'tagihanCatatan',
+        'tagihanDibayarPadaWaktu'
     ];
 
     public function pelanggan()

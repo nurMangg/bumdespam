@@ -150,7 +150,7 @@ class AksiTagihanController extends BaseController
             selectRaw('MAX(tagihanMAkhir) as tagihanMAkhir')
             ->selectRaw('SUM((tagihanMAkhir - tagihanMAwal) * tagihanInfoTarif) as totalTagihan')
             ->where('tagihanPelangganId', $detailPelanggan->pelangganId)
-            ->where('tagihanStatus', 'Lunas')
+            // ->where('tagihanStatus', 'Lunas')
             ->first();
         
         // dd($penggunaanTagihan);

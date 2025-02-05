@@ -27,7 +27,7 @@ class ImportDataController extends Controller
         $this->title = 'Import Data Tagihan';
         $this->breadcrumb = 'Import Data';
         $this->route = 'import-data-tagihan';
-        $this->image = 'images/ss_pelanggan.png';
+        $this->image = 'images/ss_tagihan.png';
 
         $this->form = array(
             array(

@@ -16,7 +16,8 @@ class Pembayaran extends Model
         'pembayaranKembali',
         'pembayaranStatus',
         'pembayaranAbonemen',
-        'pembayaranAdminFee'
+        'pembayaranAdminFee',
+        'pembayaranKasirId'
     ];
 
     public function tagihan()

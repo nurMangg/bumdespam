@@ -9,6 +9,8 @@ use App\Http\Controllers\Import\ImportPelangganController;
 use App\Http\Controllers\Import\ImportPenggunaController;
 use App\Http\Controllers\Laporan\LaporanPenggunaController;
 use App\Http\Controllers\Laporan\LaporanTagihanController;
+use App\Http\Controllers\Laporan\LaporanTransaksiByKasirController;
+use App\Http\Controllers\Laporan\LaporanTransaksiController;
 use App\Http\Controllers\Layanan\AksiTransaksiController;
 use App\Http\Controllers\Layanan\MidtransController;
 use App\Http\Controllers\Layanan\TransaksiController;
@@ -55,9 +57,12 @@ Route::middleware(['auth', 'CheckUserRole'])->prefix('master')->group(function (
 });
 
 Route::middleware(['auth', 'CheckUserRole'])->prefix('layanan')->group(function () {
+    
+   Route::get('tagihan/getInfoTagihan', [TagihanController::class, 'getInfoTagihan'])->name('tagihan.getInfoTagihan');
    Route::resource('tagihan', TagihanController::class); 
    Route::resource('aksi-tagihan', AksiTagihanController::class);
 
+   Route::get('transaksi/getInfoAllTrx', [TransaksiController::class, 'getInfoAllTransaksi'])->name('transaksi.getInfoAllTransaksi');
    Route::resource('transaksi', TransaksiController::class);
    Route::resource('aksi-transaksi', AksiTransaksiController::class);
 
@@ -84,6 +89,12 @@ Route::middleware(['auth', 'CheckUserRole'])->prefix('laporan')->group(function 
 
     Route::get('laporan-tagihan', [LaporanTagihanController::class, 'index'])->name('laporan-tagihan.index'); 
     Route::post('laporan-tagihan/export-pdf', [LaporanTagihanController::class, 'exportPdf'])->name('laporan-tagihan.exportPdf');
+
+    Route::get('laporan-transaksi', [LaporanTransaksiController::class, 'index'])->name('laporan-transaksi.index'); 
+    Route::post('laporan-transaksi/export-pdf', [LaporanTransaksiController::class, 'exportPdf'])->name('laporan-transaksi.exportPdf');
+
+    Route::get('laporan-transaksi-by-kasir', [LaporanTransaksiByKasirController::class, 'index'])->name('laporan-transaksi-by-kasir.index'); 
+    Route::post('laporan-transaksi-by-kasir/export-pdf', [LaporanTransaksiByKasirController::class, 'exportPdf'])->name('laporan-transaksi-by-kasir.exportPdf');
 });
 
 Route::middleware(['auth', 'CheckUserRole'])->prefix('import')->group(function () {

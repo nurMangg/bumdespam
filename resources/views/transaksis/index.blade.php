@@ -22,9 +22,86 @@
 
     <!-- Main content -->
     <section class="content">
-        <div class="container mb-3">
-            
+      <div class="container mb-3">
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title">Transaksi</h3>
+            <div class="card-tools">
+              <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Collapse">
+                <i class="fas fa-minus"></i>
+              </button>
+              <button type="button" class="btn btn-tool" onclick="getInfoAllTransaksi()" title="Refresh">
+                <i class="fas fa-sync-alt"></i>
+              </button>
+          </div>
+          </div>
+          <!-- /.card-header -->
+          <div class="card-body">
+            <div class="row">
+              <div class="col-12 col-sm-6 col-md-6">
+                <div class="info-box">
+                  <span class="info-box-icon bg-danger elevation-1"><i class="fas fa-money-bill-wave"></i></span>
+    
+                  <div class="info-box-content">
+                    <span class="info-box-text">Total Tagihan Belum Lunas</span>
+                    <span class="info-box-number" id="totalTagihanBelumLunasSemua">
+                      <small></small>
+                    </span>
+                  </div>
+                  <!-- /.info-box-content -->
+                </div>
+                <!-- /.info-box -->
+              </div>
+              <!-- /.col -->
+              <div class="col-12 col-sm-6 col-md-6">
+                <div class="info-box mb-3">
+                  <span class="info-box-icon bg-success elevation-1"><i class="fas fa-money-bill-wave"></i></span>
+    
+                  <div class="info-box-content">
+                    <span class="info-box-text" data-toggle="tooltip" data-placement="top" title="Total tagihan yang belum dibayar">Total Tagihan Lunas</span>
+                    <span class="info-box-number" id="totalTagihanLunasSemua"></span>
+                  </div>
+                  <!-- /.info-box-content -->
+                </div>
+                <!-- /.info-box -->
+              </div>
+              <!-- /.col -->
+    
+              <!-- fix for small devices only -->
+              <div class="clearfix hidden-md-up"></div>
+    
+              <div class="col-12 col-sm-6 col-md-6">
+                <div class="info-box mb-3">
+                  <span class="info-box-icon bg-danger elevation-1"><i class="fas fa-money-bill-wave"></i></span>
+    
+                  <div class="info-box-content">
+                    <span class="info-box-text">Tagihan Belum Lunas Bulan Ini</span>
+                    <span class="info-box-number" id="totalTagihanBelumLunasBulanIni"></span>
+                  </div>
+                  <!-- /.info-box-content -->
+                </div>
+                <!-- /.info-box -->
+              </div>
+              <!-- /.col -->
+              <div class="col-12 col-sm-6 col-md-6">
+                <div class="info-box mb-3">
+                  <span class="info-box-icon bg-success elevation-1"><i class="fas fa-money-bill-wave"></i></span>
+    
+                  <div class="info-box-content">
+                    <span class="info-box-text">Tagihan Lunas Bulan Ini</span>
+                    <span class="info-box-number" id="totalTagihanLunasBulanIni"></span>
+                  </div>
+                  <!-- /.info-box-content -->
+                </div>
+                <!-- /.info-box -->
+              </div>
+              <!-- /.col -->
+              
+            </div>
+          </div>
+          <!-- /.card-body -->
         </div>
+      </div>
       <div class="container">
         <div class="row">
           <div class="col-12">
@@ -65,6 +142,7 @@
 
 <script type="text/javascript">
     $(document).ready(function () {
+
         $.ajaxSetup({
             headers: {
                 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
@@ -103,12 +181,37 @@
             scrollX: true,
         });
 
+        getInfoAllTransaksi();
+
+
         $('body').on('click', '.bayar', function () {
             var id = $(this).data('id');
             window.location.href = '{{ route('aksi-transaksi' . '.index') }}/' + id;
         });
 
     })
+
+    
+    function getInfoAllTransaksi() {
+        $.ajax({
+            url: '{{ route('transaksi.getInfoAllTransaksi') }}',
+            type: 'GET',
+            dataType: 'json',
+            success: function(response) {
+              console.log(response);
+                $('#totalTagihanBelumLunasSemua').html('Rp. ' + response.totalSemuaTagihanBelumLunas.toLocaleString('id-ID') + ' / ' + response.jumlahTagihanBelumLunas + ' Tagihan');
+                $('#totalTagihanLunasSemua').html('Rp. ' + response.totalSemuaTagihanLunas.toLocaleString('id-ID') + ' / ' + response.jumlahTagihanLunas + ' Tagihan');
+                $('#totalTagihanBelumLunasBulanIni').html('Rp. ' + response.totalTagihanBelumLunasBulanIni.toLocaleString('id-ID') + ' / ' + response.jumlahTagihanBelumLunasBulanIni + ' Tagihan');
+                $('#totalTagihanLunasBulanIni').html('Rp. ' + response.totalTagihanLunasBulanIni.toLocaleString('id-ID') + ' / ' + response.jumlahTagihanLunasBulanIni + ' Tagihan');
+            },
+            error: function(xhr) {
+                console.error('AJAX Error: ' + xhr.status + xhr.statusText);
+            }
+        });
+
+        $('#laravel_datatable').DataTable().ajax.reload(null, false);
+
+    }    
 </script>
     
 @endsection

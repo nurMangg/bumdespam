@@ -100,6 +100,15 @@
         </div><!-- /.row -->
 
         <div class="row">
+          @if (Hash::check('password', Auth::user()->password))
+          <div class="col-12">
+            <div class="alert alert-danger alert-dismissible">
+              <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+              <h5><i class="icon fas fa-exclamation-triangle"></i> Peringatan!</h5>
+              Anda masih menggunakan password default, silakan ubah password default Anda</a>.
+            </div>
+          </div>
+          @endif
           <div class="col-12 col-sm-6 col-md-3">
             <div class="info-box">
               <span class="info-box-icon bg-info elevation-1"><i class="fas fa-user"></i></span>
