@@ -85,6 +85,15 @@ class TransaksiController extends Controller
                                     </div>';
                         }
                     })
+                    ->editColumn('tagihanStatus', function($row){
+                        if ($row->tagihanStatus == 'Lunas') {
+                            return '<span class="badge badge-success">Lunas</span>';
+                        } elseif ($row->tagihanStatus == 'Pending') {
+                            return '<span class="badge badge-warning">Pending</span>';
+                        } else {
+                            return '<span class="badge badge-danger">Belum Lunas</span>';
+                        }
+                    })
                     ->addColumn('tagihanJumlah', function($row){
                         $jumlah = Pembayaran::where('pembayaranTagihanId', $row->tagihanId)->first()->pembayaranJumlah;
                         return 'Rp ' . number_format($jumlah, 0, ',', '.');
@@ -95,7 +104,7 @@ class TransaksiController extends Controller
                     ->addColumn('tagihanPelangganNama', function($row){
                         return $row->pelanggan->pelangganNama;
                     })
-                    ->rawColumns(['action'])
+                    ->rawColumns(['action', 'tagihanStatus'])
                     ->make(true);
         }
 

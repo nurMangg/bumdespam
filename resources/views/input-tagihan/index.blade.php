@@ -102,6 +102,16 @@
               <!-- /.card-body -->
             </div>
             <!-- /.card -->
+            <div class="col-md-12">
+                <div class="alert alert-primary alert-dismissible">
+                  <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+                  <h5><i class="icon fas fa-info-circle"></i> Informasi!</h5>
+                  <ul>
+                    <li>Input Tagihan Baru akan diproses setelah Anda mengisi data pelanggan dan informasi pemakaian.</li>
+                    <li>Cek kembali, Pastikan data yang Anda masukkan sudah benar.</li>
+                  </ul>
+                </div>
+              </div>
           </div>
           <!-- /.col -->
         </div>

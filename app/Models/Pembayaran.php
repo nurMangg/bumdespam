@@ -30,6 +30,11 @@ class Pembayaran extends Model
         return $this->hasOne(MidtransPayment::class, 'midtransPaymentPembayaranId', 'pembayaranId');
     }
 
+    public function duitkuPayment()
+    {
+        return $this->hasOne(DuitkuPG::class, 'payment_pembayaranId', 'pembayaranId');
+    }
+
 }
 
 

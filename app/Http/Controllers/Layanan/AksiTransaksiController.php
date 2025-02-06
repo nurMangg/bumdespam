@@ -27,25 +27,65 @@ class AksiTransaksiController extends Controller
         $this->breadcrumb = 'Layanan';
         $this->route = 'aksi-tagihan';
         $this->paymentMethod = array(
+            // array(
+            //     'label' => 'QRIS (0.7%)',
+            //     'value' => 'QRIS',
+            //     'price' => '0.7%'
+            // ),
+            // array(
+            //     'label' => 'VA Bank BCA (5000)',
+            //     'value' => 'BCA',
+            //     'price' => '5000'
+            // ),
+            // array(
+            //     'label' => 'Alfamart',
+            //     'value' => 'ALFAMART',
+            //     'price' => '5000'
+            // ),
+            // array(
+            //     'label' => 'Indomaret',
+            //     'value' => 'INDOMARET',
+            //     'price' => '5000'
+            // ),
             array(
-                'label' => 'QRIS (0.7%)',
-                'value' => 'QRIS',
-                'price' => '0.7%'
+                'label' => 'TRANSFER BANK - CEK MANUAL',
+                'value' => 'BANK MANUAL',
+                'price' => '0'
             ),
             array(
-                'label' => 'Bank BCA',
-                'value' => 'BCA',
+                'label' => 'VA Bank BCA (5000) - DUITKU',
+                'value' => 'BCA DUITKU',
+                'price' => '5000'
+            ),
+            array(
+                'label' => 'VA Bank BRI (3000) - DUITKU',
+                'value' => 'BRI DUITKU',
+                'price' => '3000'
+            ),
+            array(
+                'label' => 'VA Bank MANDIRI (3000) - DUITKU',
+                'value' => 'MANDIRI DUITKU',
+                'price' => '3000'
+            ),
+            array(
+                'label' => 'VA Bank BNI (3000) - DUITKU',
+                'value' => 'BNI DUITKU',
+                'price' => '3000'
+            ),
+            array(
+                'label' => 'QRIS DUITKU',
+                'value' => 'QRIS DUITKU',
+                'price' => '0'
+            ),
+            array(
+                'label' => 'ALFAMART DUITKU',
+                'value' => 'ALFAMART DUITKU',
                 'price' => '2500'
             ),
             array(
-                'label' => 'Alfamart',
-                'value' => 'ALFAMART',
-                'price' => '3500'
-            ),
-            array(
-                'label' => 'Indomaret',
-                'value' => 'INDOMARET',
-                'price' => '3500'
+                'label' => 'INDOMARET DUITKU',
+                'value' => 'INDOMARET DUITKU',
+                'price' => '2500'
             ),
         );
     }

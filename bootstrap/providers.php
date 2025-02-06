@@ -6,5 +6,6 @@ return [
     Barryvdh\DomPDF\ServiceProvider::class,
     Maatwebsite\Excel\ExcelServiceProvider::class,
     Ladumor\LaravelPwa\PWAServiceProvider::class,
+    Rap2hpoutre\LaravelLogViewer\LaravelLogViewerServiceProvider::class,
 
 ];

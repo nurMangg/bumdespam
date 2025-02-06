@@ -103,7 +103,15 @@
                                     document.getElementById('pembayaranAdminFee').value = paymentPriceNumber;
                                     const payButton = document.getElementById('payButton');
                                     if (paymentValue) {
-                                        payButton.disabled = false; // Enable the button
+                                        // console.log(paymentValue);
+                                        if (paymentValue.includes('DUITKU')) {
+                                            payButton.disabled = false; // Disable the button
+                                            document.getElementById('payButton').dataset.id = 'pembayaranDuitku';
+                                        } else {
+                                            document.getElementById('payButton').dataset.id = 'pembayaranTFManual';
+
+                                            payButton.disabled = false; // Enable the button
+                                        }
                                     }
                                 }
                             </script>
@@ -279,7 +287,7 @@
               <!-- /.card-body -->
               <div class="card-footer text-right">
                 @if ($detailTagihan->tagihanStatus == "Belum Lunas")
-                    @if (Auth::user()->userRoleId != 4)
+                    @if (Auth::user()->userRoleId != App\Models\Roles::where('roleName', 'pelanggan')->first()->roleId)
                         <button id="payButtonTunai" class="btn btn-success">Bayar Tunai</button>
                     @endif
                     <button id="payButton" class="btn btn-outline-primary" disabled>Bayar Sekarang</button>
@@ -287,8 +295,11 @@
                 @elseif ($detailTagihan->tagihanStatus == "Lunas")
                     <button id="cetakStruk" class="btn btn-outline-primary">Unduh Struk</button>
                 @else
-                    <button id="cekPay" class="btn btn-outline-primary">Cek Pembayaran</button>
-
+                    @if ($detailTagihan->pembayaranInfo->pembayaranMetode === "BANK MANUAL")
+                        <button id="cekPayManual" class="btn btn-outline-primary">Cek Pembayaran</button>
+                    @else 
+                        <button id="cekPay" class="btn btn-outline-primary">Cek Pembayaran</button>
+                    @endif
                 @endif
               </div>
             </div>
@@ -305,6 +316,7 @@
 </div>
 
 <x-transaksi.pay-tunai />
+<x-modal.tfmanual />
 
 
 <script type="text/javascript">
@@ -391,39 +403,114 @@
 
         $('#payButton').click(function (e) {
             e.preventDefault();
+            
             const paymentValue = $('#paymentMethod').val();
             if (!paymentValue) {
-                alert('Please select a payment method.');
+                toastr.error("Silahkan Pilih Metode Pembayaran");
                 return;
             }
 
+            const classPayButton = $(this).attr('data-id');
+            // console.log(classPayButton);
+            if (classPayButton === 'pembayaranDuitku') {
+                $('#payButton').html('Processing...').prop('disabled', true);
+                // toastr.error("Pembayaran menggunakan Duitku tidak tersedia untuk sementara waktu");
+                // return;
+
+                $.ajax({
+                    url: '{{route('create-invoice-duitku.createInvoice')}}',
+                    type: 'POST',
+                    data: {
+                        tagihanId: "{{ $tagihanIdCrypt ?? '' }}",
+                        paymentMethod: paymentValue,
+                        pembayaranAbonemen: $('#penaltyTagihanVal').val(),
+                        totalTagihan: $('#totalTagihanVal').val(),
+                        pembayaranAdminFee: $('#pembayaranAdminFee').val()
+
+                    },
+                    success: function (response) {
+                        $('#payButton').html('Bayar Sekarang').prop('disabled', false);
+                        response = JSON.parse(response);
+                        const invoice = response.paymentUrl;
+                        window.location.href = invoice;
+                        
+                    },
+                    error: function (xhr) {
+                        // toastr.error("Pembayaran Sudah Ada!, Selesaikan Pembayaran");
+                        toastr.error(xhr.responseText)
+                        $('#payButton').html('Bayar Sekarang').prop('disabled', false);
+                    }
+                });
+            }
+            else if (classPayButton === 'pembayaranTFManual')
+            {
+                $('#payButton').html('Processing...').prop('disabled', true);
+                $('#uploadModal').modal('show');
+            }
+            else {
+                $(this).html('Processing...').prop('disabled', true);
+
+                $.ajax({
+                    url: '{{route('transaksi.createsnaptoken')}}',
+                    type: 'POST',
+                    data: {
+                        tagihanId: "{{ $tagihanIdCrypt ?? '' }}",
+                        paymentMethod: paymentValue,
+                        pembayaranAbonemen: $('#penaltyTagihanVal').val(),
+                        totalTagihan: $('#totalTagihanVal').val(),
+                        pembayaranAdminFee: $('#pembayaranAdminFee').val()
+
+                    },
+                    success: function (response) {
+                        $('#payButton').html('Bayar Sekarang').prop('disabled', false);
+
+                        const snapToken = response.snap_token;
+                        const orderId = response.order_id;
+                        
+                        executeSnap(snapToken);
+                        
+                    },
+                    error: function (xhr) {
+                        toastr.error("Pembayaran Sudah Ada!, Selesaikan Pembayaran");
+                        toastr.error(xhr.responseText)
+                        $('#payButton').html('Bayar Sekarang').prop('disabled', false);
+                    }
+                });
+            }
+
+            
+        });
+
+        $('#btnUploadFile').click(function (e) {
+            e.preventDefault();
             $(this).html('Processing...').prop('disabled', true);
 
+            var formData = new FormData($('#TFManualForm')[0]);
+            formData.append('tagihanId', "{{ $tagihanIdCrypt ?? '' }}");
+            formData.append('metodePembayaran', $('#paymentMethod').val());
+
             $.ajax({
-                url: '{{route('transaksi.createsnaptoken')}}',
+                url: '{{route('transaksi.tfmanual.store')}}',
                 type: 'POST',
-                data: {
-                    tagihanId: "{{ $tagihanIdCrypt ?? '' }}",
-                    paymentMethod: paymentValue,
-                    pembayaranAbonemen: $('#penaltyTagihanVal').val(),
-                    totalTagihan: $('#totalTagihanVal').val(),
-                    pembayaranAdminFee: $('#pembayaranAdminFee').val()
-
-                },
+                data: formData,
+                contentType: false,
+                processData: false,
                 success: function (response) {
-                    $('#payButton').html('Bayar Sekarang').prop('disabled', false);
-
-                    const snapToken = response.snap_token;
-                    const orderId = response.order_id;
-                    
-                    executeSnap(snapToken);
-                    
+                    $('#btnUploadFile').html('Upload Bukti Pembayaran').prop('disabled', false);
+                    window.reload();
+                    $('#uploadModal').modal('hide');
+                    toastr.success('Bukti Pembayaran berhasil diupload!, Menunggu Konfirmasi Kasir');
                 },
                 error: function (xhr) {
-                    toastr.error("Pembayaran Sudah Ada!, Selesaikan Pembayaran");
-                    $('#payButton').html('Bayar Sekarang').prop('disabled', false);
+                    toastr.error(xhr.responseText)
+                    $('#btnUploadFile').html('Upload Bukti Pembayaran').prop('disabled', false);
+                    $('#uploadModal').modal('hide');
+
                 }
-            });
+            })
+
+
+            
         });
 
         $('#payButtonTunai').click(function (e) {
@@ -440,8 +527,40 @@
 
 
         $('#cekPay').click(function (e) {
-            var snapToken = '{{ $detailTagihan->pembayaranInfo->midtransPayment->midtransPaymentSnapToken ?? '' }}';
-            executeSnap(snapToken);
+            // var snapToken = '{{ $detailTagihan->pembayaranInfo->midtransPayment->midtransPaymentSnapToken ?? '' }}';
+            // executeSnap(snapToken);
+
+            var paymentUrl = '{{ $detailTagihan->pembayaranInfo->duitkuPayment->payment_url ?? '' }}';
+
+            if (paymentUrl) {
+                window.location.href = paymentUrl;
+            } else {
+                toastr.error('Data Tidak Ditemukan');
+            }
+        })
+
+        $('#cekPayManual').click(function (e) {
+            $.ajax({
+                url: '{{route('transaksi.tfmanual.cekPayManual')}}',
+                type: 'POST',
+                data: {
+                    tagihanId: "{{ $tagihanIdCrypt ?? '' }}",
+                },
+                success: function (response) {
+                    // response = JSON.parse(response);
+                    console.log(response);
+                    Swal.fire({
+                        title: 'Info Status Pembayaran',
+                        text: response.message,
+                        icon: response.status === 'info' ? 'warning' : 'error',
+                        confirmButtonText: 'OK'
+                    })
+                    
+                },
+                error: function (xhr) {
+                    toastr.error(xhr.responseText)
+                }
+            })
         })
 
         function executeSnap(snapToken) {

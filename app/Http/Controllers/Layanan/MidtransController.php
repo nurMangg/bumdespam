@@ -18,7 +18,7 @@ class MidtransController extends Controller
         $tagihanDecrypt = Crypt::decryptString($request->tagihanId);
         $tagihan = Tagihan::find($tagihanDecrypt);
 
-        if($tagihan->tagihanStatus == "Lunas" || $tagihan->tagihanStatus == "Pending")
+        if($tagihan->tagihanStatus == "Lunas")
         {
             return response()->json(['error' => "SUdah ada"], 500);
         }else{
@@ -40,8 +40,11 @@ class MidtransController extends Controller
             ];
 
             // Validasi metode pembayaran
-            $enabledPayments = $paymentChannels[$selectedMethod] ?? [];
-            // dd($enabledPayments);
+            if (!array_key_exists($selectedMethod, $paymentChannels)) {
+                return response()->json(['error' => "Metode pembayaran tidak valid"], 400);
+            }
+
+            $enabledPayments = $paymentChannels[$selectedMethod];
 
             // Data transaksi
             $transactionData = [

@@ -9,11 +9,13 @@ use App\Models\HistoryWeb;
 use App\Models\Pelanggan;
 use App\Models\Roles;
 use App\Models\User;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Faker\Provider\Base;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Hash;
+use SimpleSoftwareIO\QrCode\Facades\QrCode;
 
 class PelangganController extends BaseController
 {
@@ -195,5 +197,17 @@ class PelangganController extends BaseController
 
         // dd($data);
         return view('masters.cardnama.index', ['data'=> $data]);
+    }
+
+    public function cetakKartu()
+    {
+        // $data = Pelanggan::limit(4)->get();
+        $data = Pelanggan::all();
+        return view('masters.cardnama.cetak-kartu', ['data'=> $data]);
+
+        // $pdf = Pdf::loadView('masters.cardnama.cetak-kartu', compact('data'));
+
+        // // Download PDF
+        // return $pdf->download('business_cards.pdf');
     }
 }

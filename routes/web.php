@@ -12,7 +12,9 @@ use App\Http\Controllers\Laporan\LaporanTagihanController;
 use App\Http\Controllers\Laporan\LaporanTransaksiByKasirController;
 use App\Http\Controllers\Laporan\LaporanTransaksiController;
 use App\Http\Controllers\Layanan\AksiTransaksiController;
+use App\Http\Controllers\Layanan\DuitkuController;
 use App\Http\Controllers\Layanan\MidtransController;
+use App\Http\Controllers\Layanan\TFManualController;
 use App\Http\Controllers\Layanan\TransaksiController;
 use App\Http\Controllers\Master\GolonganController;
 use App\Http\Controllers\Master\PelangganController;
@@ -42,6 +44,10 @@ Route::get('/dashboard', function () {
 })->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::post('transaksi/handle-notification', [MidtransController::class, 'handleNotification'])->name('transaksi.handleNotification')->withoutMiddleware(['auth', 'verified']);
+Route::post('transaksi/handle-notification-duitku', [DuitkuController::class, 'callback_detail'])->name('transaksi.handleNotificationduitku')->withoutMiddleware(['auth', 'verified']);
+//log-viewers
+Route::get('log-viewers', [\Rap2hpoutre\LaravelLogViewer\LogViewerController::class, 'index']);
+
 Route::get('/tagihan/kode-pelanggan', [CekTagihanController::class, 'getTagihanByKodePelanggan']);
 Route::get('/cek-tagihan', [CekTagihanController::class, 'index']);
 
@@ -50,8 +56,10 @@ Route::middleware(['auth', 'CheckUserRole'])->prefix('master')->group(function (
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
-    Route::resource('pelanggan', PelangganController::class);
+    Route::get('pelanggan/cetakKartu/', [PelangganController::class, 'cetakKartu'])->name('pelanggan.cetakKartu');
     Route::get('pelanggan/ViewKartu/{pelanggan}', [PelangganController::class, 'viewKartu'])->name('pelanggan.viewKartu');
+    Route::resource('pelanggan', PelangganController::class);
+
     Route::resource('golongan-tarif', GolonganController::class);
     Route::resource('tahun', TahunController::class);
 });
@@ -71,7 +79,13 @@ Route::middleware(['auth', 'CheckUserRole'])->prefix('layanan')->group(function 
 
 
    Route::Post('transaksi/create-snap-token', [MidtransController::class, 'createSnapToken'])->name('transaksi.createsnaptoken');
-   Route::Post('transaksi/update-database', [MidtransController::class, 'updateDatabase'])->name('transaksi.updateDatabase');
+//    Route::Post('transaksi/update-database', [MidtransController::class, 'updateDatabase'])->name('transaksi.updateDatabase');
+
+   Route::Post('transaksi/create-invoice-duitku', [DuitkuController::class, 'createInvoice'])->name('create-invoice-duitku.createInvoice');
+
+   Route::post('transaksi/tfmanual/store', [TFManualController::class, 'store'])->name('transaksi.tfmanual.store');
+   Route::Post('transaksi/tfmanual/cekPayManual', [TFManualController::class, 'cekPayManual'])->name('transaksi.tfmanual.cekPayManual');
+
 
 
 });

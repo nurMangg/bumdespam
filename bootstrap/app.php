@@ -16,6 +16,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->statefulApi();
         $middleware->validateCsrfTokens(except: [
             'transaksi/handle-notification',
+            'transaksi/handle-notification-duitku',
             
         ]);
         $middleware->alias(['CheckUserRole' => CheckUserRole::class]);

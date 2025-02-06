@@ -60,7 +60,7 @@
   $dataBelumLunas = $labels->map(fn($bulanTahun) => $tagihanByMonthBelumLunas->get($bulanTahun, 0));
 
   // Data Pelanggan PIE CHART
-  $dataPelanggan = \App\Models\Pelanggan::selectRaw("CONCAT('RT ',pelangganRt, ' RW ', pelangganRw) as pelangganDesa, COUNT(*) as total")
+  $dataPelanggan = \App\Models\Pelanggan::selectRaw("CONCAT('RW ', pelangganRw) as pelangganDesa, COUNT(*) as total")
     ->groupBy('pelangganDesa')
     ->get();
 

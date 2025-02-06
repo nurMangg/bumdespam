@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('pembayarans', function (Blueprint $table) {
-            $table->increments('pembayaranId');
+            $table->bigIncrements('pembayaranId');
             $table->unsignedInteger('pembayaranTagihanId');
             $table->foreign('pembayaranTagihanId')->references('tagihanId')->on('tagihans')->onDelete('cascade');
             $table->string('pembayaranMetode')->nullable();
