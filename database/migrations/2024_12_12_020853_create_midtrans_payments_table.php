@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('midtrans_payments', function (Blueprint $table) {
             $table->increments('midtransPaymentId');
-            $table->unsignedInteger('midtransPaymentPembayaranId');
+            $table->unsignedBigInteger('midtransPaymentPembayaranId');
             $table->foreign('midtransPaymentPembayaranId')->references('pembayaranId')->on('pembayarans')->onDelete('cascade');
             $table->string('midtransPaymentOrderId');
             $table->string('midtransPaymentTransactionId');

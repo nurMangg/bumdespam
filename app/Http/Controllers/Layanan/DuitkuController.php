@@ -66,7 +66,7 @@ class DuitkuController extends Controller
             $additionalParam    = ''; // optional
             $merchantUserInfo   = ''; // optional
             $customerVaName     = 'PDAM ' . $tagihan->pelanggan->pelangganNama ?? ''; // display name on bank confirmation display
-            $callbackUrl        = 'https://f7f4-103-167-35-60.ngrok-free.app/transaksi/handle-notification-duitku'; // url for callback
+            $callbackUrl        = 'https://d959-103-167-35-60.ngrok-free.app/transaksi/handle-notification-duitku'; // url for callback
             $returnUrl          = 'http://127.0.0.1:8000/layanan/transaksi'; // url for redirect
             $expiryPeriod       = 720; // set the expired time in minutes
             $signature = md5($merchantCode . $merchantOrderId . $paymentAmount . $apiKey);

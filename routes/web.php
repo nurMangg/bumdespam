@@ -13,12 +13,14 @@ use App\Http\Controllers\Laporan\LaporanTransaksiByKasirController;
 use App\Http\Controllers\Laporan\LaporanTransaksiController;
 use App\Http\Controllers\Layanan\AksiTransaksiController;
 use App\Http\Controllers\Layanan\DuitkuController;
+use App\Http\Controllers\Layanan\KonfirmasiTFController;
 use App\Http\Controllers\Layanan\MidtransController;
 use App\Http\Controllers\Layanan\TFManualController;
 use App\Http\Controllers\Layanan\TransaksiController;
 use App\Http\Controllers\Master\GolonganController;
 use App\Http\Controllers\Master\PelangganController;
 use App\Http\Controllers\Master\TahunController;
+use App\Http\Controllers\Notifikasi\NotifikasiController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Setting\MenuController;
 use App\Http\Controllers\Setting\PenggunaAplikasiController;
@@ -50,6 +52,10 @@ Route::get('log-viewers', [\Rap2hpoutre\LaravelLogViewer\LogViewerController::cl
 
 Route::get('/tagihan/kode-pelanggan', [CekTagihanController::class, 'getTagihanByKodePelanggan']);
 Route::get('/cek-tagihan', [CekTagihanController::class, 'index']);
+Route::get('notifikasi/index', [NotifikasiController::class, 'index'])->name('notifikasi.index');
+
+Route::get('notifikasi/send-notifikasi', [NotifikasiController::class, 'send_message'])->name('notifikasi.send_message');
+Route::get('notifikasi/get-report', [NotifikasiController::class, 'report'])->name('notifikasi.report');
 
 Route::middleware(['auth', 'CheckUserRole'])->prefix('master')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
@@ -69,8 +75,11 @@ Route::middleware(['auth', 'CheckUserRole'])->prefix('layanan')->group(function 
    Route::get('tagihan/getInfoTagihan', [TagihanController::class, 'getInfoTagihan'])->name('tagihan.getInfoTagihan');
    Route::resource('tagihan', TagihanController::class); 
    Route::resource('aksi-tagihan', AksiTagihanController::class);
+   Route::resource('transaksi/konfirmasi-transaksi-manual', KonfirmasiTFController::class);
 
    Route::get('transaksi/getInfoAllTrx', [TransaksiController::class, 'getInfoAllTransaksi'])->name('transaksi.getInfoAllTransaksi');
+   Route::get('transaksi/getInfoAllTrxManual', [KonfirmasiTFController::class, 'getInfoAllTransaksiManual'])->name('konfirmasi-transaksi-manual.getInfoAllTrxManual');
+
    Route::resource('transaksi', TransaksiController::class);
    Route::resource('aksi-transaksi', AksiTransaksiController::class);
 
@@ -85,6 +94,7 @@ Route::middleware(['auth', 'CheckUserRole'])->prefix('layanan')->group(function 
 
    Route::post('transaksi/tfmanual/store', [TFManualController::class, 'store'])->name('transaksi.tfmanual.store');
    Route::Post('transaksi/tfmanual/cekPayManual', [TFManualController::class, 'cekPayManual'])->name('transaksi.tfmanual.cekPayManual');
+
 
 
 

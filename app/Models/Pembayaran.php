@@ -22,7 +22,7 @@ class Pembayaran extends Model
 
     public function tagihan()
     {
-        return $this->belongsTo(Tagihan::class, 'pembayaranTagihanId');
+        return $this->belongsTo(Tagihan::class, 'pembayaranTagihanId', 'tagihanId');
     }
 
     public function midtransPayment()
@@ -33,6 +33,11 @@ class Pembayaran extends Model
     public function duitkuPayment()
     {
         return $this->hasOne(DuitkuPG::class, 'payment_pembayaranId', 'pembayaranId');
+    }
+
+    public function buktiPembayaran()
+    {
+        return $this->hasOne(BuktiPembayaran::class, 'buktiPembayaranPembayaranId', 'pembayaranId');
     }
 
 }

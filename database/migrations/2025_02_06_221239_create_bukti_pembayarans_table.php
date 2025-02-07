@@ -13,9 +13,9 @@ return new class extends Migration
     {
         Schema::create('buktiPembayaran', function (Blueprint $table) {
             $table->bigIncrements('buktiPembayaranId');
-            $table->unsignedInteger('buktiPembayaranPembayaranId');
+            $table->unsignedBigInteger('buktiPembayaranPembayaranId');
             $table->foreign('buktiPembayaranPembayaranId')->references('pembayaranId')->on('pembayarans')->onDelete('cascade');
-            $table->text('buktiPembayaranFoto');
+            $table->longText('buktiPembayaranFoto');
             $table->timestamps();
         });
     }

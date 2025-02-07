@@ -9,9 +9,11 @@ use App\Models\HistoryWeb;
 use App\Models\Pelanggan;
 use App\Models\Pembayaran;
 use App\Models\Tagihan;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Crypt;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 
 class InputTagihanController extends Controller
@@ -158,13 +160,13 @@ class InputTagihanController extends Controller
 
         // dd($dataTagihan);
 
-        if(!$dataTagihan){
-            return response()->json(['message' => 'Data tidak ditemukan', 'status'=> 'Error'], 403);
-        }
+        // if(!$dataTagihan){
+        //     return response()->json(['message' => 'Data tidak ditemukan', 'status'=> 'Error'], 403);
+        // }
 
-        $idBulan = $dataTagihan->tagihanBulan;
+        $idBulan = $dataTagihan->tagihanBulan ?? date('n');
 
-        $tahunBaru = $dataTagihan->tagihanTahun;
+        $tahunBaru = $dataTagihan->tagihanTahun ?? date('Y');
 
         if($idBulan < 12){
             $idBulan = $idBulan + 1;
@@ -178,20 +180,19 @@ class InputTagihanController extends Controller
 
         $data = [
             'pelangganId' => Crypt::encryptString($pelanggan->pelangganKode),
-            'pelangganKode' => $dataTagihan->pelanggan->pelangganKode,
-            'pelangganNama' => $dataTagihan->pelanggan->pelangganNama,
-            'pelangganDesa' => $dataTagihan->pelanggan->pelangganDesa,
-            'pelangganRt' => $dataTagihan->pelanggan->pelangganRt,
-            'pelangganRw' => $dataTagihan->pelanggan->pelangganRw,
-            'pelangganGolonganId' => Golongan::where('golonganId', $dataTagihan->pelanggan->pelangganGolonganId)->value('golonganNama'),
-            'pelangganStatus' => $dataTagihan->pelanggan->pelangganStatus,
+            'pelangganKode' => $pelanggan->pelangganKode,
+            'pelangganNama' => $pelanggan->pelangganNama,
+            'pelangganDesa' => $pelanggan->pelangganDesa,
+            'pelangganRt' => $pelanggan->pelangganRt,
+            'pelangganRw' => $pelanggan->pelangganRw,
+            'pelangganGolonganId' => Golongan::where('golonganId', $pelanggan->pelangganGolonganId)->value('golonganNama'),
+            'pelangganStatus' => $pelanggan->pelangganStatus,
             'tagihanBulanBaru' => Bulan::where('bulanId', $idBulan)->value('bulanNama'),
             'tagihanTahunBaru' => $tahunBaru,
-            'tagihanMeterAwal' => $dataTagihan->tagihanMAkhir + 1,
+            'tagihanMeterAwal' => ($dataTagihan->tagihanMAkhir ?? 0) + 1,
             'tagihanMeterAkhir' => '',
-            'tagihanKeterangan' => $dataTagihan->tagihanKeterangan,
-            'tagihanTerakhir' => Bulan::where('bulanId', $dataTagihan->tagihanBulan)->value('bulanNama') . ' - ' . $dataTagihan->tagihanTahun,
-            'tagihanBulanLalu' => $dataTagihan->tagihanMAwal . ' - ' . $dataTagihan->tagihanMAkhir,
+            'tagihanTerakhir' => Bulan::where('bulanId', $idBulan)->value('bulanNama') . ' - ' . $tahunBaru,
+            'tagihanBulanLalu' => ($dataTagihan->tagihanMAwal ?? 0) . ' - ' . ($dataTagihan->tagihanMAkhir ?? 0),
         ];
         
         // dd($data);
@@ -235,13 +236,14 @@ class InputTagihanController extends Controller
             ->orderBy('tagihanBulan', 'desc')
             ->first();
 
-        if(!$dataTagihan){
-            return response()->json(['message' => 'Data tidak ditemukan', 'status'=> 'Error'], 403);
-        }
+        // if(!$dataTagihan){
+        //     return response()->json(['message' => 'Data tidak ditemukan', 'status'=> 'Error'], 403);
+        // }
 
-        $idBulan = $dataTagihan->tagihanBulan;
+        $idBulan = $dataTagihan->tagihanBulan ?? intval(date('n'));
 
-        $tahunBaru = $dataTagihan->tagihanTahun;
+        $tahunBaru = $dataTagihan->tagihanTahun ?? date('Y');
+        // dd($idBulan, $tahunBaru);
 
         if($idBulan < 12){
             $idBulan = $idBulan + 1;
@@ -251,17 +253,20 @@ class InputTagihanController extends Controller
 
         }
 
+        // dd($pelanggan->pelangganPhone);
+
         $dataTagihan['tagihanBulanBaru'] = $idBulan;
+        // dd($dataTagihan['tagihanBulanBaru']);
 
         
         $newtagihan = Tagihan::create([
             'tagihanKode' => $this->generateUniqueCode(),
             'tagihanPelangganId' => $pelanggan->pelangganId,
-            'tagihanBulan' => $dataTagihan->tagihanBulanBaru,
+            'tagihanBulan' => $dataTagihan['tagihanBulanBaru'],
             'tagihanTahun' => $tahunBaru,
             'tagihanInfoTarif' => $pelanggan->golongan->golonganTarif,
             'tagihanInfoAbonemen' => $pelanggan->golongan->golonganAbonemen,
-            'tagihanMAwal' => $dataTagihan->tagihanMAkhir + 1,
+            'tagihanMAwal' => ($dataTagihan->tagihanMAkhir ?? 0) + 1,
             'tagihanMAkhir' => $request->meterAkhir,
             'tagihanUserId' => Auth::user()->id,
             'tagihanTanggal' => date('Y-m-d'),
@@ -280,6 +285,20 @@ class InputTagihanController extends Controller
             'riwayatAksi' => 'Input Tagihan',
             'riwayatData' => json_encode($newtagihan),
         ]);
+
+        
+        if ($pelanggan && $pelanggan->pelangganPhone) {
+            try {
+                $namaBulan = Bulan::where('bulanId', $dataTagihan->tagihanBulan)->value('bulanNama');
+                $this->send_message($pelanggan->pelangganPhone, $pelanggan->pelangganNama, $namaBulan, $newtagihan->tagihanTahun);
+                Log::info("Pesan berhasil dikirim.");
+            } catch (\Exception $e) {
+                Log::error("Gagal mengirim pesan: " . $e->getMessage());
+            }
+        } else {
+            Log::warning("Nomor pelanggan tidak ditemukan.");
+        }
+        
 
         return response()->json(['success' => 'Tagihan Berhasil Disimpan']);
 
@@ -326,6 +345,7 @@ class InputTagihanController extends Controller
         }
 
         $dataTagihan['tagihanBulanBaru'] = $idBulan;
+        $namaBulan = Bulan::where('bulanId', $dataTagihan->tagihanBulan)->value('bulanNama');
 
         $data = [
             'pelangganId' => Crypt::encryptString($pelanggan->pelangganKode),
@@ -341,7 +361,7 @@ class InputTagihanController extends Controller
             'tagihanMeterAwal' => $dataTagihan->tagihanMAkhir + 1,
             'tagihanMeterAkhir' => '',
             'tagihanKeterangan' => $dataTagihan->tagihanKeterangan,
-            'tagihanTerakhir' => Bulan::where('bulanId', $dataTagihan->tagihanBulan)->value('bulanNama') . ' - ' . $dataTagihan->tagihanTahun,
+            'tagihanTerakhir' => $namaBulan . ' - ' . $dataTagihan->tagihanTahun,
             'tagihanBulanLalu' => $dataTagihan->tagihanMAwal . ' - ' . $dataTagihan->tagihanMAkhir,
         ];
         

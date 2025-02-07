@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "e7f54165ef856039a36e6974df2883c0",
+    "content-hash": "1038779ed3f785b5117a463d5a209877",
     "packages": [
         {
             "name": "bacon/bacon-qr-code",
@@ -4624,6 +4624,37 @@
                 "source": "https://github.com/MyIntervals/PHP-CSS-Parser/tree/v8.7.0"
             },
             "time": "2024-10-27T17:38:32+00:00"
+        },
+        {
+            "name": "silvanix/wablas",
+            "version": "1.0.3",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/silvanixdev/plugin-wablas.git",
+                "reference": "66605a7a59aed63a99593220d426c9ea2653e9bf"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/silvanixdev/plugin-wablas/zipball/66605a7a59aed63a99593220d426c9ea2653e9bf",
+                "reference": "66605a7a59aed63a99593220d426c9ea2653e9bf",
+                "shasum": ""
+            },
+            "type": "project",
+            "autoload": {
+                "psr-4": {
+                    "Silvanix\\Wablas\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "description": "Official Wablas Plugin",
+            "support": {
+                "issues": "https://github.com/silvanixdev/plugin-wablas/issues",
+                "source": "https://github.com/silvanixdev/plugin-wablas/tree/1.0.3"
+            },
+            "time": "2022-10-17T08:00:38+00:00"
         },
         {
             "name": "simplesoftwareio/simple-qrcode",

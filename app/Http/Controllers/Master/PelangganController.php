@@ -51,10 +51,10 @@ class PelangganController extends BaseController
 
             ),
             array(
-                'label' => 'No. Telepon',
+                'label' => 'No. Telepon (62)',
                 'field' => 'pelangganPhone',
                 'type' => 'number',
-                'placeholder' => 'Masukkan No. Telepon',
+                'placeholder' => '62',
                 'width' => 6,
             ),
             array(

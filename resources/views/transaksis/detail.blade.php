@@ -497,9 +497,13 @@
                 processData: false,
                 success: function (response) {
                     $('#btnUploadFile').html('Upload Bukti Pembayaran').prop('disabled', false);
-                    window.reload();
-                    $('#uploadModal').modal('hide');
                     toastr.success('Bukti Pembayaran berhasil diupload!, Menunggu Konfirmasi Kasir');
+                    $('#uploadModal').modal('hide');
+
+                    setTimeout(function() {
+                        console.log('Timeout executed');
+                        window.location.reload();
+                    }, 1000);
                 },
                 error: function (xhr) {
                     toastr.error(xhr.responseText)

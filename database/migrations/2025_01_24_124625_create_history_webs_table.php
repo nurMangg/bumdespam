@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('msriwayat', function (Blueprint $table) {
-            $table->increments('riwayatId');
+            $table->bigIncrements('riwayatId');
             $table->string('riwayatTable');
             $table->string('riwayatAksi');
             $table->text('riwayatData');

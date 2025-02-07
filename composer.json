@@ -15,6 +15,7 @@
         "midtrans/midtrans-php": "^2.6",
         "phpoffice/phpspreadsheet": "1.29.5",
         "rap2hpoutre/laravel-log-viewer": "^2.4",
+        "silvanix/wablas": "^1.0",
         "simplesoftwareio/simple-qrcode": "^1.0.3",
         "yajra/laravel-datatables": "^11.0"
     },

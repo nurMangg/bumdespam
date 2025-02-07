@@ -24,6 +24,19 @@
     <section class="content">
         <div class="container mb-3">
             <div class="row">
+                @if (request()->is('master/pelanggan') || request()->is('master/pelanggan/*'))
+                <div class="col-md-12">
+                    <div class="alert alert-primary alert-dismissible">
+                      <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+                      <h5><i class="icon fas fa-exclamation-triangle"></i> Informasi!</h5>
+                      <ul>
+                        <li>Agar Notifikasi muncul di Whatsapp pelanggan, pastikan data pelanggan mencantumkan nomor telepon yang terdaftar</li>
+                        <li>Untuk penulisan nomor telepon <b>WAJIB</b> diawali dengan 62 tidak boleh menggunakan 0</li>
+                        <li>Untuk mencetak kartu nama klik tautan disini <a href="{{ route('pelanggan.cetakKartu')}}" target="_blank" class="btn btn-success" style="text-decoration: none">Cetak Kartu</a></li>
+                      </ul>
+                    </div>
+                  </div>
+                @endif
                 <div class="col-md-6">
                 </div>
                 <div class="col-md-6">

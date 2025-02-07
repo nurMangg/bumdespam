@@ -35,5 +35,11 @@ class Pelanggan extends Model
     {
         return $this->hasMany(Tagihan::class, 'tagihanPelangganId', 'pelangganId');
     }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'pelangganUserId', 'id');
+    }
+
 }
 

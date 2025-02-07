@@ -16,10 +16,16 @@ class BuktiPembayaran extends Model
 
     public function pembayaran()
     {
-        return $this->belongsTo(Pembayaran::class, 'buktiPembayaranPembayaranId');
+        return $this->belongsTo(Pembayaran::class, 'buktiPembayaranPembayaranId', 'pembayaranId');
     }
 
-    public static function compressImageToBase64($file, $quality = 50, $maxWidth = 800, $maxHeight = 800)
+    public function tagihan()
+    {
+        return $this->hasOneThrough(Tagihan::class, Pembayaran::class, 'pembayaranId', 'tagihanId', 'buktiPembayaranPembayaranId', 'pembayaranTagihanId');
+    }
+
+
+    public static function compressImageToBase64($file, $quality = 50, $maxWidth = 500, $maxHeight = 500)
     {
         try {
             // Baca file sebagai string

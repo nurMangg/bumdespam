@@ -45,6 +45,12 @@ class TFManualController extends Controller
                     return response()->json(['error' => 'Gagal mengompres gambar.'], 500);
                 }
 
+                // Simpan base64 image ke database
+                $buktiPembayaran = new BuktiPembayaran();
+                $buktiPembayaran->buktiPembayaranPembayaranId = $pembayaran->pembayaranId;
+                $buktiPembayaran->buktiPembayaranFoto = $base64Image;
+                $buktiPembayaran->save();
+
                 $pembayaran->pembayaranMetode = $request->metodePembayaran;
                 $pembayaran->pembayaranJumlah = (($tagihan->tagihanMAkhir - $tagihan->tagihanMAwal) * $tagihan->tagihanInfoTarif);
                 $pembayaran->pembayaranAbonemen = $tagihan->tagihanInfoAbonemen;
@@ -53,11 +59,7 @@ class TFManualController extends Controller
                 $tagihan->tagihanStatus = 'Pending';
                 $tagihan->save();
         
-                // Simpan base64 image ke database
-                $buktiPembayaran = new BuktiPembayaran();
-                $buktiPembayaran->buktiPembayaranPembayaranId = $pembayaran->pembayaranId;
-                $buktiPembayaran->buktiPembayaranFoto = $base64Image;
-                $buktiPembayaran->save();
+                
         
                 return response()->json(['success' => 'Bukti pembayaran berhasil disimpan.']);
             } catch (\Exception $e) {
