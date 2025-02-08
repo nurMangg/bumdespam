@@ -191,7 +191,7 @@ class InputTagihanController extends Controller
             'tagihanTahunBaru' => $tahunBaru,
             'tagihanMeterAwal' => ($dataTagihan->tagihanMAkhir ?? 0) + 1,
             'tagihanMeterAkhir' => '',
-            'tagihanTerakhir' => Bulan::where('bulanId', $idBulan)->value('bulanNama') . ' - ' . $tahunBaru,
+            'tagihanTerakhir' => Bulan::where('bulanId', $dataTagihan->tagihanBulan)->value('bulanNama') . ' - ' . $dataTagihan->tagihanTahun,
             'tagihanBulanLalu' => ($dataTagihan->tagihanMAwal ?? 0) . ' - ' . ($dataTagihan->tagihanMAkhir ?? 0),
         ];
         
@@ -240,7 +240,7 @@ class InputTagihanController extends Controller
         //     return response()->json(['message' => 'Data tidak ditemukan', 'status'=> 'Error'], 403);
         // }
 
-        $idBulan = $dataTagihan->tagihanBulan ?? intval(date('n'));
+        $idBulan = $dataTagihan->tagihanBulan ?? date('n');
 
         $tahunBaru = $dataTagihan->tagihanTahun ?? date('Y');
         // dd($idBulan, $tahunBaru);
@@ -289,7 +289,7 @@ class InputTagihanController extends Controller
         
         if ($pelanggan && $pelanggan->pelangganPhone) {
             try {
-                $namaBulan = Bulan::where('bulanId', $dataTagihan->tagihanBulan)->value('bulanNama');
+                $namaBulan = Bulan::where('bulanId', $newtagihan->tagihanBulan)->value('bulanNama');
                 $this->send_message($pelanggan->pelangganPhone, $pelanggan->pelangganNama, $namaBulan, $newtagihan->tagihanTahun);
                 Log::info("Pesan berhasil dikirim.");
             } catch (\Exception $e) {
