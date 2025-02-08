@@ -450,32 +450,32 @@
             else {
                 $(this).html('Processing...').prop('disabled', true);
 
-                $.ajax({
-                    url: '{{route('transaksi.createsnaptoken')}}',
-                    type: 'POST',
-                    data: {
-                        tagihanId: "{{ $tagihanIdCrypt ?? '' }}",
-                        paymentMethod: paymentValue,
-                        pembayaranAbonemen: $('#penaltyTagihanVal').val(),
-                        totalTagihan: $('#totalTagihanVal').val(),
-                        pembayaranAdminFee: $('#pembayaranAdminFee').val()
+                // $.ajax({
+                //     url: '{{route('transaksi.createsnaptoken')}}',
+                //     type: 'POST',
+                //     data: {
+                //         tagihanId: "{{ $tagihanIdCrypt ?? '' }}",
+                //         paymentMethod: paymentValue,
+                //         pembayaranAbonemen: $('#penaltyTagihanVal').val(),
+                //         totalTagihan: $('#totalTagihanVal').val(),
+                //         pembayaranAdminFee: $('#pembayaranAdminFee').val()
 
-                    },
-                    success: function (response) {
-                        $('#payButton').html('Bayar Sekarang').prop('disabled', false);
+                //     },
+                //     success: function (response) {
+                //         $('#payButton').html('Bayar Sekarang').prop('disabled', false);
 
-                        const snapToken = response.snap_token;
-                        const orderId = response.order_id;
+                //         const snapToken = response.snap_token;
+                //         const orderId = response.order_id;
                         
-                        executeSnap(snapToken);
+                //         executeSnap(snapToken);
                         
-                    },
-                    error: function (xhr) {
-                        toastr.error("Pembayaran Sudah Ada!, Selesaikan Pembayaran");
-                        toastr.error(xhr.responseText)
-                        $('#payButton').html('Bayar Sekarang').prop('disabled', false);
-                    }
-                });
+                //     },
+                //     error: function (xhr) {
+                //         toastr.error("Pembayaran Sudah Ada!, Selesaikan Pembayaran");
+                //         toastr.error(xhr.responseText)
+                //         $('#payButton').html('Bayar Sekarang').prop('disabled', false);
+                //     }
+                // });
             }
 
             
@@ -567,29 +567,29 @@
             })
         })
 
-        function executeSnap(snapToken) {
-            var tagihanId = "{{ $detailTagihan->tagihanId }}";
+        // function executeSnap(snapToken) {
+        //     var tagihanId = "{{ $detailTagihan->tagihanId }}";
             
-            snap.pay(snapToken, {
-                onSuccess: function(result) {
-                    console.log('Payment success:', result);
-                    toastr.warning("Pembayaran Berhasil!");
+        //     snap.pay(snapToken, {
+        //         onSuccess: function(result) {
+        //             console.log('Payment success:', result);
+        //             toastr.warning("Pembayaran Berhasil!");
                    
-                    window.location.reload();
+        //             window.location.reload();
 
-                },
-                onPending: function(result) {
-                    console.log('Payment pending:', result);
-                    toastr.warning("Pembayaran Pending, Menunggu Konfirmasi");
-                    window.location.reload();
-                },
-                onError: function(result) {
-                    console.log('Payment error:', result);
-                    $('#payButton').html('Bayar Sekarang').prop('disabled', false);
-                    alert('There was an error processing the payment. Please try again.');
-                }
-            });
-        }
+        //         },
+        //         onPending: function(result) {
+        //             console.log('Payment pending:', result);
+        //             toastr.warning("Pembayaran Pending, Menunggu Konfirmasi");
+        //             window.location.reload();
+        //         },
+        //         onError: function(result) {
+        //             console.log('Payment error:', result);
+        //             $('#payButton').html('Bayar Sekarang').prop('disabled', false);
+        //             alert('There was an error processing the payment. Please try again.');
+        //         }
+        //     });
+        // }
 
     })
 </script>

@@ -203,7 +203,7 @@ class PelangganController extends BaseController
     {
         // $data = Pelanggan::limit(4)->get();
         $data = Pelanggan::all();
-        return view('masters.cardnama.cetak-kartu', ['data'=> $data]);
+        return view('masters.cardnama.cetak-kartu-bw', ['data'=> $data]);
 
         // $pdf = Pdf::loadView('masters.cardnama.cetak-kartu', compact('data'));
 

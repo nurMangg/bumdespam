@@ -147,7 +147,12 @@ Route::middleware(['auth', 'CheckUserRole'])->prefix('setting')->group(function 
 
 
 Route::fallback(function () {
-    abort(404);
+    if (app()->environment('production')) {
+        return response()->view('errors.404', [], 404);
+    } else {
+        throw new \Symfony\Component\HttpKernel\Exception\NotFoundHttpException();
+    }
 });
+
 
 require __DIR__.'/auth.php';
