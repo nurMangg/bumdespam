@@ -38,7 +38,7 @@
             <!-- /.card-header -->
             <div class="card-body">
               <div class="row">
-                <div class="col-12 col-sm-6 col-md-6">
+                <div class="col-12 col-sm-6 col-md-4">
                   <div class="info-box">
                     <span class="info-box-icon bg-warning elevation-1"><i class="fas fa-file-invoice"></i></span>
       
@@ -53,13 +53,26 @@
                   <!-- /.info-box -->
                 </div>
                 <!-- /.col -->
-                <div class="col-12 col-sm-6 col-md-6">
+                <div class="col-12 col-sm-6 col-md-4">
                   <div class="info-box mb-3">
-                    <span class="info-box-icon bg-success elevation-1"><i class="fas fa-file-invoice"></i></span>
+                    <span class="info-box-icon bg-primary elevation-1"><i class="fas fa-file-invoice"></i></span>
       
                     <div class="info-box-content">
                       <span class="info-box-text" id="BulanIni">Jumlah Tagihan Bulan Ini</span>
                       <span class="info-box-number" id="jumlahTagihanBulanIni"></span>
+                    </div>
+                    <!-- /.info-box-content -->
+                  </div>
+                  <!-- /.info-box -->
+                </div>
+                <!-- /.col -->
+                <div class="col-12 col-sm-6 col-md-4">
+                  <div class="info-box mb-3">
+                    <span class="info-box-icon bg-success elevation-1"><i class="fas fa-file-invoice"></i></span>
+      
+                    <div class="info-box-content">
+                      <span class="info-box-text" id="BulanDepan">Jumlah Tagihan Bulan Depan</span>
+                      <span class="info-box-number" id="jumlahTagihanBulanDepan"></span>
                     </div>
                     <!-- /.info-box-content -->
                   </div>
@@ -170,8 +183,12 @@
               console.log(response);
                 $('#BulanLalu').html('Jumlah Tagihan Bulan ' + response.bulanLalu);
                 $('#BulanIni').html('Jumlah Tagihan Bulan ' + response.bulanIni);
+                $('#BulanDepan').html('Jumlah Tagihan Bulan ' + response.bulanDepan);
+
                 $('#jumlahTagihanBulanLalu').html(response.jumlahInputTagihanBulanLalu + ' / ' + response.jumlahInputTagihan + ' Tagihan');
                 $('#jumlahTagihanBulanIni').html(response.jumlahInputTagihanBulanIni + ' / ' + response.jumlahInputTagihan + ' Tagihan');
+                $('#jumlahTagihanBulanDepan').html(response.jumlahInputTagihanBulanDepan + ' / ' + response.jumlahInputTagihan + ' Tagihan');
+
             },
             error: function(xhr) {
                 console.error('AJAX Error: ' + xhr.status + xhr.statusText);

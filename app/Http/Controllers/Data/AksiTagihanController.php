@@ -14,6 +14,8 @@ use App\Models\Tahun;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Crypt;
+use Illuminate\Support\Facades\Log;
+use Silvanix\Wablas\Message;
 
 class AksiTagihanController extends BaseController
 {
@@ -152,13 +154,19 @@ class AksiTagihanController extends BaseController
             ->where('tagihanPelangganId', $detailPelanggan->pelangganId)
             // ->where('tagihanStatus', 'Lunas')
             ->first();
+
+        $jumlahTagihanBelumLunas = Tagihan::where('tagihanPelangganId', $detailPelanggan->pelangganId)
+            ->where('tagihanStatus', '!=', 'Lunas')
+            ->count();
+
+        // dd($jumlahTagihanBelumLunas);
         
         // dd($penggunaanTagihan);
 
         return view('layanans.detail', 
             [
                 'detailPelanggan' => $detailPelanggan,
-                
+                'jumlahTagihanBelumLunas' => $jumlahTagihanBelumLunas,
                 'penggunaanTagihan' => $penggunaanTagihan,
                 'form' => $this->form, 
                 'title' => $this->title,
@@ -248,5 +256,42 @@ class AksiTagihanController extends BaseController
         ]);
 
         return response()->json(['message' => 'Data updated successfully', 'data' => json_encode($data)]);
+    }
+
+    public function kirimPeringatan($id)
+    {
+        $send = new Message();
+    
+        $link = 'https://pdam.withmangg.my.id';
+
+        $decodePelangganKode = Crypt::decryptString($id);
+        $pelanggan = Pelanggan::where('pelangganKode', $decodePelangganKode)->first();
+        if (!$pelanggan) {
+            return response()->json(['success' => false, 'message' => 'Pelanggan tidak ditemukan'], 404);
+        }
+        $phones = $pelanggan->pelangganPhone;
+    
+        $tagihan = Tagihan::where('tagihanPelangganId', $pelanggan->pelangganId);
+        $bulan = $tagihan->where('tagihanStatus', '!=', 'Lunas')->count();
+    
+        // Pesan utama dengan tambahan informasi tagihan
+        $message = "*Peringatan Tagihan PDAM*\n\n"
+                  ."Halo, *$pelanggan->pelangganNama*! 👋\n\n"
+                  ."Kami informasikan bahwa tagihan PDAM Anda telah menunggak selama $bulan bulan. Mohon segera melakukan pembayaran untuk menghindari pemutusan layanan. \n\n"
+                  ."Silakan lakukan pembayaran melalui kanal resmi kami. Untuk informasi lebih lanjut, hubungi layanan pelanggan kami.\n"
+                  ."Pembayaran dapat dilakukan melalui metode yang tersedia.\n\n"
+                  ."🔗 *Cek tagihan dan bayar sekarang:* $link \n\n"
+                  ."Terima kasih telah menggunakan layanan kami! \n\n"
+                  ."—\n"
+                  ."🔹 *PDAM BUMDES PAGAR SEJAHTERA* 🔹";
+    
+        $response = $send->single_text($phones, $message);
+        Log::info("Response dari Wablas: " . json_encode($response));
+
+        if ($response['status']) {
+            return response()->json(['success' => true, 'message' => 'Pemberitahuan Berhasil Dikirim']);
+        } else {
+            return response()->json(['success' => false, 'message' => 'Gagal mengirim pemberitahuan']);
+        }
     }
 }

@@ -76,6 +76,7 @@ Route::middleware(['auth', 'CheckUserRole'])->prefix('layanan')->group(function 
    Route::resource('tagihan', TagihanController::class); 
    Route::resource('aksi-tagihan', AksiTagihanController::class);
    Route::resource('transaksi/konfirmasi-transaksi-manual', KonfirmasiTFController::class);
+   Route::get('tagihan/aksi-tagihan/kirim-peringatan/{id}', [AksiTagihanController::class, 'kirimPeringatan'])->name('tagihan.aksi-tagihan.kirim-peringatan');
 
    Route::get('transaksi/getInfoAllTrx', [TransaksiController::class, 'getInfoAllTransaksi'])->name('transaksi.getInfoAllTransaksi');
    Route::get('transaksi/getInfoAllTrxManual', [KonfirmasiTFController::class, 'getInfoAllTransaksiManual'])->name('konfirmasi-transaksi-manual.getInfoAllTrxManual');

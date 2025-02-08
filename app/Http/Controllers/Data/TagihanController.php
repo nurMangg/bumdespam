@@ -84,10 +84,16 @@ class TagihanController extends Controller
                 ->addColumn('tagihanBelumLunas', function($row){
                     $jumlahBelumLunas = Tagihan::where('tagihanPelangganId', $row->pelangganId)
                         ->where('tagihanStatus', 'Belum Lunas')
+                        ->orWhere('tagihanStatus', 'Pending')
                         ->count();
-                    return $jumlahBelumLunas > 0 ? $jumlahBelumLunas : '-';
+                    
+                    if ($jumlahBelumLunas >= 3) {
+                        return '<span class="text-danger">' . $jumlahBelumLunas . ' </span>';
+                    } else {
+                        return $jumlahBelumLunas > 0 ? $jumlahBelumLunas : '-';
+                    }
                 })
-                ->rawColumns(['action'])
+                ->rawColumns(['action', 'tagihanBelumLunas'])
                 ->make(true);
         }
         
@@ -114,8 +120,13 @@ class TagihanController extends Controller
             }
             
             $tanggalSekarang = Carbon::now();
+            // $tanggalSekarang = Carbon::createFromDate(2023, 10, 15); // Atur tanggal manual
             $bulanIni = $tanggalSekarang->month;
             $tahunIni = $tanggalSekarang->year;
+
+            $tanggalBulanDepan = $tanggalSekarang->addMonth();
+            $bulanDepan = $tanggalBulanDepan->month;
+            $tahunDepan = $tanggalBulanDepan->year;
 
             $tanggalBulanLalu = $tanggalSekarang->subMonth();
             $bulanLalu = $tanggalBulanLalu->month;
@@ -126,13 +137,17 @@ class TagihanController extends Controller
             $jumlahTagihan = Pelanggan::whereNull('deleted_at')->where('pelangganStatus', 'Aktif')->count();
             $jumlahTagihanBulanLalu = $tagihan->where('tagihanBulan', $bulanLalu)->where('tagihanTahun', $tahunLalu)->count();
             $jumlahTagihanBulanIni = $tagihan->where('tagihanBulan', $bulanIni)->where('tagihanTahun', $tahunIni)->count();
+            $jumlahTagihanBulanDepan = $tagihan->where('tagihanBulan', $bulanDepan)->where('tagihanTahun', $tahunDepan)->count();
+
 
             return response()->json([
                 'jumlahInputTagihan' => $jumlahTagihan,
                 'bulanLalu' => Bulan::where('bulanId', $bulanLalu)->first()->bulanNama,
                 'bulanIni' => Bulan::where('bulanId', $bulanIni)->first()->bulanNama,
+                'bulanDepan' => Bulan::where('bulanId', $bulanDepan)->first()->bulanNama,
                 'jumlahInputTagihanBulanLalu' => $jumlahTagihanBulanLalu,
                 'jumlahInputTagihanBulanIni' => $jumlahTagihanBulanIni,
+                'jumlahInputTagihanBulanDepan' => $jumlahTagihanBulanDepan
             ]);
         };
         

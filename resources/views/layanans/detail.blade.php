@@ -129,6 +129,11 @@
       <div class="container mb-3 mt-5">
         <div class="row">
             <div class="col-md-6">
+                @if ($jumlahTagihanBelumLunas >= 3 && $detailPelanggan->pelangganPhone)
+                    <button id="kirimPeringatan" data-id="{{ Crypt::encryptString($detailPelanggan->pelangganKode) ?? ' -'}}" class="btn btn-warning" style="color: #ffffff" onclick="kirimPeringatan()"><i class="fas fa-bell"></i> Kirim Peringatan</button>
+                @else
+                    <button class="btn btn-warning" style="color: #ffffff" disabled><i class="fas fa-bell"></i> Kirim Peringatan</button>
+                @endif
             </div>
             <div class="col-md-6">
                 <div class="float-sm-right">
@@ -247,6 +252,26 @@
                 @foreach ($form as $field)
                     $('#{{ $field['field'] }}').val(data.{{ $field['field'] }});
                 @endforeach
+            })
+        });
+
+        $('body').on('click', '#kirimPeringatan', function () {
+            var id = $(this).data('id');
+            $('#kirimPeringatan').html('Processing...').prop('disabled', true);
+
+            $.get(`{{ route('tagihan.aksi-tagihan.kirim-peringatan', [ 'id' => ':id' ]) }}`.replace(':id', id), function (data) {
+                if (data.success) {
+                    $('#kirimPeringatan').html('Kirim Peringatan').prop('disabled', false);
+                    toastr.success(data.message);
+                } else {
+                    $('#kirimPeringatan').html('Kirim Peringatan').prop('disabled', false);
+                    toastr.error(data.message);
+                }
+            }).fail(function(xhr, status, error) {
+                $('#kirimPeringatan').html('Kirim Peringatan').prop('disabled', false);
+                // toastr.error(xhr.responseText);
+                toastr.error('Terjadi kesalahan saat mengirim peringatan.');
+
             })
         });
 
