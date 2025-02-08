@@ -7,6 +7,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Password;
 use Illuminate\View\View;
+use Silvanix\Wablas\Message;
 
 class PasswordResetLinkController extends Controller
 {
@@ -40,5 +41,28 @@ class PasswordResetLinkController extends Controller
                     ? back()->with('status', __($status))
                     : back()->withInput($request->only('email'))
                         ->withErrors(['email' => __($status)]);
+    }
+
+    public function sendOTP(Request $request)
+    {
+        $request->validate([
+            'phone' => 'required|exists:mspelanggan,pelangganPhone',
+        ]);
+
+        // Buat OTP dan simpan ke sesi atau database
+        $otp = rand(100000, 999999);
+        session(['otp' => $otp, 'phone' => $request->phone]);
+
+        // Kirim OTP melalui SMS
+        $sent = new Message();
+        $message = "*Permintaan OTP Reset Password!*\n\n"
+                  ."Kode OTP Anda: $otp\n\n"
+                  ."—\n"
+                  ."🔹 *PDAM BUMDES PAGAR SEJAHTERA* 🔹";
+    
+        // Mengirim pesan ke WhatsApp melalui Wablas
+        $send_text = $sent->single_text($request->phone, $message);
+
+        return back()->with('status', 'Kode OTP telah dikirim ke nomor telepon Anda.');
     }
 }

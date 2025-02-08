@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Models\Pelanggan;
+use App\Models\User;
 use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -57,5 +59,30 @@ class NewPasswordController extends Controller
                     ? redirect()->route('login')->with('status', __($status))
                     : back()->withInput($request->only('email'))
                         ->withErrors(['email' => __($status)]);
+    }
+
+    public function resetWithPhone(Request $request)
+    {
+        $request->validate([
+            'phone' => 'required|exists:mspelanggan,pelangganPhone',
+            'otp' => 'required',
+            'password' => 'required|confirmed|min:8',
+        ]);
+
+        // Verifikasi OTP
+        if ($request->otp != session('otp')) {
+            return back()->withErrors(['otp' => 'Kode OTP tidak valid.']);
+        }
+
+        // Reset password
+        $pelanggan = Pelanggan::where('pelangganPhone', $request->phone)->first();
+        $user = User::find($pelanggan->pelangganUserId);
+        $user->update(['password' => Hash::make($request->password)]);
+        
+
+        // Hapus sesi OTP
+        session()->forget(['otp', 'phone']);
+
+        return redirect()->route('/')->with('status', 'Password berhasil diubah.');
     }
 }
