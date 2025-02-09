@@ -136,8 +136,8 @@ class TransaksiController extends Controller
                 return $item;
             });
 
-            $totalSemuaTagihanBelumLunas = $tagihan->where('tagihanStatus', 'Belum Lunas')->sum('tagihanJumlahTotal');
-            $jumlahTagihanBelumLunas = $tagihan->where('tagihanStatus', 'Belum Lunas')->count();
+            $totalSemuaTagihanBelumLunas = $tagihan->whereIn('tagihanStatus', ['Belum Lunas', 'Pending'])->sum('tagihanJumlahTotal');
+            $jumlahTagihanBelumLunas = $tagihan->whereIn('tagihanStatus', ['Belum Lunas', 'Pending'])->count();
             $totalSemuaTagihanLunas = $tagihan->where('tagihanStatus', 'Lunas')->sum('tagihanJumlahTotal');
             $jumlahTagihanLunas = $tagihan->where('tagihanStatus', 'Lunas')->count();
 

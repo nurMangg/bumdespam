@@ -380,10 +380,14 @@
                             uangBayarTunai: $('#uangBayarTunai').val().replace(/\./g, ''),
                         },
                         success: function (response) {
+                            $('#saveBtn').html('Simpan Data');
+                            
                             toastr.success("Pembayaran Berhasil!");
                             window.location.reload();
                         },
                         error: function (xhr) {
+                            $('#saveBtn').html('Simpan Data');
+
                             toastr.error("Terjadi kesalahan saat memproses pembayaran.");
                         }
                     });
@@ -448,7 +452,7 @@
                 $('#uploadModal').modal('show');
             }
             else {
-                $(this).html('Processing...').prop('disabled', true);
+                // $(this).html('Processing...').prop('disabled', true);
 
                 // $.ajax({
                 //     url: '{{route('transaksi.createsnaptoken')}}',
@@ -499,6 +503,8 @@
                     $('#btnUploadFile').html('Upload Bukti Pembayaran').prop('disabled', false);
                     toastr.success('Bukti Pembayaran berhasil diupload!, Menunggu Konfirmasi Kasir');
                     $('#uploadModal').modal('hide');
+                    $('#payButton').html('Bayar Sekarang').prop('disabled', false);
+
 
                     setTimeout(function() {
                         console.log('Timeout executed');
@@ -506,6 +512,7 @@
                     }, 1000);
                 },
                 error: function (xhr) {
+                    $('#payButton').html('Bayar Sekarang').prop('disabled', false);
                     toastr.error(xhr.responseText)
                     $('#btnUploadFile').html('Upload Bukti Pembayaran').prop('disabled', false);
                     $('#uploadModal').modal('hide');

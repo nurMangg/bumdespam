@@ -13,11 +13,11 @@
       return $item;
   });
 
-  $totalSemuaTagihanBelumLunas = $tagihan->where('tagihanStatus', 'Belum Lunas')->sum('tagihanJumlahTotal');
+  $totalSemuaTagihanBelumLunas = $tagihan->whereIn('tagihanStatus', ['Pending', 'Belum Lunas'])->sum('tagihanJumlahTotal');
   $totalSemuaTagihanLunas = $tagihan->where('tagihanStatus', 'Lunas')->sum('tagihanJumlahTotal');
 
   //Transaksi tabel
-  function getTagihanByStatus(string $status)
+  function fetchTagihanByStatus(array $statuses)
   {
       return DB::table('tagihans')
           ->join('msbulan', 'tagihans.tagihanBulan', '=', 'msbulan.bulanId')
@@ -26,15 +26,15 @@
               SUM((tagihans.tagihanMAkhir - tagihans.tagihanMAwal) * tagihans.tagihanInfoTarif + tagihans.tagihanInfoAbonemen) as totalJumlah
           ')
           ->whereNull('tagihans.deleted_at')
-          ->where('tagihanStatus', $status)
+          ->whereIn('tagihanStatus', $statuses)
           ->groupBy('bulanTahun')
           ->orderByRaw('tagihanTahun, tagihanBulan')
           ->pluck('totalJumlah', 'bulanTahun');
   }
 
-  // Fetch data for both statuses
-  $tagihanByMonthLunas = getTagihanByStatus('Lunas');
-  $tagihanByMonthBelumLunas = getTagihanByStatus('Belum Lunas');
+  // Retrieve data for each status
+  $tagihanByMonthLunas = fetchTagihanByStatus(['Lunas']);
+  $tagihanByMonthBelumLunas = fetchTagihanByStatus(['Pending', 'Belum Lunas']);
 
   // Merge keys for all months and sort them
   $allMonths = $tagihanByMonthLunas->keys()
