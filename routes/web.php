@@ -143,7 +143,13 @@ Route::middleware(['auth', 'CheckUserRole'])->prefix('setting')->group(function 
     Route::post('reset-password/{id}', [ResetPasswordController::class, 'resetPassword'])->name('reset-password.resetPassword');
 });
 
-
+Route::get('/check-opcache', function () {
+    if (function_exists('opcache_get_status')) {
+        return response()->json(opcache_get_status());
+    } else {
+        return response()->json(['error' => 'OPcache tidak tersedia'], 500);
+    }
+});
 
 
 Route::fallback(function () {
