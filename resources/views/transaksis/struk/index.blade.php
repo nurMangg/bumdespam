@@ -5,21 +5,30 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Struk Pembayaran PAMSIMAS</title>
     <style>
+        /* @font-face {
+            font-family: 'Tahoma';
+            src: url("fonts/Tahoma Regular font.ttf") format('truetype');
+        } */
         body {
-            font-family: Arial, sans-serif;
-            font-size: 10px;
-            line-height: 1.5;
+            font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+            font-style: normal;
+            font-size: 19px;
             margin: 0;
             padding: 0;
-        }
-        .struk {
-            width: 80mm;
-            margin: 0 auto;
-            padding: 10px;
-            border: 1px solid #000;
+            width: 100%;
             box-sizing: border-box;
         }
-
+        body, html{
+            padding: 0%;
+            margin: 0%;
+        }
+        .struk {
+            width: 100%;
+            max-width: 100%;
+            margin: 0;
+            /* padding: 5px; */
+            border: none;
+        }
         .struk h1, .struk h2, .struk h3 {
             text-align: center;
             margin: 0;
@@ -29,38 +38,39 @@
             text-align: center;
         }
         .header, .content, .footer {
-            margin-bottom: 20px;
+            margin-bottom: 10px;
         }
         .content {
             text-align: left;
+            padding-left: 10px;
+            padding-right: 10px;
         }
         .content table {
             width: 100%;
+            border-collapse: collapse;
         }
         .content table td {
-            padding: 4px;
+            padding: 2px 0;
         }
         .footer {
-            border-top: 1px solid #000;
-            padding-top: 10px;
-        }
-        .footer p {
-            margin: 0;
+            padding-top: 5px;
         }
     </style>
 </head>
 <body>
     <div class="struk">
         <div class="kop">
-            {{-- <h2>KOP</h2> --}}
-            <img src="{{ public_path('images/logolandscape.png') }}" alt="Logo-bumdes">
-            <hr>
+            <img src="{{ public_path('images/logolandscape.png') }}" alt="Logo-bumdes" style="max-width: 100%;">
         </div>
-        <div class="header">
-            <h3>STRUK PEMBAYARAN PAMSIMAS</h3>
-            <p>No. Ref : {{ $data['tagihanKode']}}</p>
-            <p>Kasir : {{ $data['pembayaranKasirName'] ?? 'Aplikasi' }}</p>
+        <br>
+        <div class="header" style="margin-bottom: 40px;">
+            <h3>STRUK PEMBAYARAN PAMSIMAS</h3>       
         </div>
+        <div class="" style="padding-right: 10px; padding-left: 10px">
+            <p style="line-height: 0.8em;">No. Ref : {{ $data['tagihanKode']}}</p>
+            <p style="line-height: 0.8em; margin-bottom: 30px">Kasir : {{ $data['pembayaranKasirName'] ?? 'Aplikasi' }}</p>
+        </div>
+        
         <div class="content">
             <table>
                 <tr>
@@ -97,14 +107,13 @@
                 </tr>
             </table>
         </div>
-        <div class="footer">
+        <div class="footer" style="padding-right: 10px; padding-left: 10px">
             <p>Simpanlah Struk Ini Sebagai</p>
             <p>Bukti Pembayaran Anda</p>
-            <hr>
+            <hr style="border: 1px dashed #000;">
             <p><strong>TERIMA KASIH</strong></p>
         </div>
-    <p>Dicetak pada tanggal : {{ \Carbon\Carbon::now()->format('Y-m-d H:i:s') }}</p>
-
+        <p style="padding-left: 10px; padding-right: 10px">Dicetak pada tanggal : {{ \Carbon\Carbon::now()->format('Y-m-d H:i:s') }}</p>
     </div>
 </body>
 </html>

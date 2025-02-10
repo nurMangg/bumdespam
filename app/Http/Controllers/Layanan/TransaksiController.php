@@ -187,10 +187,14 @@ class TransaksiController extends Controller
             'name' => "Kasir",
         ];
         // dd($data);
-
         $pdf = Pdf::loadView('transaksis.struk.index', compact('data'))
-            ->setPaper([0, 0, 306, 475], 'portrait');
-        return $pdf->download('struk-pembayaran-' . $data['pelangganKode'] . '-' . $data['tagihanKode'] . '.pdf');
+            ->setPaper([0, 0, 306, 1181], 'portrait')
+            ->set_option('isHtml5ParserEnabled', true)
+            ->set_option('isPhpEnabled', true)
+            ->set_option('defaultFont', 'Tahomaku');
+            // ->setOption('fontDir', storage_path('app/public/fonts'));
+
+        return $pdf->stream('struk-pembayaran-' . $data['pelangganKode'] . '-' . $data['tagihanKode'] . '.pdf');
 
     }
 }
