@@ -11,6 +11,7 @@
 
         <title>{{ $settingWeb->settingWebNama ? $settingWeb->settingWebNama . ' | PDAM' : env('APP_NAME') }}</title>
         <link rel="shortcut icon" href="{{ $settingWeb->settingWebLogo ? asset($settingWeb->settingWebLogo) : asset('images/favicon.svg') }}" type="image/x-icon">
+        <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
 
 
         <!-- Fonts -->
@@ -23,16 +24,25 @@
             body {
                 transition: background-image 0.5s ease-in-out;
             }
+
+            @media only screen and (max-width: 767px) {
+                .min-h-screen {
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    justify-content: center;
+                }
+            }
         </style>
     </head>
     <body class="font-sans text-gray-900 antialiased bg-cover bg-center bg-no-repeat">
-        <div class="min-h-screen flex flex-col sm:justify-center items-center pt-6 sm:pt-0">
+        <div class="min-h-screen flex flex-col sm:justify-center items-center px-4 sm:px-6 lg:px-8">
             
 
-            <div class="w-full sm:max-w-md mt-6 px-6 py-4 bg-white bg-opacity-50 shadow-md overflow-hidden sm:rounded-lg">
-                <div class="flex flex-col items-center justify-center mb-4">
+            <div class="w-full sm:max-w-md mt-6 px-6 py-4 bg-white bg-opacity-50 shadow-md overflow-hidden sm:rounded-lg" data-aos="fade-up" data-aos-duration="2000" style="border-radius: 0.5rem;">
+                <div class="flex flex-col items-center justify-center mb-4 animate-fade-in-down">
                     <a href="/">
-                        <x-application-logo class="fill-current text-gray-500" />
+                        <x-application-logo class="fill-current text-gray-500 w-48 h-48 animate-spin-slow" />
                     </a>
                     <p class="text-center text-sm text-gray-600 mt-2">
                         {{ $settingWeb->settingWebAlamat ? $settingWeb->settingWebAlamat : '' }}
@@ -60,5 +70,10 @@
                 document.body.style.backgroundImage = `url('${randomBackground}')`;
             });
         </script>
+        <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+        <script>
+            AOS.init();
+          </script>
     </body>
 </html>
+

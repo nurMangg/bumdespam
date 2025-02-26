@@ -231,7 +231,7 @@
         <!-- Main Sidebar Container -->
         <aside class="main-sidebar" style="background-color: #ffffff;">
             <!-- Brand Logo -->
-            <a href="index3.html" class="brand-link">
+            <a href="{{ route('dashboard') }}" class="brand-link">
                 <img src="{{ $settingWeb->settingWebLogo ? asset($settingWeb->settingWebLogo) : asset('images/favicon.svg') }}" alt="AdminLTE Logo"
                     class="brand-image img-circle elevation-3" style="opacity: .8">
                 <span class="brand-text font-weight-light">{{ $settingWeb->settingWebNama ?? "BUMDES PDAM"}}</span>
