@@ -9,7 +9,7 @@ class Bulan extends Model
     protected $table = 'msbulan';
 
     public $timestamps = false;
-    protected $primaryKey = 'id';
+    protected $primaryKey = 'bulanId';
     
     protected $fillable = [
         'bulan',

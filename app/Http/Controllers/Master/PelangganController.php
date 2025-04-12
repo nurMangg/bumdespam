@@ -58,6 +58,13 @@ class PelangganController extends BaseController
                 'width' => 6,
             ),
             array(
+                'label' => 'Desa',
+                'field' => 'pelangganDesa',
+                'type' => 'text',
+                'placeholder' => 'Masukkan Alamat',
+                'width' => 6,
+            ),
+            array(
                 'label' => 'RT',
                 'field' => 'pelangganRt',
                 'type' => 'number',
@@ -165,6 +172,7 @@ class PelangganController extends BaseController
             'pelangganKode' => $this->generateUniqueCode(),
             'pelangganNama' => $request->pelangganNama,
             'pelangganPhone' => $request->pelangganPhone,
+            'pelangganDesa' => $request->pelangganDesa,
             'pelangganRt' => $request->pelangganRt,
             'pelangganRw' => $request->pelangganRw,
             'pelangganGolonganId' => $request->pelangganGolonganId,

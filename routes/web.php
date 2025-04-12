@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Dashboard\ApexChartController;
 use App\Http\Controllers\Data\AksiTagihanController;
 use App\Http\Controllers\Data\CekTagihanController;
 use App\Http\Controllers\Data\InputTagihanController;
@@ -7,6 +8,7 @@ use App\Http\Controllers\Data\TagihanController;
 use App\Http\Controllers\Import\ImportDataController;
 use App\Http\Controllers\Import\ImportPelangganController;
 use App\Http\Controllers\Import\ImportPenggunaController;
+use App\Http\Controllers\IoT\IoTController;
 use App\Http\Controllers\Laporan\LaporanPenggunaController;
 use App\Http\Controllers\Laporan\LaporanTagihanController;
 use App\Http\Controllers\Laporan\LaporanTransaksiByKasirController;
@@ -30,6 +32,7 @@ use App\Http\Controllers\Setting\RoleController;
 use App\Http\Controllers\Setting\SettingPenggunaController;
 use App\Http\Controllers\Setting\WebController;
 use App\Models\Roles;
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
@@ -45,6 +48,12 @@ Route::get('/dashboard', function () {
     return view('dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
 
+Route::get('/dashboard-iot',[IoTController::class, 'index'] )->middleware(['auth', 'verified'])->name('dashboard.iot');
+Route::get('/api/getWaterUsageChart', [IoTController::class, 'getWaterUsageChart'])->name('api.getWaterUsageChart');
+Route::get('/api/getWaterUsageChartNotNull', [IoTController::class, 'getWaterUsageChartNotNull'])->name('api.getWaterUsageChartNotNull');
+
+Route::get('/api/getPelanggan', [IoTController::class, 'getPelanggan'])->name('api.getPelanggan');
+Route::get('/api/getWaterUsageSummary', [IoTController::class, 'getWaterUsageSummary'])->name('api.getWaterUsageSummary');
 Route::post('transaksi/handle-notification', [MidtransController::class, 'handleNotification'])->name('transaksi.handleNotification')->withoutMiddleware(['auth', 'verified']);
 Route::post('transaksi/handle-notification-duitku', [DuitkuController::class, 'callback_detail'])->name('transaksi.handleNotificationduitku')->withoutMiddleware(['auth', 'verified']);
 //log-viewers
@@ -75,6 +84,7 @@ Route::middleware(['auth', 'CheckUserRole'])->prefix('layanan')->group(function 
    Route::get('tagihan/getInfoTagihan', [TagihanController::class, 'getInfoTagihan'])->name('tagihan.getInfoTagihan');
    Route::resource('tagihan', TagihanController::class); 
    Route::resource('aksi-tagihan', AksiTagihanController::class);
+   Route::post('transaksi/konfirmasi-transaksi/konfirmasi', [KonfirmasiTFController::class, 'konfirmasiTransaksi'])->name('konfirmasi-transaksi-manual.konfirmasiTransaksi');
    Route::resource('transaksi/konfirmasi-transaksi-manual', KonfirmasiTFController::class);
    Route::get('tagihan/aksi-tagihan/kirim-peringatan/{id}', [AksiTagihanController::class, 'kirimPeringatan'])->name('tagihan.aksi-tagihan.kirim-peringatan');
 
@@ -115,6 +125,12 @@ Route::middleware(['auth', 'CheckUserRole'])->prefix('laporan')->group(function 
     Route::get('laporan-tagihan', [LaporanTagihanController::class, 'index'])->name('laporan-tagihan.index'); 
     Route::post('laporan-tagihan/export-pdf', [LaporanTagihanController::class, 'exportPdf'])->name('laporan-tagihan.exportPdf');
 
+    Route::get('laporan-tagihan/export-excel', [LaporanTagihanController::class, 'exportExcel'])->name('laporan-tagihan.exportExcel');
+    Route::get('laporan-pelanggan/export-excel', [LaporanPenggunaController::class, 'exportExcel'])->name('laporan-pelanggan.exportExcel');
+    Route::get('laporan-transaksi/export-excel', [LaporanTransaksiController::class, 'exportExcel'])->name('laporan-transaksi.exportExcel');
+    Route::get('laporan-transaksi-by-kasir/export-excel', [LaporanTransaksiByKasirController::class, 'exportExcel'])->name('laporan-transaksi-by-kasir.exportExcel');
+    
+
     Route::get('laporan-transaksi', [LaporanTransaksiController::class, 'index'])->name('laporan-transaksi.index'); 
     Route::post('laporan-transaksi/export-pdf', [LaporanTransaksiController::class, 'exportPdf'])->name('laporan-transaksi.exportPdf');
 
@@ -129,6 +145,11 @@ Route::middleware(['auth', 'CheckUserRole'])->prefix('import')->group(function (
     Route::get('import-data-tagihan', [ImportDataController::class, 'index'])->name('import-data-tagihan.index');
     Route::Post('import-data-tagihan/store', [ImportDataController::class, 'store'])->name('import-data-tagihan.store');
 });
+
+Route::middleware(['auth', 'CheckUserRole'])->group(function () {
+    Route::get('/api/tagihan-apex-chart', [ApexChartController::class, 'tagihanApexChart'])->name('api.tagihan-apex-chart');
+});
+
 
 Route::middleware(['auth', 'CheckUserRole'])->prefix('setting')->group(function () {
     Route::resource('pengguna-aplikasi', PenggunaAplikasiController::class);
@@ -151,6 +172,13 @@ Route::get('/check-opcache', function () {
     }
 });
 
+Route::get('/clear', function () {
+    Artisan::call('cache:clear');
+    Artisan::call('config:clear');
+    Artisan::call('route:clear');
+    Artisan::call('view:clear');
+    return response()->json(['success' => 'Cache berhasil dihapus. Website akan berjalan lebih cepat']);
+})->middleware(['auth', 'CheckUserRole'])->name('clear');
 
 Route::fallback(function () {
     if (app()->environment('production')) {

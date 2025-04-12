@@ -37,6 +37,7 @@ class DataImport implements ToModel, WithStartRow, SkipsOnFailure, WithHeadingRo
             'pelangganKode' => $this->generateUniqueCode(),
             'pelangganNama' => $row['nama'],
             'pelangganPhone' => $row['phone'],
+            'pelangganDesa' => $row['desa'],
             'pelangganRt' => $row['rt'],
             'pelangganRw' => $row['rw'],
             'pelangganGolonganId' => $row['golongan_id'],

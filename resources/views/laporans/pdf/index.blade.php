@@ -45,13 +45,12 @@
             text-align: left;
             background-color: #fff;
             border-bottom: 1px solid #ddd;
-            font-size: 12px;
+            font-size: 10px;
         }
         th {
             background-color: #608BC1;
             color: #fff;
             font-weight: bold;
-            
         }
         tbody tr:nth-child(odd) {
             background-color: #f9f9f9;
@@ -81,7 +80,7 @@
                 </tr>
                 <tr>
                     <td style="border: none;" width="100">Pelanggan</td>
-                    <td style="border: none;">: {{ $filterKasir ?? 'Semua Kasir' }}</td>
+                    <td style="border: none;">: {{ $filterPelanggan ?? 'Semua Pelanggan' }}</td>
                 </tr>
             </table>
         </div>

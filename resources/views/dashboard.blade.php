@@ -60,8 +60,8 @@
   $dataBelumLunas = $labels->map(fn($bulanTahun) => $tagihanByMonthBelumLunas->get($bulanTahun, 0));
 
   // Data Pelanggan PIE CHART
-  $dataPelanggan = \App\Models\Pelanggan::selectRaw("CONCAT('RW ', pelangganRw) as pelangganDesa, COUNT(*) as total")
-    ->groupBy('pelangganDesa')
+  $dataPelanggan = \App\Models\Pelanggan::selectRaw("CONCAT(pelangganDesa, ' RW ', pelangganRw) as pelangganAlamat, COUNT(*) as total")
+    ->groupBy('pelangganAlamat')
     ->get();
 
     $backgroundColor = [
@@ -74,7 +74,7 @@
 
     $dataPelangganChart = $dataPelanggan->map(function($item, $index) use ($backgroundColor) {
         return [
-            'label' => $item->pelangganDesa,
+            'label' => $item->pelangganAlamat,
             'backgroundColor' => $backgroundColor[$index % count($backgroundColor)],
             'data' => [$item->total]
         ];
@@ -82,6 +82,44 @@
 
 
 ?>
+
+@push('script-header')
+  <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+@endpush
+
+@push('style-header')
+<style>
+  .hidden {
+      display: none;
+  }
+
+  .no-data {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 16px;
+      font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      /* font-weight: bold; */
+      color: black;
+      background: rgba(255, 255, 255, 0.8);
+      padding: 10px 20px;
+      border-radius: 8px;
+      z-index: 2;
+  }
+
+  #chart-container {
+      position: relative;
+  }
+
+  .blur-chart {
+      filter: blur(0.75px);
+      pointer-events: none;
+  }
+</style>
+    
+@endpush
+
 @section('content')
 <div class="content-wrapper">
     <!-- Content Header (Page header) -->
@@ -172,45 +210,56 @@
         </div>
 
         <div class="row">
+          <div class="col-md-12">
+            <div class="card shadow-sm">
+                <div class="card-header">
+                    <h3 class="card-title mb-0">Grafik Tagihan Pamsimas</h3>
+                    <div class="card-tools">
+                      <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                        <i class="fas fa-minus"></i>
+                      </button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <form id="filterForm" class="form-inline justify-content-center mb-4">
+                        <div class="form-group mr-3">
+                            <label for="bulan" class="mr-1">Bulan:</label>
+                            <select id="bulan" class="form-control">
+                                @php
+                                    $bulanIndonesia = [
+                                        1 => 'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+                                        'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
+                                    ];
+                                @endphp
+                                @for($i = 1; $i <= 12; $i++)
+                                    <option value="{{ $i }}" {{ $i == date('m') ? 'selected' : '' }}>
+                                        {{ $bulanIndonesia[$i] }}
+                                    </option>
+                                @endfor
+                            </select>
+                        </div>
+                        <div class="form-group mr-3">
+                            <label for="tahun" class="mr-1">Tahun:</label>
+                            <select id="tahun" class="form-control">
+                                @for($i = date('Y') - 5; $i <= date('Y'); $i++)
+                                    <option value="{{ $i }}" {{ $i == date('Y') ? 'selected' : '' }}>
+                                        {{ $i }}
+                                    </option>
+                                @endfor
+                            </select>
+                        </div>
+                        <button type="button" class="btn btn-success" onclick="fetchData()">Tampilkan</button>
+                    </form>
+                    <div id="chart-container" class="position-relative">
+                        <div id="chart" class="" style="height: 400px;"></div>
+                        <div id="no-data" class="no-data hidden text-center">Tidak Ada Data</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
           <div class="col-md-6">
-            {{-- <div class="card">
-              <div class="card-header border-0">
-                <div class="d-flex justify-content-between">
-                  <h3 class="card-title">Online Store Visitors</h3>
-                  <a href="javascript:void(0);">View Report</a>
-                </div>
-              </div>
-              <div class="card-body">
-                <div class="d-flex">
-                  <p class="d-flex flex-column">
-                    <span class="text-bold text-lg">820</span>
-                    <span>Visitors Over Time</span>
-                  </p>
-                  <p class="ml-auto d-flex flex-column text-right">
-                    <span class="text-success">
-                      <i class="fas fa-arrow-up"></i> 12.5%
-                    </span>
-                    <span class="text-muted">Since last week</span>
-                  </p>
-                </div>
-                <!-- /.d-flex -->
-  
-                <div class="position-relative mb-4">
-                  <canvas id="visitors-chart" height="200"></canvas>
-                </div>
-  
-                <div class="d-flex flex-row justify-content-end">
-                  <span class="mr-2">
-                    <i class="fas fa-square text-primary"></i> This Week
-                  </span>
-  
-                  <span>
-                    <i class="fas fa-square text-gray"></i> Last Week
-                  </span>
-                </div>
-              </div>
-            </div> --}}
-            <!-- /.card -->
 
             <div class="card">
               <div class="card-header">
@@ -219,9 +268,6 @@
                 <div class="card-tools">
                   <button type="button" class="btn btn-tool" data-card-widget="collapse">
                     <i class="fas fa-minus"></i>
-                  </button>
-                  <button type="button" class="btn btn-tool" data-card-widget="remove">
-                    <i class="fas fa-times"></i>
                   </button>
                 </div>
               </div>
@@ -275,15 +321,12 @@
 
           <div class="col-md-6">
             <div class="card">
-              <div class="card-header border-0">
+              <div class="card-header">
                 <h3 class="card-title">Tagihan Baru</h3>
                 <div class="card-tools">
-                  {{-- <a href="#" class="btn btn-tool btn-sm">
-                    <i class="fas fa-download"></i>
-                  </a>
-                  <a href="#" class="btn btn-tool btn-sm">
-                    <i class="fas fa-bars"></i>
-                  </a> --}}
+                  <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                    <i class="fas fa-minus"></i>
+                  </button>
                 </div>
               </div>
               <div class="card-body table-responsive p-0">
@@ -311,9 +354,14 @@
             </div>
 
             <div class="card">
-              <div class="card-header border-0">
+              <div class="card-header">
                 <div class="d-flex justify-content-between">
                   <h3 class="card-title">Total Transaksi</h3>
+                  <div class="card-tools">
+                    <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                      <i class="fas fa-minus"></i>
+                    </button>
+                  </div>
                 </div>
               </div>
               <div class="card-body">
@@ -368,5 +416,83 @@
 </script>
     <!-- AdminLTE dashboard demo (This is only for demo purposes) -->
 <script src="{{ asset('dist/js/pages/dashboard3.js') }}" defer></script>
-{{-- <script src="{{ asset('dist/js/pages/dashboard2.js') }}" defer></script> --}}
+<script>
+  async function fetchData() {
+      const bulan = document.getElementById('bulan').value;
+      const tahun = document.getElementById('tahun').value;
+      const chartContainer = document.getElementById("chart");
+      const noDataMessage = document.getElementById("no-data");
+
+      try {
+          const response = await fetch(`/api/tagihan-apex-chart?bulan=${bulan}&tahun=${tahun}`);
+          const data = await response.json();
+
+          if (data.length === 0) {
+              noDataMessage.classList.remove("hidden");
+              chartContainer.classList.add("blur-chart");
+          } else {
+              noDataMessage.classList.add("hidden");
+              chartContainer.classList.remove("blur-chart");
+          }
+
+          const categories = data.map(item => item.rw);
+          const lunas = data.map(item => item.lunas);
+          const belumLunas = data.map(item => item.belum_lunas);
+
+          var options = {
+              series: [
+                  { name: 'Lunas', data: lunas },
+                  { name: 'Belum Lunas', data: belumLunas }
+              ],
+              chart: {
+                  type: 'bar',
+                  height: 350,
+                  stacked: true,
+                  toolbar: { show: true },
+                  zoom: { enabled: true }
+              },
+              responsive: [{
+                  breakpoint: 480,
+                  options: {
+                      legend: { position: 'bottom', offsetX: -10, offsetY: 0 }
+                  }
+              }],
+              plotOptions: {
+                  bar: {
+                      horizontal: false,
+                      borderRadius: 10,
+                      borderRadiusApplication: 'end',
+                      borderRadiusWhenStacked: 'last',
+                      dataLabels: {
+                          total: {
+                              enabled: true,
+                              style: { fontSize: '13px', fontWeight: 900 }
+                          }
+                      }
+                  }
+              },
+              xaxis: {
+                  categories: categories,
+              },
+              legend: {
+                  position: 'right',
+                  offsetY: 40
+              },
+              fill: {
+                  opacity: 1
+              }
+          };
+
+          document.querySelector("#chart").innerHTML = "";
+          var chart = new ApexCharts(document.querySelector("#chart"), options);
+          chart.render();
+
+      } catch (error) {
+          console.error("Error fetching data:", error);
+      }
+  }
+
+  document.addEventListener("DOMContentLoaded", fetchData);
+</script>
+
 @endpush

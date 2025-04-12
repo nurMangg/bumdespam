@@ -70,8 +70,10 @@
     <link rel="stylesheet" href="{{ asset('plugins/summernote/summernote-bs4.min.css') }}">
 
     <link rel="stylesheet" href="{{ asset('plugins/sweetalert2/sweetalert2.min.css')}}">
-    
+
+    @stack('script-header')
 </head>
+@stack('style-header')
 <style>
     .nav-pills .nav-link.active {
         background-color: #608BC1;
@@ -250,6 +252,13 @@
                                 <p>Dashboard</p>
                             </a>
                         </li>
+                        <li class="nav-item">
+                            <a href="{{ route('dashboard.iot') }}" class="nav-link {{ Route::is('dashboard.iot') ? 'active' : '' }}">
+                                <i class="nav-icon fas fa-robot"></i>
+                                <p>Dashboard IoT</p>
+                            </a>
+                        </li>
+                        
                         @foreach ($megamenus as $megaM)
                             @php
                                 // Ambil sub-menu yang terkait dengan menu utama ini

@@ -29,6 +29,18 @@
         <div class="row">
           @if (Auth::user()->userRoleId != App\Models\Roles::where('roleName', 'pelanggan')->first()->roleId)
           <div class="col-md-12">
+            <div class="alert alert-danger alert-dismissible">
+              <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+              <h5><i class="icon fas fa-exclamation-triangle"></i> Peringatan!</h5>
+              <ul>
+                <li>Jangan Gunakan <b>Export to PDF</b> Jika tidak menggunakan <b>Filter Data</b>, menghindari error yang muncul</li>
+                <li><b>Export to PDF</b> Tidak mendukung data banyak!.</li>
+                <li>Jika ingin meng-Export semua data, gunakan <b>Export to Excel</b></li>
+            
+              </ul>
+            </div>
+          </div>
+          <div class="col-md-12">
             <div class="card">
                 <div class="card-header">
                   <h3 class="card-title">{{ __('Filter Data') }}</h3>
@@ -78,6 +90,7 @@
                     @endforeach
                   </div>
                     <div class="col-md-12 text-right">
+                      <button type="submit" id="excelButton" class="btn btn-success">Export to PDF</button>
                       <button type="submit" id="pdfButton" class="btn btn-danger">Export to PDF</button>
                       <button type="submit" id="filterBtn" class="btn btn-primary">Preview Filter</button>
                     </div>
@@ -184,7 +197,7 @@
 
             // Menyembunyikan tombol PDF
             $('#pdfButton').text('Exporting...');
-            
+
             // Kirim request AJAX
             $.ajax({
                 url: '{{ route($route . '.exportPdf') }}',
@@ -214,12 +227,43 @@
                     }
                 },
                 error: function (xhr, status, error) {
-                  $('#pdfButton').text('Export to PDF');
+                    $('#pdfButton').text('Export to PDF');
 
                     alert('Terjadi kesalahan: ' + error);
                 }
             });
         });
+
+
+        $('#excelButton').click(function (event) {
+    event.preventDefault();
+
+    // Ubah teks tombol untuk menunjukkan proses
+    $('#excelButton').text('Exporting...');
+
+    // Ambil data filter
+    var filterData = {};
+    @foreach ($form as $field)
+        @if ($field['type'] === 'checkbox') 
+            filterData['{{ $field['field'] }}'] = $('input[name="{{ $field['field'] }}[]"]:checked').map(function() {
+                return this.value;
+            }).get();
+        @else 
+            filterData['{{ $field['field'] }}'] = $('#{{ $field['field'] }}').val();
+        @endif
+    @endforeach
+
+    // Konversi filter menjadi query string
+    var queryString = $.param({ filter: filterData });
+
+    // Redirect langsung untuk mengunduh file
+    window.location.href = '{{ route($route . '.exportExcel') }}?' + queryString;
+
+    // Kembalikan teks tombol setelah beberapa detik
+    setTimeout(function() {
+        $('#excelButton').text('Export to Excel');
+    }, 3000);
+});
 
     })
 </script>

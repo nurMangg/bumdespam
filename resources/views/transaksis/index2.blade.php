@@ -192,7 +192,7 @@
             }).then((result) => {
                 if (result.isConfirmed) {
                     $.ajax({
-                        url: "{{ route($route . '.store') }}/",
+                        url: "{{ route('konfirmasi-transaksi-manual.konfirmasiTransaksi') }}/",
                         type: 'POST',
                         dataType: 'json',
                         data: {

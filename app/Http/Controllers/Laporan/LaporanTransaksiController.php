@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Laporan;
 
+use App\Exports\TransaksiExport;
 use App\Http\Controllers\Controller;
 use App\Models\Bulan;
 use App\Models\Pelanggan;
@@ -10,9 +11,11 @@ use App\Models\Tagihan;
 use App\Models\Tahun;
 use App\Models\User;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
+use Maatwebsite\Excel\Facades\Excel;
 use stdClass;
 
 class LaporanTransaksiController extends Controller
@@ -70,7 +73,15 @@ class LaporanTransaksiController extends Controller
                 'width' => 3,
                 'required' => true
             ),
-            
+            array(
+                'label' => 'Desa',
+                'field' => 'pelangganDesa',
+                'type' => 'select',
+                'options' => Pelanggan::all()->pluck('pelangganDesa', 'pelangganDesa')->unique()->sort()->toArray(), 
+                'placeholder' => 'Semua Desa',
+                'width' => 3,
+                'required' => true
+            ),
             array(
                 'label' => 'RT',
                 'field' => 'pelangganRt',
@@ -100,6 +111,10 @@ class LaporanTransaksiController extends Controller
             array(
                 'label' => 'Nama',
                 'field' => 'pelangganNama',
+            ),
+            array(
+                'label' => 'Desa',
+                'field' => 'pelangganDesa',
             ),
             array(
                 'label' => 'RT/RW',
@@ -166,6 +181,11 @@ class LaporanTransaksiController extends Controller
                             } elseif ($field === 'tagihanSampaiBulan') {
                                 // Filter berdasarkan sampai bulan tagihan
                                 $query->where('tagihanBulan', '<=', $value);
+                            } elseif ($field === 'pelangganDesa') {
+                                // Filter berdasarkan rt pelanggan
+                                $query->whereHas('pelanggan', function ($q) use ($value) {
+                                    $q->where('pelangganDesa', $value);
+                                });
                             } elseif ($field === 'pelangganRt') {
                                 // Filter berdasarkan rt pelanggan
                                 $query->whereHas('pelanggan', function ($q) use ($value) {
@@ -195,6 +215,9 @@ class LaporanTransaksiController extends Controller
                     ->addIndexColumn()
                     ->addColumn('pelangganNama', function($row){
                         return $row->pelanggan->pelangganNama;
+                    })
+                    ->addColumn('pelangganDesa', function($row){
+                        return $row->pelanggan->pelangganDesa;
                     })
                     ->addColumn('pelangganRTRW', function($row){
                         return $row->pelanggan->pelangganRt . ' / ' . $row->pelanggan->pelangganRw;
@@ -253,6 +276,11 @@ class LaporanTransaksiController extends Controller
                 } elseif ($field === 'tagihanSampaiBulan') {
                     // Filter berdasarkan sampai bulan tagihan
                     $query->where('tagihanBulan', '<=', $value);
+                } elseif ($field === 'pelangganDesa') {
+                    // Filter berdasarkan rt pelanggan
+                    $query->whereHas('pelanggan', function ($q) use ($value) {
+                        $q->where('pelangganDesa', $value);
+                    });
                 } elseif ($field === 'pelangganRt') {
                     // Filter berdasarkan rt pelanggan
                     $query->whereHas('pelanggan', function ($q) use ($value) {
@@ -288,7 +316,7 @@ class LaporanTransaksiController extends Controller
         $data->transform(function($item) {
             $pelanggan = $item->pelanggan;
             $item->pelangganNama = $pelanggan->pelangganNama;
-            $item->pelangganAlamat = $pelanggan->pelangganDesa;
+            $item->pelangganDesa = $pelanggan->pelangganDesa;
             $item->pelangganRTRW = $pelanggan->pelangganRt . ' / ' . $pelanggan->pelangganRw;
             $item->tagihanTotal = ($item->tagihanMAkhir - $item->tagihanMAwal) * $item->tagihanInfoTarif;
             $item->tagihanJumlahTotal = $item->tagihanTotal + $item->tagihanInfoAbonemen;
@@ -307,7 +335,7 @@ class LaporanTransaksiController extends Controller
 
     
         // Generate PDF
-        $pdf = Pdf::loadView('laporans.pdf.transaksi', ['data' => $data, 'title' => $this->title, 'grid' => $this->grid, 'dataJumlah' => $dataJumlah, 'filterTanggal' => $filterTanggal, 'filterPelanggan' => $filterPelanggan])
+        $pdf = Pdf::loadView('laporans.pdf.transaksi', ['data' => $data, 'title' => $this->title, 'grid' => $this->grid, 'dataJumlah' => $dataJumlah, 'filterTanggal' => $filterTanggal, 'filterPelanggan' => '-'])
             ->setPaper('a4', 'landscape');
 
         // Simpan PDF ke folder storage
@@ -322,5 +350,12 @@ class LaporanTransaksiController extends Controller
             'status' => 'success',
             'url' => $fileUrl,
         ]);
+    }
+
+    public function exportExcel(Request $request)
+    {
+        $filters = $request->query('filter', []);
+
+        return Excel::download(new TransaksiExport($filters), 'transaksi-' . Carbon::now()->format('d-m-Y_H-i-s') . '.xlsx');
     }
 }

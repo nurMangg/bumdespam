@@ -131,7 +131,7 @@ class KonfirmasiTFController extends Controller
         ]);
     }
 
-    public function store(Request $request) {
+    public function konfirmasiTransaksi(Request $request) {
         $request->validate([
             'pembayaranId' => 'required',
         ]);

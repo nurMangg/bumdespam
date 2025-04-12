@@ -19,6 +19,7 @@ class Pelanggan extends Model
         'pelangganKode',
         'pelangganNama',
         'pelangganPhone',
+        'pelangganDesa',
         'pelangganRt',
         'pelangganRw',
         'pelangganGolonganId',

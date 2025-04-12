@@ -2,13 +2,16 @@
 
 namespace App\Http\Controllers\Laporan;
 
+use App\Exports\PelangganExport;
 use App\Http\Controllers\Controller;
 use App\Models\Golongan;
 use App\Models\Pelanggan;
 use App\Models\SettingWeb;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Maatwebsite\Excel\Facades\Excel;
 
 class LaporanPenggunaController extends Controller
 {
@@ -28,6 +31,15 @@ class LaporanPenggunaController extends Controller
         $this->route = 'laporan-pelanggan';
 
         $this->form = array(
+            array(
+                'label' => 'Desa',
+                'field' => 'pelangganDesa',
+                'type' => 'select',
+                'options' => Pelanggan::all()->pluck('pelangganDesa', 'pelangganDesa')->unique()->sort()->toArray(), 
+                'placeholder' => 'Semua Desa',
+                'width' => 3,
+                'required' => true
+            ),
             array(
                 'label' => 'RT',
                 'field' => 'pelangganRt',
@@ -85,6 +97,10 @@ class LaporanPenggunaController extends Controller
                 'field' => 'pelangganPhone',
             ],
             array(
+                'label' => 'Desa',
+                'field' => 'pelangganDesa',
+            ),
+            array(
                 'label' => 'RT',
                 'field' => 'pelangganRt',
             ),
@@ -110,7 +126,7 @@ class LaporanPenggunaController extends Controller
     public function index(Request $request)
     {
         if ($request->ajax()) {
-            $query = Pelanggan::select('pelangganId', 'pelangganKode', 'pelangganPhone', 'pelangganNama', 'pelangganRt', 'pelangganRw', 'pelangganStatus', 'pelangganGolonganId', 'created_at')
+            $query = Pelanggan::select('pelangganId', 'pelangganKode', 'pelangganPhone', 'pelangganNama', 'pelangganDesa', 'pelangganRt', 'pelangganRw', 'pelangganStatus', 'pelangganGolonganId', 'created_at')
                 ->orderBy('created_at', 'desc');
 
             if ($request->has('filter')) {
@@ -182,5 +198,12 @@ class LaporanPenggunaController extends Controller
             'status' => 'success',
             'url' => $fileUrl,
         ]);
+    }
+
+    public function exportExcel(Request $request)
+    {
+        $filters = $request->query('filter', []);
+
+        return Excel::download(new PelangganExport($filters), 'pelanggan-' . Carbon::now()->format('d-m-Y_H-i-s') . '.xlsx');
     }
 }

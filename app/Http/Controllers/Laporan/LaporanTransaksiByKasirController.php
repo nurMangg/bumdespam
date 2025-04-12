@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Laporan;
 
+use App\Exports\TransaksiKasirExport;
 use App\Http\Controllers\Controller;
 use App\Models\Bulan;
 use App\Models\Pelanggan;
@@ -9,9 +10,11 @@ use App\Models\Tagihan;
 use App\Models\Tahun;
 use App\Models\User;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
+use Maatwebsite\Excel\Facades\Excel;
 use stdClass;
 
 class LaporanTransaksiByKasirController extends Controller
@@ -33,7 +36,7 @@ class LaporanTransaksiByKasirController extends Controller
 
         $this->form = array(
             array(
-                'label' => 'RW',
+                'label' => 'Kasir',
                 'field' => 'pelangganKasir',
                 'type' => 'select',
                 'options' => User::withAdminOrKasirRole()->pluck('name', 'id')->toArray(),
@@ -64,6 +67,10 @@ class LaporanTransaksiByKasirController extends Controller
             array(
                 'label' => 'Nama',
                 'field' => 'pelangganNama',
+            ),
+            array(
+                'label' => 'Desa',
+                'field' => 'pelangganDesa',
             ),
             array(
                 'label' => 'RT/RW',
@@ -137,6 +144,9 @@ class LaporanTransaksiByKasirController extends Controller
                     ->addColumn('pelangganNama', function($row){
                         return $row->pelanggan->pelangganNama;
                     })
+                    ->addColumn('pelangganDesa', function($row){
+                        return $row->pelanggan->pelangganDesa;
+                    })
                     ->addColumn('pelangganRTRW', function($row){
                         return $row->pelanggan->pelangganRt . ' / ' . $row->pelanggan->pelangganRw;
                     })
@@ -197,6 +207,7 @@ class LaporanTransaksiByKasirController extends Controller
         $data->transform(function($item) {
             $pelanggan = $item->pelanggan;
             $item->pelangganNama = $pelanggan->pelangganNama;
+            $item->pelangganDesa = $pelanggan->pelangganDesa;
             $item->pelangganRTRW = $pelanggan->pelangganRt . ' / ' . $pelanggan->pelangganRw;
             $item->tagihanTotal = ($item->tagihanMAkhir - $item->tagihanMAwal) * $item->tagihanInfoTarif;
             $item->tagihanJumlahTotal = $item->tagihanTotal + $item->tagihanInfoAbonemen;
@@ -243,5 +254,12 @@ class LaporanTransaksiByKasirController extends Controller
             'status' => 'success',
             'url' => $fileUrl,
         ]);
+    }
+
+    public function exportExcel(Request $request)
+    {
+        $filters = $request->query('filter', []);
+
+        return Excel::download(new TransaksiKasirExport($filters), 'transaksi-kasir-' . Carbon::now()->format('d-m-Y_H-i-s') . '.xlsx');
     }
 }

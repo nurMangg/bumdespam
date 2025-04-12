@@ -35,6 +35,7 @@ class PelangganImport implements ToModel, WithStartRow, SkipsOnFailure, WithHead
             'pelangganKode' => $this->generateUniqueCode(),
             'pelangganNama' => $row['nama'],
             'pelangganPhone' => $row['phone'],
+            'pelangganDesa' => $row['desa'],
             'pelangganRt' => $row['rt'],
             'pelangganRw' => $row['rw'],
             'pelangganGolonganId' => $row['golongan_id'],
