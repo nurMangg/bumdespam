@@ -17,7 +17,9 @@ class MeteranFakeSeeder extends Seeder
     {
         DB::table('readMeteran')->truncate();
 
-        $pelanggan = DB::table('mspelanggan')->pluck('pelangganKode'); 
+        // $pelanggan = DB::table('mspelanggan')->pluck('pelangganKode'); 
+        $pelanggan = collect(['PAM0001', 'PAM0002', 'PAM0003']);
+
 
         $startDate = Carbon::now()->subDays(30);
         $endDate = Carbon::now();

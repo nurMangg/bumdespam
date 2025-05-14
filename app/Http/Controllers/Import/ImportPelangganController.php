@@ -75,7 +75,7 @@ class ImportPelangganController extends Controller
                 'riwayatData' => json_encode(['file' => $request->file('file')->getClientOriginalName()]),
             ]);
             
-            return response()->json(['success' => 'Data pasien berhasil diimport.']);
+            return response()->json(['success' => 'Data Pelanggan berhasil diimport.']);
         } catch (\Exception $e) {
             return response()->json(['error' => 'Terjadi kesalahan saat import: ' . $e->getMessage()], 500);
         }

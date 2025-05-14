@@ -229,21 +229,15 @@ class InputTagihanController extends Controller
         if(!$pelanggan) {
             return response()->json(['errors' => "Tidak Ada Data Pelanggan", 'status'=> 'Error'], 422);
         }
-        // dd($pelanggan);
 
         $dataTagihan = Tagihan::where('tagihanPelangganId', $pelanggan->pelangganId)
             ->orderBy('tagihanTahun', 'desc')
             ->orderBy('tagihanBulan', 'desc')
             ->first();
 
-        // if(!$dataTagihan){
-        //     return response()->json(['message' => 'Data tidak ditemukan', 'status'=> 'Error'], 403);
-        // }
-
         $idBulan = $dataTagihan->tagihanBulan ?? date('n');
 
         $tahunBaru = $dataTagihan->tagihanTahun ?? date('Y');
-        // dd($idBulan, $tahunBaru);
 
         if($idBulan < 12){
             $idBulan = $idBulan + 1;

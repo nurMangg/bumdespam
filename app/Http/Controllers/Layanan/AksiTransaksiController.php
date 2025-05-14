@@ -185,6 +185,34 @@ class AksiTransaksiController extends Controller
         }
     }
 
+
+    // Halaman Kasir
+    public function showfromkasir($tagihanId)
+    {
+        $decodeTagihanKode = Crypt::decryptString($tagihanId);
+        
+        $detailtagihan = Tagihan::where('tagihanId', $decodeTagihanKode)->first();
+
+        // dd($detailtagihan->pembayaranInfo);
+        $pelangganInfo = Pelanggan::where('pelangganId', $detailtagihan->tagihanPelangganId)->first();
+
+        $detailTagihanCrypt = Crypt::encryptString($detailtagihan->tagihanId);
+        
+        // dd($penggunaanTagihan);
+
+        return view('kasir.detail-tagihan', 
+            [
+                'detailPelanggan' => $pelangganInfo,
+                'detailTagihan' => $detailtagihan,
+                'tagihanIdCrypt' => $detailTagihanCrypt,
+                'paymentMethod' => $this->paymentMethod,
+                'title' => $this->title,
+                'breadcrumb' => $this->breadcrumb,
+                'route' => $this->route,
+                'primaryKey' => $this->primaryKey
+        ]);
+    }
+
     
     
 }

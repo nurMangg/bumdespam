@@ -43,9 +43,11 @@ use Illuminate\Support\Facades\Route;
 Route::get('/dashboard', function () {
     if (Auth::user()->userRoleId == Roles::where('roleName', 'pelanggan')->first()->roleId) {
         return view('pelanggan.dashboard');
-
+    } else if (Auth::user()->userRoleId == Roles::where('roleName', 'kasir')->first()->roleId) {
+        return view('dashboard-kasir');
+    } else {
+        return view('dashboard');
     }
-    return view('dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::get('/dashboard-iot',[IoTController::class, 'index'] )->middleware(['auth', 'verified'])->name('dashboard.iot');
@@ -148,6 +150,8 @@ Route::middleware(['auth', 'CheckUserRole'])->prefix('import')->group(function (
 
 Route::middleware(['auth', 'CheckUserRole'])->group(function () {
     Route::get('/api/tagihan-apex-chart', [ApexChartController::class, 'tagihanApexChart'])->name('api.tagihan-apex-chart');
+
+    Route::get('/tagihan/{id}/detail', [AksiTransaksiController::class, 'showfromkasir'])->name('kasir-tagihan.showfromkasir');
 });
 
 
@@ -179,6 +183,13 @@ Route::get('/clear', function () {
     Artisan::call('view:clear');
     return response()->json(['success' => 'Cache berhasil dihapus. Website akan berjalan lebih cepat']);
 })->middleware(['auth', 'CheckUserRole'])->name('clear');
+
+Route::get('/queue-table', function () {
+    Artisan::call('queue:table');
+    Artisan::call('migrate');
+    return response()->json(['success' => 'Cache berhasil dihapus. Website akan berjalan lebih cepat']);
+})->middleware(['auth', 'CheckUserRole'])->name('clear');
+
 
 Route::fallback(function () {
     if (app()->environment('production')) {

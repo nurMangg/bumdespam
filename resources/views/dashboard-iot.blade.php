@@ -181,7 +181,7 @@
           customers.forEach(customer => {
               let option = document.createElement("option");
               option.value = customer.pelangganKode;
-              option.textContent = customer.pelangganNama;
+              option.textContent = customer.pelangganKode + ' - ' + customer.pelangganNama;
               select.appendChild(option);
           });
       });
